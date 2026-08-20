@@ -31,6 +31,7 @@ per ciascuno slot ancora vuoto, e la capienza massima e' mostrata sempre in chia
 | `npm run build` | Genera `dist/artifact.html`, la stessa app senza richieste di rete (Tailwind compilato inline, icone in SVG), per la pubblicazione come Artifact |
 | `npm test` | Verifiche funzionali su `dist/artifact.html` con un browser headless |
 | `npm run grid -- calendario.csv` | Ricalcola la griglia degli incroci portieri dal calendario ufficiale |
+| `npm run data` | Rigenera l'elenco giocatori da `data/listone.tsv` |
 
 ## Griglia degli incroci portieri
 
@@ -41,10 +42,24 @@ un CSV `giornata,casa,ospite` e rifiuta il file se non e' coerente (380 partite,
 invertita casa/trasferta perche' la validazione fallisca invece di produrre una griglia
 sbagliata.
 
-## Stato dei dati
+## Dati
 
-I dati sul listone sono **provvisori** e l'interfaccia lo dichiara. Restano da fare:
+`data/listone.tsv` e' la trascrizione del listone ufficiale Fantacalcio.it 2026/27:
+496 calciatori delle 20 squadre, con ruolo Classic, ruoli Mantra, FVM e quotazione
+(valori Classic e Mantra). `npm run data` lo converte in `data/players.generated.js`,
+raggruppando i portieri in blocchi squadra.
 
-- quotazioni, FVM e ruoli Mantra dall'export ufficiale;
-- consigli, gerarchie, rigoristi e giocatori a rischio verificati sulle cinque fonti;
-- griglia ricalcolata sul calendario ufficiale 2026/27.
+La trascrizione e' stata verificata su tre fronti: numerazione per squadra contigua
+senza salti, coerenza fra ruolo Classic e Mantra, e confronto di FVM e quotazioni con
+gli 88 giocatori gia' presenti nella versione precedente dell'app, con zero divergenze.
+
+La griglia degli incroci e' quella ufficiale della stessa fonte, trascritta e verificata
+per simmetria su tutte le 400 caselle; le uniche tre coppie a indice 0 sono i derby
+cittadini, come il calendario impone.
+
+### Cosa manca
+
+I tag che dipendono da valutazioni esterne e non dai numeri del listone:
+rigoristi, modificatore di difesa e giocatori a rischio. Vanno dalla verifica sulle
+cinque fonti (SOS Fanta, Gazzetta, Sky, Goal, Sisal). Finche' non ci sono, i relativi
+filtri restano vuoti e l'app lo dichiara invece di riempirli con stime.

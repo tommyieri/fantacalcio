@@ -56,7 +56,7 @@ function check(nome, atteso, ottenuto) {
   check('capienza massima (500 - 23 slot vuoti)', 477, s0.capienza);
   check('max attacco (quota A 250 - 5 altri slot A)', 245, s0.maxA);
   check('max centrocampo (quota C 150 - 7 altri slot C)', 143, s0.maxC);
-  check('righe in tabella', 110, await page.evaluate(() => document.querySelectorAll('#tabella tr').length));
+  check('righe in tabella (listone ufficiale)', 457, await page.evaluate(() => document.querySelectorAll('#tabella tr').length));
 
   // Prezzo consigliato del miglior attaccante: deve stare dentro il max di reparto
   const prezzoTop = await page.evaluate(() => {
@@ -120,15 +120,15 @@ function check(nome, atteso, ottenuto) {
 
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
-  check('solo difensori', 26, await page.evaluate(() => document.querySelectorAll('#tabella tr').length));
+  check('solo difensori', 176, await page.evaluate(() => document.querySelectorAll('#tabella tr').length));
   await page.click('[data-ruolo="ALL"]');
-  await page.click('[data-tag="RIGORISTA"]');
+  await page.click('[data-tag="TOP"]');
   const nRig = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('filtro rigoristi non vuoto', true, nRig > 0 && nRig < 110);
+  check('filtro top non vuoto', true, nRig > 0 && nRig < 457);
   await page.click('[data-tag="ALL"]');
   await page.fill('#ricerca', 'napoli');
   const nNap = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('ricerca "napoli" non vuota', true, nNap > 0 && nNap < 110);
+  check('ricerca "napoli" non vuota', true, nNap > 0 && nNap < 457);
   await page.fill('#ricerca', '');
 
   console.log('\n— piano di spesa modificabile —');
@@ -151,8 +151,11 @@ function check(nome, atteso, ottenuto) {
   await page.selectOption('#griglia-a', 'JUV');
   await page.selectOption('#griglia-b', 'TOR');
   const g = await page.evaluate(() => document.getElementById('griglia-valore').textContent + ' | ' + document.getElementById('griglia-testo').textContent);
-  check('JUV/TOR indice 0 marcato provvisorio', true, g.startsWith('0') && g.includes('provvisorio'));
-  await page.selectOption('#griglia-b', 'JUV');
+  check('JUV/TOR: alternanza perfetta, dato ufficiale', true, g.startsWith('0') && !g.includes('provvisorio'));
+  await page.selectOption('#griglia-a', 'NAP');
+  await page.selectOption('#griglia-b', 'ROM');
+  check('NAP/ROM indice 3 (era 12 nella griglia sbagliata)', '3', await page.evaluate(() => document.getElementById('griglia-valore').textContent));
+  await page.selectOption('#griglia-b', 'NAP');
   check('stessa squadra gestita', true, (await page.evaluate(() => document.getElementById('griglia-testo').textContent)).includes('diverse'));
 
   console.log('\n— igiene della pagina —');

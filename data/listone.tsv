@@ -1,0 +1,497 @@
+squadra	n	ruolo	mantra	nome	fvm	fvm_m	quot	quot_m
+Atalanta	1	P	Por	Carnesecchi	52	52	16	16
+Atalanta	2	P	Por	Sportiello	1	1	1	1
+Atalanta	3	P	Por	Vismara	1	1	1	1
+Atalanta	4	D	Dc	Scalvini	28	28	10	10
+Atalanta	5	D	Dc	Hien	16	16	8	8
+Atalanta	6	D	Dd;E	Zappacosta	24	24	8	8
+Atalanta	7	D	Dc	Djimsiti	16	16	7	7
+Atalanta	8	D	B;Ds;E	Ahanor	16	18	6	7
+Atalanta	9	D	Dd;E	Bellanova	15	15	6	6
+Atalanta	10	D	Ds;E	Bernasconi	17	17	6	6
+Atalanta	11	D	Ds;Dc	Kolasinac	12	14	5	6
+Atalanta	12	D	Dd;Dc	Kossounou	7	8	3	3
+Atalanta	13	C	M;C	Ederson D.S.	45	48	12	13
+Atalanta	14	C	C;T	Samardzic	42	42	12	12
+Atalanta	15	C	C;T	Pasalic	32	32	9	9
+Atalanta	16	C	M;C	Gaetano	24	27	7	8
+Atalanta	17	C	W	Zalewski	21	19	6	5
+Atalanta	18	C	M;C	De Roon	12	14	4	5
+Atalanta	19	C	M;C	Sulemana I.	7	8	3	3
+Atalanta	20	A	Pc	Scamacca	128	125	19	18
+Atalanta	21	A	Pc	Krstovic	100	97	18	17
+Atalanta	22	A	A	De Ketelaere	106	108	17	18
+Atalanta	23	A	A	Raspadori	62	64	13	14
+Atalanta	24	A	A	Sulemana K.	16	17	6	6
+Bologna	1	P	Por	Skorupski	37	37	10	10
+Bologna	2	P	Por	Happonen	1	1	1	1
+Bologna	3	P	Por	Pessina Mas.	1	1	1	1
+Bologna	4	D	Dc	Lucumì	18	18	8	8
+Bologna	5	D	Ds;E	Miranda J.	24	24	8	8
+Bologna	6	D	Ds;Dc	Heggem	15	17	6	7
+Bologna	7	D	Dd;E	Zortea	19	19	6	6
+Bologna	8	D	Dd;E	Holm	13	13	5	5
+Bologna	9	D	Dc	Vitik	11	11	5	5
+Bologna	10	D	Dc	Casale	6	6	3	3
+Bologna	11	D	Ds;E	Alhassane	6	6	2	2
+Bologna	12	D	Dd;Dc	Helland	5	5	2	2
+Bologna	13	D	Dd;E	De Silvestri	4	4	1	1
+Bologna	14	C	W;A	Orsolini	200	200	26	25
+Bologna	15	C	W;T	Rowe	37	40	11	11
+Bologna	16	C	W;T	Bernardeschi	21	21	9	9
+Bologna	17	C	W;A	Cambiaghi	25	25	8	7
+Bologna	18	C	T	Odgaard	22	20	8	7
+Bologna	19	C	M;C	Ferguson	18	21	7	8
+Bologna	20	C	M;C	Pobega	14	17	6	7
+Bologna	21	C	M;C	Amondarain	12	14	5	6
+Bologna	22	C	M;C	Moro N.	10	12	4	4
+Bologna	23	C	W;A	Dominguez B.	8	7	3	2
+Bologna	24	C	M;C	El Azzouzi O.	4	4	2	2
+Bologna	25	A	Pc	Dovbyk	84	81	16	16
+Bologna	26	A	Pc	Dallinga	23	20	8	7
+Cagliari	1	P	Por	Caprile	27	27	9	9
+Cagliari	2	P	Por	Ciocci	1	1	1	1
+Cagliari	3	P	Por	Sherri	1	1	1	1
+Cagliari	4	D	Dc	Mina	20	20	8	8
+Cagliari	5	D	B;Ds;E	Obert	14	16	7	7
+Cagliari	6	D	Dc	Kofler	11	11	5	5
+Cagliari	7	D	Dd;Dc	Zè Pedro	11	13	5	6
+Cagliari	8	D	B;Dd;E	Zappa	9	11	4	4
+Cagliari	9	D	Ds;E	Idrissi R.	7	7	3	3
+Cagliari	10	D	Ds;Dc	Rodriguez Ju.	10	12	3	4
+Cagliari	11	D	Dd;E	Raterink	1	1	1	1
+Cagliari	12	C	C;T	Fazzini	19	21	7	8
+Cagliari	13	C	M;C	Adopo	13	16	6	7
+Cagliari	14	C	M;C	Winks	14	17	6	7
+Cagliari	15	C	W	Felici	10	8	5	4
+Cagliari	16	C	M;C	Romano	12	15	5	6
+Cagliari	17	C	M;C	Prati	7	7	4	4
+Cagliari	18	C	M;C	Deiola	8	8	3	3
+Cagliari	19	C	M;C	Liteta	1	1	1	1
+Cagliari	20	A	A	Esposito Se.	50	50	13	14
+Cagliari	21	A	Pc	Mutandwa	19	18	6	6
+Cagliari	22	A	T;A	Maldini	14	15	5	6
+Cagliari	23	A	Pc	Borrelli	9	7	4	3
+Cagliari	24	A	Pc	Mendy P.	9	7	4	3
+Cagliari	25	A	A	Albarracin	1	1	1	1
+Cagliari	26	A	Pc	Trepy	2	2	1	1
+Como	1	P	Por	Butez	56	56	16	16
+Como	2	P	Por	Tornqvist	1	1	1	1
+Como	3	P	Por	Vigorito	1	1	1	1
+Como	4	D	Dc	Ramon	32	32	10	10
+Como	5	D	Dd;Dc	Chalobah T.	26	28	9	10
+Como	6	D	Dd;E	Couto	27	27	8	8
+Como	7	D	Ds;E	Kaiki	23	23	7	7
+Como	8	D	Ds;E	Valle	18	18	6	6
+Como	9	D	Dc	Kempf	13	13	5	5
+Como	10	D	Dd;E	Smolcic I.	10	10	4	4
+Como	11	D	Dd;E	Van Der Brempt	5	5	2	2
+Como	12	D	Ds;Dc	Cuenca A.	8	8	1	1
+Como	13	D	Dc	Goldaniga	1	1	1	1
+Como	14	C	T;A	Paz N.	250	250	30	28
+Como	15	C	T	Baturina	102	100	19	18
+Como	16	C	C;T	Da Cunha	90	90	18	18
+Como	17	C	W;A	Rodriguez Je.	32	31	12	11
+Como	18	C	M;C	Perrone	38	41	10	11
+Como	19	C	C;T	Caqueret	20	20	6	6
+Como	20	C	T	Liberali	22	20	6	5
+Como	21	C	W;A	Addai	10	8	5	4
+Como	22	C	M;C	Milla	14	16	5	5
+Como	23	C	W	Fadera	3	3	2	2
+Como	24	C	C;T	Lahdo	1	1	1	1
+Como	25	A	Pc	Douvikas	157	154	20	20
+Como	26	A	W;A	Diao	50	52	11	12
+Como	27	A	Pc	Morata	10	8	4	3
+Como	28	A	W;A	Kuhn	5	7	3	4
+Como	29	A	Pc	Azon	1	1	1	1
+Fiorentina	1	P	Por	De Gea	45	45	13	13
+Fiorentina	2	P	Por	Christensen O.	1	1	1	1
+Fiorentina	3	P	Por	Lezzerini	1	1	1	1
+Fiorentina	4	D	Dd;E	Dodò	30	30	10	10
+Fiorentina	5	D	Dc	Dragusin	27	27	8	8
+Fiorentina	6	D	Dd;Ds;E	Jimenez A.	23	25	8	9
+Fiorentina	7	D	Ds;Dc	Valdepenas	18	20	6	7
+Fiorentina	8	D	Ds;Dc	Viery	19	21	6	7
+Fiorentina	9	D	Ds;E	Parisi	12	12	5	5
+Fiorentina	10	D	Dc	Pongracic	8	8	4	4
+Fiorentina	11	D	Dd;E	Joao Mario	7	7	3	3
+Fiorentina	12	D	Ds;Dc	Ranieri L.	7	7	3	3
+Fiorentina	13	C	C;T	Atta	87	87	17	17
+Fiorentina	14	C	T;A	Gudmundsson A.	61	58	13	12
+Fiorentina	15	C	W;T	Mastantuono	58	58	12	12
+Fiorentina	16	C	C	Mandragora	28	28	9	9
+Fiorentina	17	C	M;C	Fagioli	23	25	8	9
+Fiorentina	18	C	C	Ndour	25	25	8	8
+Fiorentina	19	C	M;C	Oulai	20	22	6	7
+Fiorentina	20	C	C;T	Fabbian	8	8	4	4
+Fiorentina	21	C	C;T	Brescianini	7	7	3	3
+Fiorentina	22	A	Pc	Kean	212	212	25	25
+Fiorentina	23	A	Pc	Piccoli	24	21	8	7
+Frosinone	1	P	Por	Palmisani	8	8	4	4
+Frosinone	2	P	Por	Desplanches	8	8	2	2
+Frosinone	3	P	Por	Lolic	1	1	1	1
+Frosinone	4	D	Dc	Monterisi	14	14	6	6
+Frosinone	5	D	Ds;Dc	Bracaglia	11	13	5	5
+Frosinone	6	D	Dd;E	Oyono A.	12	12	5	5
+Frosinone	7	D	Dc	Calvani	10	10	4	4
+Frosinone	8	D	Dc	Akpoguma	7	7	3	3
+Frosinone	9	D	Dc	Cittadini	8	8	3	3
+Frosinone	10	D	Dc	Amey	1	1	1	1
+Frosinone	11	D	Ds;E	Corrado	3	3	1	1
+Frosinone	12	D	Dc	Gelli J.	1	1	1	1
+Frosinone	13	D	Dd;E	Oyono J.	3	3	1	1
+Frosinone	14	C	M;C	Calò	25	28	7	8
+Frosinone	15	C	W	Zerbin	13	11	5	4
+Frosinone	16	C	M;C	Cichella	11	13	4	4
+Frosinone	17	C	C	Koutsoupias	12	12	4	4
+Frosinone	18	C	W	Fini	9	8	3	2
+Frosinone	19	C	C;T	Gelli F.	8	8	3	3
+Frosinone	20	C	C;T	Hasa	5	5	2	2
+Frosinone	21	C	M;C	El Azzouzi A.	3	3	1	1
+Frosinone	22	C	C	Kone B.	3	3	1	1
+Frosinone	23	A	W;A	Ghedjemis	30	32	9	10
+Frosinone	24	A	Pc	Raimondo	24	21	7	6
+Frosinone	25	A	W;A	Kvernadze	15	16	4	5
+Genoa	1	P	Por	Bijlow	18	18	8	8
+Genoa	2	P	Por	Sommariva	1	1	1	1
+Genoa	3	P	Por	Stolz	1	1	1	1
+Genoa	4	D	Dc	Ostigard	40	40	11	11
+Genoa	5	D	Ds;Dc	Vasquez	33	35	9	10
+Genoa	6	D	Dd;E	Norton-Cuffy	22	22	8	8
+Genoa	7	D	Dc	Marcandalli	13	13	6	6
+Genoa	8	D	Ds;E	Martin	15	15	5	5
+Genoa	9	D	Ds;E	Mitaj	9	9	4	4
+Genoa	10	D	Dc	Otoa	5	5	2	2
+Genoa	11	D	Ds;E	Puczka	7	7	2	2
+Genoa	12	D	Dd;Ds;E	Sabelli	5	5	2	2
+Genoa	13	D	Ds;Dc	Matturro	2	2	1	1
+Genoa	14	C	T	Baldanzi	30	27	11	10
+Genoa	15	C	M;C	Frendrup	19	21	7	8
+Genoa	16	C	M;C	Sow	14	17	7	8
+Genoa	17	C	E;C	Ellertsson	18	21	6	7
+Genoa	18	C	W;T	Meichtry	14	14	5	5
+Genoa	19	C	W;T	Traorè Hj.	11	11	5	5
+Genoa	20	C	M;C	Amorim	11	13	4	5
+Genoa	21	C	W;T	Messias	8	8	3	3
+Genoa	22	C	M;C	Masini	4	4	2	2
+Genoa	23	C	W	Venturino	6	5	2	2
+Genoa	24	A	Pc	Colombo	63	60	11	10
+Genoa	25	A	A	Vitinha O.	20	21	8	8
+Genoa	26	A	Pc	Havel	9	7	4	3
+Inter	1	P	Por	Martinez Jo.	63	63	17	17
+Inter	2	P	Por	Provedel	5	5	2	2
+Inter	3	P	Por	Di Gennaro	1	1	1	1
+Inter	4	D	E;W	Dimarco	265	265	32	30
+Inter	5	D	Dc	Akanji	55	55	16	16
+Inter	6	D	Dc	Bastoni	44	44	14	14
+Inter	7	D	Dc	Stones	38	38	12	12
+Inter	8	D	Dc	Bisseck	33	33	11	11
+Inter	9	D	B;Ds;E	Carlos Augusto	27	30	7	8
+Inter	10	D	Dd;Dc	Pavard	18	20	6	7
+Inter	11	C	M;C	Calhanoglu	230	260	27	28
+Inter	12	C	C	Barella	82	82	17	17
+Inter	13	C	C	Zielinski	41	41	10	10
+Inter	14	C	E;C	Diouf	37	40	8	9
+Inter	15	C	C	Sucic P.	26	26	8	8
+Inter	16	C	C;T	Frattesi	13	13	7	7
+Inter	17	C	C	Mkhitaryan	19	19	5	5
+Inter	18	C	E;W	Luis Henrique	13	15	4	5
+Inter	19	C	M;C	Stankovic A.	10	11	3	3
+Inter	20	A	Pc	Martinez L.	370	370	35	35
+Inter	21	A	Pc	Thuram	280	280	29	29
+Inter	22	A	Pc	Esposito F.P.	93	90	16	16
+Inter	23	A	Pc	Bonny	21	18	7	6
+Juventus	1	P	Por	Di Gregorio	40	40	9	9
+Juventus	2	P	Por	Perin	10	10	6	6
+Juventus	3	P	Por	Pinsoglio	1	1	1	1
+Juventus	4	D	Dc	Bremer	50	50	15	15
+Juventus	5	D	Dd;Dc	Kalulu	46	48	13	14
+Juventus	6	D	Dd;Ds;E	Cambiaso	27	30	9	10
+Juventus	7	D	B;Dd;E	Celik	21	23	8	9
+Juventus	8	D	Ds;Dc	Kelly L.	13	15	5	6
+Juventus	9	D	Dc	Gatti	10	10	4	4
+Juventus	10	D	B;Ds;E	Cabal	4	4	1	1
+Juventus	11	D	Dc	Rugani	3	3	1	1
+Juventus	12	C	C	Mckennie	68	68	17	17
+Juventus	13	C	W;T	Alajbegovic	57	57	12	12
+Juventus	14	C	W;A	Conceicao	60	57	12	11
+Juventus	15	C	C	Thuram K.	41	41	10	10
+Juventus	16	C	M;C	Locatelli	32	35	8	9
+Juventus	17	C	W	Zhegrova	18	16	6	5
+Juventus	18	C	C;T	Koopmeiners	14	14	5	5
+Juventus	19	C	C	Douglas Luiz	12	12	4	4
+Juventus	20	C	C;T	Miretti	11	11	3	3
+Juventus	21	A	Pc	Kolo Muani	225	225	26	26
+Juventus	22	A	A	Yildiz	200	205	23	24
+Juventus	23	A	Pc	David	40	37	9	8
+Juventus	24	A	W;A	Boga	25	28	6	7
+Juventus	25	A	A	Ekhator	10	10	3	3
+Lazio	1	P	Por	Mandas	30	30	9	9
+Lazio	2	P	Por	Motta	1	1	1	1
+Lazio	3	P	Por	Renzetti	1	1	1	1
+Lazio	4	D	Dc	Doekhi	22	22	7	7
+Lazio	5	D	Dc	Romagnoli	24	24	7	7
+Lazio	6	D	Dd;Ds;E	Marusic	20	23	6	6
+Lazio	7	D	Ds;E	Tavares N.	17	17	6	6
+Lazio	8	D	Ds;E	Pedraza	15	15	5	5
+Lazio	9	D	Dd;E	Floriani Mussolini	12	12	3	3
+Lazio	10	D	Dc	Provstgaard	10	10	3	3
+Lazio	11	D	Dd;E	Lazzari	8	8	2	2
+Lazio	12	D	Ds;E	Pellegrini Lu.	5	5	2	2
+Lazio	13	D	Dd;Dc	Patric	4	4	1	1
+Lazio	14	C	W;A	Zaccagni	91	88	16	15
+Lazio	15	C	C;T	Taylor K.	64	64	13	13
+Lazio	16	C	W;A	Cancellieri	28	26	9	8
+Lazio	17	C	W;A	Isaksen	25	23	9	8
+Lazio	18	C	M;C	Rovella	16	19	6	7
+Lazio	19	C	C;T	Dele-Bashiru	13	13	5	5
+Lazio	20	C	M;C	Cataldi	12	15	4	5
+Lazio	21	C	M;C	Belahyane	5	5	1	1
+Lazio	22	C	W;T	Przyborek	5	5	1	1
+Lazio	23	A	A	Dia	31	33	10	11
+Lazio	24	A	Pc	Ratkov	32	29	10	9
+Lazio	25	A	A	Noslin	17	17	6	6
+Lecce	1	P	Por	Falcone	25	25	8	8
+Lecce	2	P	Por	Samooja	1	1	1	1
+Lecce	3	D	Dc	Tiago Gabriel	17	17	7	7
+Lecce	4	D	Ds;E	Gallo	13	13	6	6
+Lecce	5	D	Dc	Gaspar K.	12	12	5	5
+Lecce	6	D	Dd;E	Veiga D.	11	11	5	5
+Lecce	7	D	Dc	Siebert	12	12	4	4
+Lecce	8	D	Dc	Jean	4	4	2	2
+Lecce	9	D	Ds;E	Ndaba	4	4	1	1
+Lecce	10	D	Dd;Dc	Perez M.	1	1	1	1
+Lecce	11	C	M;C	Coulibaly L.	14	16	6	7
+Lecce	12	C	W	Pierotti	19	17	6	5
+Lecce	13	C	C;T	Berisha M.	16	16	5	5
+Lecce	14	C	C;T	Gandelman	14	14	5	5
+Lecce	15	C	M;C	Ngom	11	13	4	5
+Lecce	16	C	M;C	Maleh	5	5	2	2
+Lecce	17	C	M;C	Fofana Sa.	1	1	1	1
+Lecce	18	C	M;C	Gorter	3	3	1	1
+Lecce	19	C	M;C	Kaba	2	2	1	1
+Lecce	20	A	Pc	Geubbels	25	23	9	8
+Lecce	21	A	Pc	Stulic	18	16	7	6
+Lecce	22	A	W;A	N'Dri	9	11	3	4
+Milan	1	P	Por	Maignan	50	50	15	15
+Milan	2	P	Por	Terracciano	1	1	1	1
+Milan	3	P	Por	Torriani	1	1	1	1
+Milan	4	D	Dc	Pavlovic	48	48	14	14
+Milan	5	D	Dc	Gila	31	31	12	12
+Milan	6	D	Ds;E	Bartesaghi	25	25	8	8
+Milan	7	D	Dc	Gabbia	23	23	7	7
+Milan	8	D	Dc	Tomori	20	20	7	7
+Milan	9	D	Dd;E	Athekame	8	8	3	3
+Milan	10	D	Dd;Dc	De Winter	12	14	3	4
+Milan	11	D	Ds;E	Estupinan	9	9	3	3
+Milan	12	D	Ds;Dc	Diawara S.	4	4	2	2
+Milan	13	C	T;A	Pulisic	180	174	25	23
+Milan	14	C	C;T	Rabiot	128	128	22	22
+Milan	15	C	M;C	Modric	50	60	12	13
+Milan	16	C	E;W	Saelemaekers	43	45	10	11
+Milan	17	C	W	Chukwueze	11	9	6	5
+Milan	18	C	M;C	Fofana Y.	23	26	5	6
+Milan	19	C	C	Jashari	11	11	4	4
+Milan	20	C	C;T	Loftus-Cheek	11	11	4	4
+Milan	21	C	M;C	Ricci S.	11	13	4	4
+Milan	22	C	C;W	Musah	6	6	2	2
+Milan	23	A	Pc	Ramos G.	240	240	27	27
+Milan	24	A	A	Leao	120	123	18	19
+Milan	25	A	A	Nkunku	52	54	13	14
+Milan	26	A	Pc	Gimenez	14	13	6	5
+Milan	27	A	Pc	Camarda	18	17	5	4
+Monza	1	P	Por	Thiam	12	12	5	5
+Monza	2	P	Por	Pizzignacco	1	1	1	1
+Monza	3	P	Por	Strajnar	1	1	1	1
+Monza	4	D	Ds;E	Mangas	15	15	6	6
+Monza	5	D	Dd;Ds;E	Birindelli	12	14	4	5
+Monza	6	D	Dc	Delli Carri	11	11	4	4
+Monza	7	D	Dc	Lucchesi	12	12	4	4
+Monza	8	D	Ds;Dc	Carboni A.	9	11	3	4
+Monza	9	D	Dd;Dc	Kouadio	9	10	3	3
+Monza	10	D	Dc	Antov	2	2	1	1
+Monza	11	D	Dd;E	Bakoune	4	4	1	1
+Monza	12	C	T	Colpani	25	22	8	7
+Monza	13	C	M;C	Pessina	20	22	7	8
+Monza	14	C	C	Akinsanmiro	16	16	6	6
+Monza	15	C	M;C	Colombo L.	7	8	3	3
+Monza	16	C	E;W	Ciurria	6	6	2	2
+Monza	17	A	Pc	Cutrone	33	30	9	8
+Monza	18	A	A	Mota	18	18	5	5
+Monza	19	A	A	Robinson J.	10	10	4	4
+Monza	20	A	Pc	Varela G.	7	6	3	3
+Monza	21	A	Pc	Petagna	5	5	2	2
+Napoli	1	P	Por	Meret	45	45	11	11
+Napoli	2	P	Por	Milinkovic-Savic V.	10	10	5	5
+Napoli	3	P	Por	Contini	1	1	1	1
+Napoli	4	D	Dc	Rrahmani	47	47	14	14
+Napoli	5	D	Dd;E	Di Lorenzo	40	40	12	12
+Napoli	6	D	Ds;E	Spinazzola	24	24	8	8
+Napoli	7	D	Dc	Buongiorno	18	18	7	7
+Napoli	8	D	Dc	Beukema	16	16	6	6
+Napoli	9	D	B;Ds;E	Olivera	13	15	5	6
+Napoli	10	D	Dc	Marin R.	6	6	2	2
+Napoli	11	D	Dc	Marianucci	5	5	1	1
+Napoli	12	D	Dd;Ds;E	Mazzocchi	3	3	1	1
+Napoli	13	C	C;T	Mctominay	240	240	28	28
+Napoli	14	C	T	De Bruyne	100	94	15	14
+Napoli	15	C	C	Zambo Anguissa	55	55	11	11
+Napoli	16	C	W	Politano	47	43	10	9
+Napoli	17	C	W;T	Vergara	34	34	8	8
+Napoli	18	C	M;C	Lobotka	20	22	7	8
+Napoli	19	C	C;T	Folorunsho	10	10	4	4
+Napoli	20	C	M;C	Gilmour	9	9	3	3
+Napoli	21	A	Pc	Hojlund	271	271	28	28
+Napoli	22	A	W;A	Santos A.	60	63	14	15
+Napoli	23	A	Pc	Lukaku	45	41	10	9
+Napoli	24	A	W;A	Neres	22	25	6	7
+Napoli	25	A	A	Giovane	10	10	4	4
+Napoli	26	A	A	Lang	10	10	3	3
+Napoli	27	A	Pc	Lucca	10	9	3	3
+Parma	1	P	Por	Daffara	5	5	7	7
+Parma	2	P	Por	Suzuki	20	20	7	7
+Parma	3	P	Por	Corvi	1	1	1	1
+Parma	4	D	B;Dd;E	Delprato	21	24	8	8
+Parma	5	D	Ds;E	Valeri	24	24	8	8
+Parma	6	D	Dc	Circati	18	18	6	6
+Parma	7	D	Dc	Valenti	10	10	4	4
+Parma	8	D	Dd;Ds;E	Britschgi	10	12	3	4
+Parma	9	D	Dc	Troilo	8	8	3	3
+Parma	10	D	Ds;E	Carboni F.	3	3	1	1
+Parma	11	D	Dc	Ndiaye	4	4	1	1
+Parma	12	C	C	Bernabè	36	36	7	7
+Parma	13	C	M;C	Nicolussi Caviglia	18	20	6	7
+Parma	14	C	M;C	Keita M.	15	17	5	6
+Parma	15	C	W;A	Ondrejka	18	16	5	4
+Parma	16	C	W;A	Almqvist	14	12	4	3
+Parma	17	C	W;A	Diallo O.	12	10	3	2
+Parma	18	C	C	Sorensen O.	12	12	3	3
+Parma	19	C	M;C	Ordonez C.	5	6	2	2
+Parma	20	C	E;C	Cremaschi	3	3	1	1
+Parma	21	A	Pc	Pellegrino M.	81	79	15	15
+Parma	22	A	Pc	Tourè E.	43	43	11	11
+Parma	23	A	A	Frigan	13	13	5	5
+Parma	24	A	Pc	Elphege	11	10	3	3
+Roma	1	P	Por	Svilar	65	65	18	18
+Roma	2	P	Por	De Marzi	1	1	1	1
+Roma	3	P	Por	Gollini	1	1	1	1
+Roma	4	D	E	Wesley	84	84	17	16
+Roma	5	D	Dc	Mancini	49	49	15	15
+Roma	6	D	Dc	N'Dicka	44	44	13	13
+Roma	7	D	Dc	Hermoso	26	26	10	10
+Roma	8	D	Dc	Koulierakis	20	20	8	8
+Roma	9	D	B;Dd;E	Rensch	16	18	5	6
+Roma	10	D	Dc	Ghilardi	10	10	4	4
+Roma	11	D	Dc	Ziolkowski	2	2	1	1
+Roma	12	C	M;C	Konè M.	42	45	10	11
+Roma	13	C	C;T	Pellegrini Lo.	28	28	10	10
+Roma	14	C	M;C	Cristante	29	32	8	9
+Roma	15	C	C	Pisilli	17	17	5	5
+Roma	16	C	M;C	El Aynaoui	18	20	4	5
+Roma	17	A	Pc	Malen	365	365	34	34
+Roma	18	A	Pc	Castro S.	83	80	14	13
+Roma	19	A	A	Dybala	67	67	14	15
+Roma	20	A	A	Soulè	55	55	12	13
+Roma	21	A	Pc	Vaz	4	3	1	1
+Sassuolo	1	P	Por	Muric	15	15	7	7
+Sassuolo	2	P	Por	Russo A.	1	1	1	1
+Sassuolo	3	P	Por	Turati	3	3	1	1
+Sassuolo	4	D	Dc	Idzes	19	19	7	7
+Sassuolo	5	D	Ds;E	Doig	13	13	4	4
+Sassuolo	6	D	Dd;Dc	Walukiewicz	10	12	4	4
+Sassuolo	7	D	Ds;Dc	Candè	12	14	3	3
+Sassuolo	8	D	Dd;E	Missori	2	2	1	1
+Sassuolo	9	D	Ds;E	Pieragnolo	1	1	1	1
+Sassuolo	10	C	C;T	Thorstvedt	41	41	10	10
+Sassuolo	11	C	C	Konè I.	20	20	9	9
+Sassuolo	12	C	W;T	Volpato	23	23	7	7
+Sassuolo	13	C	C;T	Adzic	14	14	5	5
+Sassuolo	14	C	C;T	Bakola	16	16	5	5
+Sassuolo	15	C	M;C	Matic	15	17	5	6
+Sassuolo	16	C	M;C	Boloca	5	5	2	2
+Sassuolo	17	C	M;C	Lipani	5	5	2	2
+Sassuolo	18	C	M;C	Iannoni	1	1	1	1
+Sassuolo	19	A	A	Berardi	115	118	18	19
+Sassuolo	20	A	A	Laurientè	88	91	15	16
+Sassuolo	21	A	Pc	Pinamonti	58	55	13	12
+Sassuolo	22	A	Pc	Bowie	39	36	10	9
+Sassuolo	23	A	Pc	Moro L.	1	1	1	1
+Torino	1	P	Por	Mascardi	1	1	1	1
+Torino	2	P	Por	Paleari	1	1	1	1
+Torino	3	P	Por	Siviero	1	1	1	1
+Torino	4	D	Dc	Coco	18	18	7	7
+Torino	5	D	Dc	Ismajli	18	18	7	7
+Torino	6	D	Dc	Comuzzo	11	11	6	6
+Torino	7	D	Dd;E	Pedersen	13	13	5	5
+Torino	8	D	Dc	Comert	10	10	4	4
+Torino	9	D	B;Ds;E	Biraghi	5	6	2	2
+Torino	10	C	T	Vlasic	80	77	14	13
+Torino	11	C	C;T	Casadei	37	37	10	10
+Torino	12	C	W;T	Oristanio	27	27	7	7
+Torino	13	C	E;W	Cacciamani	18	20	5	6
+Torino	14	C	M;C	Gineitis	13	15	5	6
+Torino	15	C	M;C	Fitz-Jim	13	15	4	5
+Torino	16	C	M;C	Ilkhan	10	12	4	5
+Torino	17	C	W;A	Njie	12	19	4	3
+Torino	18	C	W;A	Aboukhlal	5	4	3	2
+Torino	19	C	C;T	Anjorin	4	4	1	1
+Torino	20	C	C	Ilic	4	4	1	1
+Torino	21	A	Pc	Simeone	82	79	15	15
+Torino	22	A	A	Adams C.	32	34	9	10
+Torino	23	A	Pc	Zapata D.	18	16	7	6
+Torino	24	A	Pc	Kulenovic	9	7	4	3
+Udinese	1	P	Por	Okoye	29	29	9	9
+Udinese	2	P	Por	Padelli	1	1	1	1
+Udinese	3	P	Por	Piana	1	1	1	1
+Udinese	4	D	Dc	Solet	46	46	13	13
+Udinese	5	D	Dd;E	Vojvoda	19	19	8	8
+Udinese	6	D	Dd;Dc	Kristensen T.	15	17	7	8
+Udinese	7	D	Ds;E	Kamara H.	12	12	6	6
+Udinese	8	D	Ds;E	Arizala	8	8	4	4
+Udinese	9	D	Dd;Ds;Dc	Bertola	10	14	4	6
+Udinese	10	D	Dc	Kabasele	9	9	4	4
+Udinese	11	D	Dd;E	Zanoli	10	10	4	4
+Udinese	12	D	Ds;Dc	Ebosse	4	4	2	2
+Udinese	13	D	Dc	Palma	5	5	2	2
+Udinese	14	D	Dd;Dc	Abankwah	3	3	1	1
+Udinese	15	D	Dc	Mlacic	3	3	1	1
+Udinese	16	C	T;A	Zaniolo	90	88	18	17
+Udinese	17	C	C;T	Ekkelenkamp	41	41	10	10
+Udinese	18	C	T	Unai Gomez	23	20	7	6
+Udinese	19	C	M;C	Karlstrom	20	23	6	7
+Udinese	20	C	M;C	Piotrowski	15	17	5	6
+Udinese	21	C	M;C	Miller L.	12	15	3	3
+Udinese	22	C	W;T	Chakvetadze	6	6	2	2
+Udinese	23	C	M;C	Camara A.	3	3	1	1
+Udinese	24	C	M;C	Zarraga	4	4	1	1
+Udinese	25	A	Pc	Davis K.	121	121	19	19
+Udinese	26	A	Pc	Gueye	7	6	4	3
+Udinese	27	A	Pc	Buksa	4	4	2	2
+Udinese	28	A	Pc	Bayo V.	3	3	1	1
+Venezia	1	P	Por	Stankovic F.	14	14	6	6
+Venezia	2	P	Por	Grandi	1	1	1	1
+Venezia	3	P	Por	Pozzi	1	1	1	1
+Venezia	4	D	Dc	Bella-Kotchap	13	13	6	6
+Venezia	5	D	Ds;E	Haps	11	11	5	5
+Venezia	6	D	Dc	Moreno M.	11	11	5	5
+Venezia	7	D	Dd;E	Correia T.	12	12	4	4
+Venezia	8	D	Dc	Halhal	10	10	4	4
+Venezia	9	D	Dd;E	Hainaut	7	7	3	3
+Venezia	10	D	Dc	Schingtienne	7	7	3	3
+Venezia	11	D	Ds;Dc	Sverko	7	7	3	3
+Venezia	12	D	B;Ds;E	Franjic	4	4	2	2
+Venezia	13	D	Dd;E	Sagrado	4	4	2	2
+Venezia	14	D	Ds;Dc	Gomes	1	1	1	1
+Venezia	15	C	M;C	Basic	19	20	6	7
+Venezia	16	C	M;C	Busio	14	17	5	6
+Venezia	17	C	C;T	Perez K.	14	14	5	5
+Venezia	18	C	C	Sohm	14	14	5	5
+Venezia	19	C	C;T	Helgason	7	7	3	3
+Venezia	20	C	C	Duncan	4	4	2	2
+Venezia	21	C	C	Dagasso	1	1	1	1
+Venezia	22	A	Pc	Adams A.	52	50	12	11
+Venezia	23	A	Pc	Rrahmani Al.	20	17	8	7
+Venezia	24	A	A	Yeboah J.	28	29	8	8
+Venezia	25	A	Pc	Adorante	14	12	5	4
+Venezia	26	A	Pc	Lauberbach	1	1	1	1
+Venezia	27	A	W;A	Lisman	1	1	1	1
