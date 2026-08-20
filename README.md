@@ -6,23 +6,24 @@ I portieri sono singoli: possono venire da tre squadre diverse.
 
 ## Come si usa
 
-`index.html` e' l'applicazione: una pagina sola, HTML + Tailwind + JavaScript, nessun
-passaggio di compilazione. Si apre con un doppio clic oppure si pubblica su GitHub Pages
-cosi' com'e'. Lo stato dell'asta viene salvato nel browser.
+`index.html` e' l'applicazione: una pagina sola, HTML + Tailwind + JavaScript, nessun passaggio
+di compilazione. Si apre con un doppio clic oppure si pubblica su GitHub Pages cosi' com'e'.
+Tutti i dati dell'asta vengono salvati nel browser di chi la usa.
 
-## Come funziona
+### Pubblicarla su GitHub Pages
 
-L'app e' un tabellone d'asta per tutta la lega, non solo per la tua rosa. Registri ogni
-giocatore che viene aggiudicato — tuo o di un avversario — e da li' derivano crediti residui,
-slot occupati e capienza di ognuno.
+Il repository e' gia' pronto: `index.html` sta nella radice e c'e' un `.nojekyll` che evita
+l'elaborazione Jekyll. Serve solo attivare la pubblicazione, una volta sola:
 
-E' quello che serve davvero in asta: il vincolo non e' quanto puoi spendere tu, ma quanto puo'
-ancora rilanciare chi ti sta contro. Ogni riga del listone dice quanti avversari possono
-ancora contendere quel ruolo e fino a che cifra puo' spingersi il piu' ricco fra loro. Chi ha
-riempito un reparto sparisce dal conteggio, e il pulsante che lo assegna si disattiva.
+1. **Settings** del repository, voce **Pages** nella colonna di sinistra;
+2. in *Build and deployment*, **Source**: `Deploy from a branch`;
+3. **Branch**: `main`, cartella `/ (root)`, poi **Save**.
 
-Tre viste: **Asta** (tabellone e listone), **Formazioni tipo** (i titolari delle 20 squadre con
-lo stato in asta di ciascuno) e **Griglia portieri** (incroci e migliori coppie ancora libere).
+Dopo un paio di minuti il sito e' online su
+`https://tommyieri.github.io/fantacalcio/`. Ogni push su `main` lo aggiorna da solo.
+
+Attenzione: con GitHub Pages il sito e' pubblico anche se il repository e' privato. Le rose
+dell'asta pero' restano nel browser di ciascuno, non vengono caricate da nessuna parte.
 
 ## Il motore del budget
 
