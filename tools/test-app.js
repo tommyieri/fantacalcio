@@ -220,6 +220,21 @@ function check(nome, atteso, ottenuto) {
   await page.click('#tabellone [data-squadra="1"]');
 
   console.log('\n— viste —');
+  await page.click('[data-vista="simulatore"]');
+  check('vista simulatore visibile', false, await page.evaluate(() => document.getElementById('vista-simulatore').classList.contains('hidden')));
+  check('campetto con 4 reparti', true, await page.evaluate(() => 
+    !!document.getElementById('campo-attacco') && !!document.getElementById('campo-centrocampo') &&
+    !!document.getElementById('campo-difesa') && !!document.getElementById('campo-portiere')));
+  check('selettore moduli presente con 8 moduli', 8, await page.evaluate(() => document.querySelectorAll('#moduli-selettore button').length));
+  check('scheda modificatore difesa calcola bonus', true, await page.evaluate(() => document.getElementById('sim-mod-bonus').textContent.includes('pt')));
+  check('copertura 11 a voto calcolata', true, await page.evaluate(() => document.getElementById('sim-copertura-pct').textContent.includes('%')));
+
+  await page.click('[data-vista="strategia"]');
+  check('vista strategia visibile', false, await page.evaluate(() => document.getElementById('vista-strategia').classList.contains('hidden')));
+  check('tre nomine strategiche consigliate', 3, await page.evaluate(() => document.querySelectorAll('#consigli-nomine > div').length));
+  check('radar scarsita per i 4 ruoli', 4, await page.evaluate(() => document.querySelectorAll('#radar-scarsita > div').length));
+  check('matrice necessita avversari presente', 8, await page.evaluate(() => document.querySelectorAll('#matrice-avversari-body tr').length));
+
   await page.click('[data-vista="formazioni"]');
   check('vista formazioni visibile', false, await page.evaluate(() => document.getElementById('vista-formazioni').classList.contains('hidden')));
   check('venti schede squadra', 20, await page.evaluate(() => document.querySelectorAll('#formazioni > div').length));
@@ -239,6 +254,20 @@ function check(nome, atteso, ottenuto) {
   check('coppie consigliate fra i blocchi liberi', true, await page.evaluate(() =>
     document.querySelectorAll('#coppie-consigliate > div').length > 0));
   await page.click('[data-vista="asta"]');
+
+  console.log('\n— radar rilanci live e semafori —');
+  // Apri il radar rilanci su un giocatore per testare il calcolo di chi può rilanciare
+  await page.evaluate(() => {
+    const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
+      const nome = t.querySelector('td:nth-child(2) span.font-semibold');
+      return nome && nome.textContent.trim() === 'Orsolini';
+    });
+    tr.querySelector('[data-apri]').click();
+  });
+  check('pannello assegnazione aperto con radar rilanci', true, await page.evaluate(() => !!document.getElementById('radar-messaggio')));
+  await page.fill('#prezzo-input', '50');
+  check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
+  await page.click('[data-chiudi]');
 
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
