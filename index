@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FantaStrategy Hub - Guida Completa & Live Auction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6 font-sans">
+  <div class="max-w-7xl mx-auto space-y-5">
+    
+    <!-- Dashboard Metriche & Budget Dinamico -->
+    <header class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+          <i class="fa-solid fa-trophy text-amber-400"></i> FantaStrategy Pro
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">Guida Multilink Integrata (Gazzetta, Sky, SOS Fanta, Goal, Sisal) • Budget 500 cr (2P, 8D, 8C, 6A)</p>
+      </div>
+      
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
+        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
+          <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Crediti Residui</span>
+          <span id="budget-left" class="text-xl md:text-2xl font-black text-emerald-400">500</span>
+          <span class="text-[10px] text-slate-500">/ 500</span>
+        </div>
+        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
+          <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Slot Rosa</span>
+          <span id="slots-count" class="text-xl md:text-2xl font-black text-indigo-400">0</span>
+          <span class="text-[10px] text-slate-500">/ 24</span>
+        </div>
+        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
+          <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Max Bid Attacco</span>
+          <span id="max-bid-a" class="text-xl md:text-2xl font-black text-rose-400">220</span>
+        </div>
+        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
+          <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Max Bid Centrocampo</span>
+          <span id="max-bid-c" class="text-xl md:text-2xl font-black text-amber-400">80</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sezione Griglia Portieri Interattiva -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-amber-400"></i> Calcolatore Coppia Portieri (Incroci Casa/Trasferta)
+        </h2>
+        <span class="text-[11px] text-slate-400">Indice 0 = Alternanza perfetta in casa</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+        <div>
+          <label class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Squadra 1</label>
+          <select id="grid-team-a" onchange="calculateGridPairing()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Squadra 2</label>
+          <select id="grid-team-b" onchange="calculateGridPairing()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+          </select>
+        </div>
+        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Incrocio Trasferte</span>
+            <span id="grid-result-text" class="text-xs text-slate-300">Seleziona 2 squadre</span>
+          </div>
+          <span id="grid-result-val" class="text-lg font-black text-amber-400">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layout Principale -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Listone Ufficiale e Filtri Strategici -->
+      <section class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+        
+        <!-- Barra di Ricerca e Ruoli -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div class="relative w-full sm:w-80">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500 text-xs"></i>
+            <input type="text" id="search-input" placeholder="Cerca calciatore, squadra o tag..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-200">
+          </div>
+          
+          <div class="flex flex-wrap gap-1.5 w-full sm:w-auto">
+            <button onclick="filterRole('ALL')" class="role-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-xs font-bold">TUTTI</button>
+            <button onclick="filterRole('P')" class="role-btn px-3 py-1.5 rounded-lg bg-slate-800 text-xs font-bold text-amber-400">P (Blocchi)</button>
+            <button onclick="filterRole('D')" class="role-btn px-3 py-1.5 rounded-lg bg-slate-800 text-xs font-bold text-emerald-400">D</button>
+            <button onclick="filterRole('C')" class="role-btn px-3 py-1.5 rounded-lg bg-slate-800 text-xs font-bold text-blue-400">C</button>
+            <button onclick="filterRole('A')" class="role-btn px-3 py-1.5 rounded-lg bg-slate-800 text-xs font-bold text-rose-400">A</button>
+          </div>
+        </div>
+
+        <!-- Filtri Rapidi Guida Asta -->
+        <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-800/80 text-[11px]">
+          <span class="text-slate-500 self-center font-semibold">Filtri Guida:</span>
+          <button onclick="setTagFilter('ALL')" class="tag-filter-btn px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-semibold">Tutti</button>
+          <button onclick="setTagFilter('TOP')" class="tag-filter-btn px-2.5 py-1 rounded bg-slate-800 text-amber-300 font-semibold"><i class="fa-solid fa-crown mr-1"></i>Top 1° Slot</button>
+          <button onclick="setTagFilter('RIGORISTA')" class="tag-filter-btn px-2.5 py-1 rounded bg-slate-800 text-emerald-300 font-semibold"><i class="fa-solid fa-bullseye mr-1"></i>Rigoristi</button>
+          <button onclick="setTagFilter('SCOMMESSA')" class="tag-filter-btn px-2.5 py-1 rounded bg-slate-800 text-indigo-300 font-semibold"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Scommesse</button>
+          <button onclick="setTagFilter('1 CR')" class="tag-filter-btn px-2.5 py-1 rounded bg-slate-800 text-teal-300 font-semibold"><i class="fa-solid fa-coins mr-1"></i>Low Cost 1 cr</button>
+          <button onclick="setTagFilter('RISCHIO')" class="tag-filter-btn px-2.5 py-1 rounded bg-slate-800 text-rose-300 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>A Rischio</button>
+        </div>
+
+        <!-- Tabella Calciatori -->
+        <div class="overflow-x-auto max-h-[600px] rounded-xl border border-slate-800/80">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 z-10">
+              <tr>
+                <th class="p-3">R</th>
+                <th class="p-3">Calciatore / Blocco</th>
+                <th class="p-3">Team</th>
+                <th class="p-3 text-center">FVM / Q.</th>
+                <th class="p-3">Consiglio Guida (5 Fonti)</th>
+                <th class="p-3 text-center">Max Suggerito</th>
+                <th class="p-3 text-right">Azione</th>
+              </tr>
+            </thead>
+            <tbody id="players-table-body" class="divide-y divide-slate-800/60">
+              <!-- Render Dinamico -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Pannello Gestione Rosa -->
+      <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-users-viewfinder text-indigo-400"></i> La Mia Rosa
+            </h2>
+            <span id="role-summary-badge" class="text-[11px] font-semibold text-slate-400 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">0P 0D 0C 0A</span>
+          </div>
+
+          <div id="roster-list" class="space-y-1.5 max-h-[480px] overflow-y-auto pr-1">
+            <!-- Render Dinamico -->
+          </div>
+        </div>
+        
+        <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500 flex justify-between items-center">
+          <span>Target: 2P, 8D, 8C, 6A</span>
+          <button onclick="resetAuction()" class="text-rose-400 hover:text-rose-300 font-semibold transition">Azzera Asta</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Matrice Incroci Griglia Portieri Ufficiale
+    const teamsList = ['ATA','BOL','CAG','COM','FIO','FRO','GEN','INT','JUV','LAZ','LEC','MIL','MON','NAP','PAR','ROM','SAS','TOR','UDI','VEN'];
+    const gridMatrix = {
+      ATA: { ATA:0, BOL:6, CAG:6, COM:10, FIO:8, FRO:5, GEN:8, INT:8, JUV:10, LAZ:12, LEC:13, MIL:11, MON:7, NAP:11, PAR:7, ROM:7, SAS:14, TOR:9, UDI:10, VEN:9 },
+      BOL: { ATA:6, BOL:0, CAG:9, COM:12, FIO:10, FRO:11, GEN:7, INT:9, JUV:11, LAZ:7, LEC:6, MIL:10, MON:13, NAP:6, PAR:11, ROM:12, SAS:6, TOR:8, UDI:10, VEN:7 },
+      CAG: { ATA:6, BOL:9, CAG:0, COM:11, FIO:6, FRO:8, GEN:10, INT:12, JUV:8, LAZ:11, LEC:10, MIL:7, MON:12, NAP:10, PAR:8, ROM:9, SAS:11, TOR:11, UDI:9, VEN:6 },
+      COM: { ATA:10, BOL:12, CAG:11, COM:0, FIO:6, FRO:6, GEN:7, INT:10, JUV:8, LAZ:10, LEC:13, MIL:9, MON:7, NAP:9, PAR:7, ROM:9, SAS:11, TOR:11, UDI:8, VEN:7 },
+      FIO: { ATA:8, BOL:10, CAG:6, COM:6, FIO:0, FRO:10, GEN:8, INT:10, JUV:11, LAZ:6, LEC:6, MIL:9, MON:7, NAP:12, PAR:12, ROM:13, SAS:7, TOR:8, UDI:11, VEN:11 },
+      FRO: { ATA:5, BOL:11, CAG:8, COM:6, FIO:10, FRO:0, GEN:14, INT:10, JUV:9, LAZ:7, LEC:7, MIL:11, MON:9, NAP:6, PAR:11, ROM:12, SAS:6, TOR:10, UDI:10, VEN:13 },
+      GEN: { ATA:8, BOL:7, CAG:10, COM:7, FIO:8, FRO:14, GEN:0, INT:12, JUV:5, LAZ:9, LEC:8, MIL:7, MON:10, NAP:7, PAR:9, ROM:10, SAS:7, TOR:14, UDI:7, VEN:12 },
+      INT: { ATA:8, BOL:9, CAG:12, COM:10, FIO:10, FRO:10, GEN:12, INT:0, JUV:7, LAZ:7, LEC:8, MIL:0, MON:7, NAP:10, PAR:13, ROM:12, SAS:4, TOR:12, UDI:12, VEN:8 },
+      JUV: { ATA:10, BOL:11, CAG:8, COM:8, FIO:11, FRO:9, GEN:5, INT:7, JUV:0, LAZ:13, LEC:12, MIL:12, MON:10, NAP:12, PAR:10, ROM:6, SAS:10, TOR:0, UDI:8, VEN:8 },
+      LAZ: { ATA:12, BOL:7, CAG:11, COM:10, FIO:6, FRO:7, GEN:9, INT:7, JUV:13, LAZ:0, LEC:13, MIL:12, MON:7, NAP:16, PAR:7, ROM:0, SAS:12, TOR:6, UDI:8, VEN:8 },
+      LEC: { ATA:13, BOL:6, CAG:10, COM:13, FIO:6, FRO:7, GEN:8, INT:8, JUV:12, LAZ:13, LEC:0, MIL:11, MON:6, NAP:11, PAR:4, ROM:6, SAS:14, TOR:7, UDI:7, VEN:9 },
+      MIL: { ATA:11, BOL:10, CAG:7, COM:9, FIO:9, FRO:11, GEN:7, INT:0, JUV:12, LAZ:12, LEC:11, MIL:0, MON:12, NAP:9, PAR:6, ROM:7, SAS:15, TOR:7, UDI:8, VEN:11 },
+      MON: { ATA:7, BOL:13, CAG:12, COM:7, FIO:7, FRO:9, GEN:10, INT:7, JUV:10, LAZ:7, LEC:6, MIL:12, MON:0, NAP:10, PAR:16, ROM:7, SAS:6, TOR:9, UDI:8, VEN:7 },
+      NAP: { ATA:11, BOL:6, CAG:10, COM:9, FIO:12, FRO:6, GEN:7, INT:10, JUV:12, LAZ:16, LEC:11, MIL:9, MON:10, NAP:0, PAR:17, ROM:12, SAS:9, TOR:7, UDI:11, VEN:6 },
+      PAR: { ATA:7, BOL:11, CAG:8, COM:7, FIO:12, FRO:11, GEN:9, INT:13, JUV:10, LAZ:7, LEC:4, MIL:6, MON:16, NAP:17, PAR:0, ROM:10, SAS:10, TOR:9, UDI:11, VEN:11 },
+      ROM: { ATA:7, BOL:12, CAG:9, COM:9, FIO:13, FRO:12, GEN:10, INT:12, JUV:6, LAZ:0, LEC:6, MIL:7, MON:7, NAP:12, PAR:10, ROM:0, SAS:4, TOR:13, UDI:11, VEN:11 },
+      SAS: { ATA:14, BOL:6, CAG:11, COM:11, FIO:7, FRO:6, GEN:7, INT:4, JUV:10, LAZ:12, LEC:14, MIL:15, MON:6, NAP:9, PAR:10, ROM:4, SAS:0, TOR:9, UDI:7, VEN:9 },
+      TOR: { ATA:9, BOL:8, CAG:11, COM:11, FIO:8, FRO:10, GEN:14, INT:12, JUV:0, LAZ:6, LEC:7, MIL:7, MON:9, NAP:7, PAR:9, ROM:13, SAS:9, TOR:0, UDI:10, VEN:11 },
+      UDI: { ATA:10, BOL:10, CAG:9, COM:8, FIO:11, FRO:10, GEN:7, INT:12, JUV:8, LAZ:8, LEC:7, MIL:8, MON:8, NAP:11, PAR:11, ROM:11, SAS:7, TOR:10, UDI:0, VEN:7 },
+      VEN: { ATA:9, BOL:7, CAG:6, COM:7, FIO:11, FRO:13, GEN:12, INT:8, JUV:8, LAZ:8, LEC:9, MIL:11, MON:7, NAP:6, PAR:11, ROM:11, SAS:9, TOR:11, UDI:7, VEN:0 }
+    };
+
+    // Database Integrato con Consigli Multi-Fonte
+    const playersDB = [
+      // BLOCCHI PORTIERI
+      { id: 1, role: 'P', teamCode: 'ATA', name: 'Blocco Atalanta (Carnesecchi/Sportiello/Vismara)', team: 'Atalanta', fvm: 52, quot: 16, status: 'TOP DIFESA', tag: 'TOP', note: 'Carnesecchi certezza. Incroci ideali: FRO (5), BOL/CAG (6).', baseMax: 36 },
+      { id: 2, role: 'P', teamCode: 'BOL', name: 'Blocco Bologna (Skorupski/Happonen/Pessina)', team: 'Bologna', fvm: 37, quot: 10, status: 'SICUREZZA', tag: 'TOP', note: 'Ottimo rendimento casalingo. Incroci: SAS/LEC/NAP (6).', baseMax: 22 },
+      { id: 3, role: 'P', teamCode: 'CAG', name: 'Blocco Cagliari (Caprile/Ciocci/Sherri)', team: 'Cagliari', fvm: 27, quot: 9, status: 'LOW COST', tag: '1 CR', note: 'Caprile paratutto. Incrocio perfetto con FIO/VEN (6).', baseMax: 8 },
+      { id: 4, role: 'P', teamCode: 'COM', name: 'Blocco Como (Butez/Tornqvist/Vigorito)', team: 'Como', fvm: 56, quot: 16, status: 'TOP EMERGENTE', tag: 'TOP', note: 'Butez portiere affidabile. Incroci: FIO/FRO (6).', baseMax: 32 },
+      { id: 5, role: 'P', teamCode: 'FIO', name: 'Blocco Fiorentina (De Gea/Christensen/Lezzerini)', team: 'Fiorentina', fvm: 45, quot: 13, status: 'TOP RENDIMENTO', tag: 'TOP', note: 'De Gea voto alto costante. Incroci: CAG/COM/LAZ/LEC (6).', baseMax: 30 },
+      { id: 6, role: 'P', teamCode: 'FRO', name: 'Blocco Frosinone (Palmisani/Desplanches/Lolic)', team: 'Frosinone', fvm: 8, quot: 4, status: 'LOW COST 1 CR', tag: '1 CR', note: 'Porta low-cost per completamento a 1 credito.', baseMax: 3 },
+      { id: 7, role: 'P', teamCode: 'GEN', name: 'Blocco Genoa (Bijlow/Sommariva/Stolz)', team: 'Genoa', fvm: 18, quot: 8, status: 'LOW COST', tag: '1 CR', note: 'Bijlow da rotazione. Incrocio eccellente: JUV (5).', baseMax: 6 },
+      { id: 8, role: 'P', teamCode: 'INT', name: 'Blocco Inter (Martinez Jo./Provedel/Di Gennaro)', team: 'Inter', fvm: 63, quot: 17, status: 'SUPER TOP', tag: 'TOP', note: 'Miglior tenuta difensiva. Incrocio perfetto: MIL (0), SAS (4).', baseMax: 42 },
+      { id: 9, role: 'P', teamCode: 'JUV', name: 'Blocco Juventus (Di Gregorio/Perin/Pinsoglio)', team: 'Juventus', fvm: 40, quot: 9, status: 'SUPER TOP', tag: 'TOP', note: 'Pochissimi gol subiti. Incrocio perfetto: TOR (0), GEN (5).', baseMax: 38 },
+      { id: 10, role: 'P', teamCode: 'LAZ', name: 'Blocco Lazio (Mandas/Motta/Renzetti)', team: 'Lazio', fvm: 30, quot: 9, status: 'BUONA MEDIA', tag: 'TOP', note: 'Mandas titolare. Incrocio perfetto: ROM (0), FIO/TOR (6).', baseMax: 18 },
+      { id: 11, role: 'P', teamCode: 'LEC', name: 'Blocco Lecce (Falcone/Samooja)', team: 'Lecce', fvm: 25, quot: 8, status: 'PARA-RIGORI', tag: 'SCOMMESSA', note: 'Falcone colleziona voti eccellenti. Incrocio: PAR (4).', baseMax: 6 },
+      { id: 12, role: 'P', teamCode: 'MIL', name: 'Blocco Milan (Maignan/Terracciano/Torriani)', team: 'Milan', fvm: 50, quot: 15, status: 'TOP ASSOLUTO', tag: 'TOP', note: 'Maignan saracinesca. Incrocio perfetto: INT (0), PAR (6).', baseMax: 34 },
+      { id: 13, role: 'P', teamCode: 'MON', name: 'Blocco Monza (Thiam/Pizzignacco/Strajnar)', team: 'Monza', fvm: 12, quot: 5, status: 'LOW COST', tag: '1 CR', note: 'Thiam titolare economico. Incroci: LEC/SAS (6).', baseMax: 4 },
+      { id: 14, role: 'P', teamCode: 'NAP', name: 'Blocco Napoli (Meret/Milinkovic-Savic/Contini)', team: 'Napoli', fvm: 45, quot: 11, status: 'TOP DIFESA', tag: 'TOP', note: 'Doppia sicurezza Meret/Milinkovic. Incrocio: VEN/FRO (6).', baseMax: 36 },
+      { id: 15, role: 'P', teamCode: 'PAR', name: 'Blocco Parma (Suzuki/Daffara/Corvi)', team: 'Parma', fvm: 20, quot: 7, status: 'LOW COST', tag: '1 CR', note: 'Suzuki reattivo. Ottimo incrocio low cost: LEC (4).', baseMax: 5 },
+      { id: 16, role: 'P', teamCode: 'ROM', name: 'Blocco Roma (Svilar/Gollini/De Marzi)', team: 'Roma', fvm: 65, quot: 18, status: 'TOP FANTAMEDIA', tag: 'TOP', note: 'Svilar garanzia voto altissimo. Incrocio: LAZ (0), SAS (4).', baseMax: 36 },
+      { id: 17, role: 'P', teamCode: 'SAS', name: 'Blocco Sassuolo (Muric/Turati/Russo)', team: 'Sassuolo', fvm: 15, quot: 7, status: 'LOW COST', tag: '1 CR', note: 'Incrocio d\'oro a basso costo: INT (4), ROM (4), BOL (6).', baseMax: 5 },
+      { id: 18, role: 'P', teamCode: 'TOR', name: 'Blocco Torino (Mascardi/Paleari/Siviero)', team: 'Torino', fvm: 1, quot: 1, status: 'SCOMMESSA 1 CR', tag: '1 CR', note: 'Presa a 1 credito per formare la coppia con la JUV (0).', baseMax: 2 },
+      { id: 19, role: 'P', teamCode: 'UDI', name: 'Blocco Udinese (Okoye/Padelli/Piana)', team: 'Udinese', fvm: 29, quot: 9, status: 'SOLIDO', tag: 'TOP', note: 'Okoye portiere solido in casa. Incroci: GEN/LEC/SAS/VEN (7).', baseMax: 8 },
+      { id: 20, role: 'P', teamCode: 'VEN', name: 'Blocco Venezia (Stankovic F./Grandi/Pozzi)', team: 'Venezia', fvm: 14, quot: 6, status: 'LOW COST', tag: '1 CR', note: 'Stankovic affidabile tra i pali. Incroci: CAG/NAP (6).', baseMax: 4 },
+
+      // DIFENSORI
+      { id: 101, role: 'D', name: 'Dimarco', team: 'Inter', fvm: 265, quot: 32, status: 'SUPER TOP 1° SLOT', tag: 'TOP', note: 'Re indiscusso del ruolo: corner, punizioni e bonus pesanti.', baseMax: 42 },
+      { id: 102, role: 'D', name: 'Wesley', team: 'Roma', fvm: 84, quot: 17, status: 'TOP SPINTA & ASSIST', tag: 'TOP', note: 'Esterno a tutta fascia molto offensivo, sforna assist continui.', baseMax: 25 },
+      { id: 103, role: 'D', name: 'Akanji', team: 'Inter', fvm: 55, quot: 16, status: 'TOP MODIFICATORE', tag: 'TOP', note: 'Pilastro centrale nerazzurro, garanzia di voto 6.5/7.', baseMax: 18 },
+      { id: 104, role: 'D', name: 'Bremer', team: 'Juventus', fvm: 50, quot: 15, status: 'TOP MODIFICATORE', tag: 'TOP', note: 'Invalicabile nell\'uno contro uno, sicurezza assoluta.', baseMax: 22 },
+      { id: 105, role: 'D', name: 'Mancini', team: 'Roma', fvm: 49, quot: 15, status: 'TITOLARE & GOL DI TESTA', tag: 'TOP', note: 'Sempre pericoloso sui calci d\'angolo, leader difensivo.', baseMax: 15 },
+      { id: 106, role: 'D', name: 'Pavlovic', team: 'Milan', fvm: 48, quot: 14, status: 'MODIFICATORE FISICO', tag: 'TOP', note: 'Fisico dominante, voti solidi e minaccia sulle palle inattive.', baseMax: 16 },
+      { id: 107, role: 'D', name: 'Rrahmani', team: 'Napoli', fvm: 47, quot: 14, status: 'TOP DIFESA CONTE', tag: 'TOP', note: 'Comanda la linea azzurra, regolarità di rendimento.', baseMax: 16 },
+      { id: 108, role: 'D', name: 'Kalulu', team: 'Juventus', fvm: 46, quot: 13, status: 'TITOLARE MODIFICATORE', tag: 'TOP', note: 'Duttilità tattica, ottima tenuta nei duelli difensivi.', baseMax: 14 },
+      { id: 109, role: 'D', name: 'Solet', team: 'Udinese', fvm: 46, quot: 13, status: 'TOP PROVINCIA', tag: 'TOP', note: 'Fisicità e uscite palla al piede, voti costantemente alti.', baseMax: 14 },
+      { id: 110, role: 'D', name: 'Bastoni', team: 'Inter', fvm: 44, quot: 14, status: 'TOP MODIFICATORE', tag: 'TOP', note: 'Regista difensivo aggiunto con frequenti assist mancini.', baseMax: 18 },
+      { id: 111, role: 'D', name: 'Di Lorenzo', team: 'Napoli', fvm: 40, quot: 12, status: 'CAPITANO & BONUS', tag: 'TOP', note: 'Inamovibile sulla corsia destra, costante presenza in area.', baseMax: 16 },
+      { id: 112, role: 'D', name: 'Stones', team: 'Inter', fvm: 38, quot: 12, status: 'MODIFICATORE ELEGANTE', tag: 'TOP', note: 'Esperienza internazionale e pulizia di gioco.', baseMax: 12 },
+      { id: 113, role: 'D', name: 'Ramon', team: 'Como', fvm: 32, quot: 10, status: 'TITOLARE COMO', tag: 'SCOMMESSA', note: 'Centrale moderno, perno della difesa lariana.', baseMax: 8 },
+      { id: 114, role: 'D', name: 'Gila', team: 'Milan', fvm: 31, quot: 12, status: 'TITOLARE AFFIDABILE', tag: 'TOP', note: 'Senso della posizione e concentrazione continua.', baseMax: 10 },
+      { id: 115, role: 'D', name: 'Dodo', team: 'Fiorentina', fvm: 30, quot: 10, status: 'TRENO SULLA FASCIA', tag: 'TOP', note: 'Spinta costante e cross velenosi per Kean.', baseMax: 9 },
+      { id: 116, role: 'D', name: 'Scalvini', team: 'Atalanta', fvm: 28, quot: 10, status: 'ATTENZIONE MINUTAGGIO', tag: 'RISCHIO', note: 'Talento da modificatore ma da gestire per il rientro.', baseMax: 7 },
+      { id: 117, role: 'D', name: 'Couto', team: 'Como', fvm: 27, quot: 8, status: 'ESTERNO OFFENSIVO', tag: 'SCOMMESSA', note: 'Spinta continua e intesa con la trequarti di qualità.', baseMax: 7 },
+      { id: 118, role: 'D', name: 'Dragusin', team: 'Fiorentina', fvm: 27, quot: 8, status: 'DOMINATORE AEREO', tag: 'TOP', note: 'Marcatore roccioso, pericolosissimo sui calci d\'angolo.', baseMax: 8 },
+      { id: 119, role: 'D', name: 'Chalobah T.', team: 'Como', fvm: 26, quot: 9, status: 'FISICITÀ DIFENSIVA', tag: 'SCOMMESSA', note: 'Impatto atletico e centimetri al servizio della squadra.', baseMax: 6 },
+      { id: 120, role: 'D', name: 'Delprato', team: 'Parma', fvm: 21, quot: 8, status: 'SCOMMESSA LOW COST', tag: '1 CR', note: 'Capitano, titolare indiscusso consigliato da Sisal a basso costo.', baseMax: 4 },
+      { id: 121, role: 'D', name: 'Valeri', team: 'Parma', fvm: 24, quot: 8, status: 'TERZINO SPINTA', tag: 'SCOMMESSA', note: 'Mancino calibrato per i cross, titolarità solida.', baseMax: 5 },
+      { id: 122, role: 'D', name: 'Zortea', team: 'Bologna', fvm: 19, quot: 6, status: 'INCURSORE BONUS', tag: 'SCOMMESSA', note: 'Si butta nello spazio e conclude verso la porta.', baseMax: 5 },
+      { id: 123, role: 'D', name: 'Idzes', team: 'Sassuolo', fvm: 19, quot: 7, status: 'TITOLARE CERTO', tag: '1 CR', note: 'Comanda la difesa neroverde, titolare fisso da 6.', baseMax: 4 },
+      { id: 124, role: 'D', name: 'Luperto', team: 'Cagliari', fvm: 20, quot: 8, status: 'CERTEZZA TITOLARE', tag: '1 CR', note: 'Media voto affidabile, ideale come 6°/7° slot.', baseMax: 3 },
+      { id: 125, role: 'D', name: 'Gallo', team: 'Lecce', fvm: 13, quot: 6, status: 'TITOLARE 1 CR', tag: '1 CR', note: 'Presenza fissa sulla corsia mancina a costo minimo.', baseMax: 1 },
+      { id: 126, role: 'D', name: 'Svoboda', team: 'Venezia', fvm: 7, quot: 3, status: 'TAPPA-BUCHI 1 CR', tag: '1 CR', note: 'Perfetto per completare l\'8° slot della difesa a 1 credito.', baseMax: 1 },
+
+      // CENTROCAMPISTI
+      { id: 201, role: 'C', name: 'Paz N.', team: 'Como', fvm: 250, quot: 30, status: 'SUPER TOP 1° SLOT', tag: 'TOP', note: 'Faro di gioco: punizioni dirette, assist e tiri da fuori.', baseMax: 75 },
+      { id: 202, role: 'C', name: 'Mctominay', team: 'Napoli', fvm: 240, quot: 28, status: 'SUPER TOP GOLEADOR', tag: 'TOP', note: 'Incursore letale in area, potenziale da doppia cifra di gol.', baseMax: 72 },
+      { id: 203, role: 'C', name: 'Calhanoglu', team: 'Inter', fvm: 230, quot: 27, status: 'CECCHINO RIGORISTA', tag: 'RIGORISTA', note: 'Primo rigorista nerazzurro infallibile, bonus certi.', baseMax: 68 },
+      { id: 204, role: 'C', name: 'Orsolini', team: 'Bologna', fvm: 200, quot: 26, status: 'SUPER TOP & RIGORI', tag: 'RIGORISTA', note: 'Rigorista del Bologna, gioca da ala pura d\'attacco.', baseMax: 65 },
+      { id: 205, role: 'C', name: 'Pulisic', team: 'Milan', fvm: 180, quot: 25, status: 'SUPER TOP ASSOLUTO', tag: 'TOP', note: 'Attaccante aggiunto a listino C: gol, assist e rigori.', baseMax: 62 },
+      { id: 206, role: 'C', name: 'Rabiot', team: 'Milan', fvm: 128, quot: 22, status: 'TOP MEDIANA', tag: 'TOP', note: 'Fisicità straripante, inserimenti e media voto sempre alta.', baseMax: 35 },
+      { id: 207, role: 'C', name: 'Baturina', team: 'Como', fvm: 102, quot: 19, status: 'TOP FANTASIA', tag: 'SCOMMESSA', note: 'Numero 10 puro consigliato da Sky e Goal per i bonus assist.', baseMax: 28 },
+      { id: 208, role: 'C', name: 'De Bruyne', team: 'Napoli', fvm: 100, quot: 15, status: 'MAESTRO BALISTICA', tag: 'TOP', note: 'Visione superiore e traiettorie perfette da palla ferma.', baseMax: 30 },
+      { id: 209, role: 'C', name: 'Zaccagni', team: 'Lazio', fvm: 91, quot: 16, status: 'LEADER & RIGORISTA', tag: 'RIGORISTA', note: 'Capitano, primo rigorista biancoceleste e bonus continui.', baseMax: 28 },
+      { id: 210, role: 'C', name: 'Da Cunha', team: 'Como', fvm: 90, quot: 18, status: 'SEMI-TOP QUALITÀ', tag: 'SCOMMESSA', note: 'Trequartista d\'inserimento con ottimo feeling col gol.', baseMax: 24 },
+      { id: 211, role: 'C', name: 'Zaniolo', team: 'Udinese', fvm: 90, quot: 18, status: 'SCOMMESSA ESPLOSIVA', tag: 'SCOMMESSA', note: 'Perno offensivo dell\'Udinese, strappi e conclusioni potenti.', baseMax: 22 },
+      { id: 212, role: 'C', name: 'Atta', team: 'Fiorentina', fvm: 87, quot: 17, status: 'TOP RIVELAZIONE', tag: 'SCOMMESSA', note: 'Mancino velenoso ed esplosività, grande sorpresa dell\'anno.', baseMax: 22 },
+      { id: 213, role: 'C', name: 'Barella', team: 'Inter', fvm: 82, quot: 17, status: 'GARANZIA VOTO', tag: 'TOP', note: 'Inamovibile, rendimento eccezionale e voti alti costanti.', baseMax: 20 },
+      { id: 214, role: 'C', name: 'Vlasic', team: 'Torino', fvm: 80, quot: 14, status: 'LEADER TECNICO', tag: 'TOP', note: 'Trequartista totale, tira da fuori e batte i piazzati granata.', baseMax: 18 },
+      { id: 215, role: 'C', name: 'Mckennie', team: 'Juventus', fvm: 68, quot: 17, status: 'INCURSORE TOP', tag: 'TOP', note: 'Tempismo perfetto senza palla e vizio del gol d\'inserimento.', baseMax: 16 },
+      { id: 216, role: 'C', name: 'Taylor K.', team: 'Lazio', fvm: 64, quot: 13, status: 'REGIA & PIAZZATI', tag: 'SCOMMESSA', note: 'Faro di manovra con ottima attitudine al passaggio chiave.', baseMax: 14 },
+      { id: 217, role: 'C', name: 'Gudmundsson A.', team: 'Fiorentina', fvm: 61, quot: 13, status: 'DRIBBLING & RIGORI', tag: 'RIGORISTA', note: 'Classe superiore, si alterna con Kean sui penalty.', baseMax: 15 },
+      { id: 218, role: 'C', name: 'Conceicao', team: 'Juventus', fvm: 60, quot: 12, status: 'SPACCAPARTITE DRIBBLING', tag: 'SCOMMESSA', note: 'Devastante nell\'uno contro uno, procura falli e assist.', baseMax: 15 },
+      { id: 219, role: 'C', name: 'Mastantuono', team: 'Fiorentina', fvm: 58, quot: 12, status: 'TALENTO CRISTALLINO', tag: 'SCOMMESSA', note: 'Gioiello argentino con un mancino educatissimo sui calci franchi.', baseMax: 14 },
+      { id: 220, role: 'C', name: 'Alajbegovic', team: 'Juventus', fvm: 57, quot: 12, status: 'GIOVANE PROMESSA', tag: 'SCOMMESSA', note: 'Consigliato come colpo a sorpresa per la trequarti.', baseMax: 12 },
+      { id: 221, role: 'C', name: 'Zambo Anguissa', team: 'Napoli', fvm: 55, quot: 11, status: 'DOMINATORE CENTROCAMPO', tag: 'TOP', note: 'Forza fisica e inserimenti costanti nello schema di Conte.', baseMax: 12 },
+      { id: 222, role: 'C', name: 'Modric', team: 'Milan', fvm: 50, quot: 12, status: 'REGIA MAESTOSA', tag: 'TOP', note: 'Qualità pura, calci piazzati vellutati e voti brillanti.', baseMax: 10 },
+      { id: 223, role: 'C', name: 'Ederson D.S.', team: 'Atalanta', fvm: 45, quot: 12, status: 'CERTEZZA MEDIANA', tag: 'TOP', note: 'Recupera palloni e conclude da fuori area con potenza.', baseMax: 10 },
+      { id: 224, role: 'C', name: 'Samardzic', team: 'Atalanta', fvm: 42, quot: 12, status: 'SPECIALISTA PIAZZATI', tag: 'SCOMMESSA', note: 'Mancino micidiale su punizione e tiro da lontano.', baseMax: 10 },
+      { id: 225, role: 'C', name: 'Koné M.', team: 'Roma', fvm: 42, quot: 10, status: 'TITOLARE FISSO', tag: 'TOP', note: 'Padrone della mediana giallorossa, pochi malus.', baseMax: 8 },
+      { id: 226, role: 'C', name: 'Thorstvedt', team: 'Sassuolo', fvm: 41, quot: 10, status: 'GOL DALLA MEDIANA', tag: 'SCOMMESSA', note: 'Incursore di stazza, pericoloso di testa in area avversaria.', baseMax: 9 },
+      { id: 227, role: 'C', name: 'Bernabé', team: 'Parma', fvm: 36, quot: 7, status: 'FARO TECNICO', tag: 'SCOMMESSA', note: 'Geometrie perfette, voti sempre sopra la sufficienza.', baseMax: 7 },
+      { id: 228, role: 'C', name: 'Fazzini', team: 'Cagliari', fvm: 19, quot: 7, status: 'SCOMMESSA LOW COST', tag: '1 CR', note: 'Trequartista di manovra a prezzo contenuto consigliato da Sisal.', baseMax: 3 },
+      { id: 229, role: 'C', name: 'Adopo', team: 'Cagliari', fvm: 13, quot: 6, status: 'TITOLARE 1 CR', tag: '1 CR', note: 'Classica copertura certa per l\'8° slot a 1 credito.', baseMax: 1 },
+      { id: 230, role: 'C', name: 'Busio', team: 'Venezia', fvm: 14, quot: 5, status: 'TITOLARE 1 CR', tag: '1 CR', note: 'Titolare garantito nel centrocampo del Venezia.', baseMax: 1 },
+
+      // ATTACCANTI
+      { id: 301, role: 'A', name: 'Martinez L.', team: 'Inter', fvm: 370, quot: 35, status: 'SUPER TOP ASSOLUTO', tag: 'TOP', note: 'Capocannoniere дизайна nerazzurro, primo rigorista e 1° slot assoluto.', baseMax: 190 },
+      { id: 302, role: 'A', name: 'Malen', team: 'Roma', fvm: 365, quot: 34, status: 'SUPER TOP BOMBER', tag: 'TOP', note: 'Nuovo re dell\'attacco romanista, finalizzatore letale.', baseMax: 185 },
+      { id: 303, role: 'A', name: 'Thuram', team: 'Inter', fvm: 280, quot: 29, status: 'TOP ATTACCO', tag: 'TOP', note: 'Potenza atletica incontenibile, gol pesanti e assist a grappoli.', baseMax: 130 },
+      { id: 304, role: 'A', name: 'Hojlund', team: 'Napoli', fvm: 271, quot: 28, status: 'TOP BOMBER NAPOLI', tag: 'TOP', note: 'Centravanti ideale di Conte, strapotere fisico in area.', baseMax: 125 },
+      { id: 305, role: 'A', name: 'Ramos G.', team: 'Milan', fvm: 240, quot: 27, status: 'TOP CENTRAVANTI MILAN', tag: 'TOP', note: 'Punta centrale di riferimento dei rossoneri, grande senso del gol.', baseMax: 115 },
+      { id: 306, role: 'A', name: 'Kolo Muani', team: 'Juventus', fvm: 225, quot: 26, status: 'TOP ATTACCANTE JUVE', tag: 'TOP', note: 'Velocità impressionante e freddezza sotto porta in bianconero.', baseMax: 110 },
+      { id: 307, role: 'A', name: 'Kean', team: 'Fiorentina', fvm: 212, quot: 25, status: 'SUPER TOP BOMBER & RIGORI', tag: 'RIGORISTA', note: 'Terminale offensivo unico della Fiorentina e rigorista primario.', baseMax: 105 },
+      { id: 308, role: 'A', name: 'Yildiz', team: 'Juventus', fvm: 200, quot: 23, status: 'TOP TALENTO CRISTALLINO', tag: 'TOP', note: 'Numero 10 puro: dribbling secco, conclusioni a giro e assist.', baseMax: 95 },
+      { id: 309, role: 'A', name: 'Douvikas', team: 'Como', fvm: 157, quot: 20, status: 'BOMBER RIVELAZIONE', tag: 'SCOMMESSA', note: 'Consigliato da Gazzetta e SOS Fanta come colpo da 15+ gol.', baseMax: 70 },
+      { id: 310, role: 'A', name: 'Scamacca', team: 'Atalanta', fvm: 128, quot: 19, status: 'TOP CENTRAVANTI ATALANTA', tag: 'TOP', note: 'Balistica pesante, colpi di testa e presenza dominante.', baseMax: 58 },
+      { id: 311, role: 'A', name: 'Leao', team: 'Milan', fvm: 120, quot: 18, status: 'TOP SPACCAPARTITE', tag: 'TOP', note: 'Strappi inarrestabili sulla fascia sinistra e rifiniture vincenti.', baseMax: 55 },
+      { id: 312, role: 'A', name: 'Davis K.', team: 'Udinese', fvm: 121, quot: 19, status: 'LEADER ATTACCO UDINESE', tag: 'TOP', note: 'Fisicità devastante, fa reparto da solo e conclude con forza.', baseMax: 55 },
+      { id: 313, role: 'A', name: 'Berardi', team: 'Sassuolo', fvm: 115, quot: 18, status: 'TOP RIGORISTA & LEADER', tag: 'RIGORISTA', note: 'Faro indiscusso del Sassuolo: rigori, punizioni e assist.', baseMax: 52 },
+      { id: 314, role: 'A', name: 'De Ketelaere', team: 'Atalanta', fvm: 106, quot: 17, status: 'QUALITÀ & INCURSIONI', tag: 'TOP', note: 'Visione sopraffina e continui tagli in area di rigore.', baseMax: 48 },
+      { id: 315, role: 'A', name: 'Krstovic', team: 'Atalanta', fvm: 100, quot: 18, status: 'BOMBER RAPIDO', tag: 'SCOMMESSA', note: 'Tira da qualsiasi posizione, volume di conclusioni altissimo.', baseMax: 45 },
+      { id: 316, role: 'A', name: 'Esposito F.P.', team: 'Inter', fvm: 93, quot: 16, status: 'SCOMMESSA TALENTO', tag: 'SCOMMESSA', note: 'Fiuto del gol innato, ottima carta a gara in corso.', baseMax: 38 },
+      { id: 317, role: 'A', name: 'Laurienté', team: 'Sassuolo', fvm: 88, quot: 15, status: 'DRIBBLING & CORSA', tag: 'SCOMMESSA', note: 'Scatti brucianti e piazzati velenosi a supporto di Berardi.', baseMax: 36 },
+      { id: 318, role: 'A', name: 'Dovbyk', team: 'Bologna', fvm: 84, quot: 16, status: 'CENTRAVANTI FISICO', tag: 'TOP', note: 'Terminale offensivo del tridente bolognese.', baseMax: 35 },
+      { id: 319, role: 'A', name: 'Castro S.', team: 'Roma', fvm: 83, quot: 14, status: 'ATTACCANTE DI PRESSING', tag: 'SCOMMESSA', note: 'Grinta incredibile, attacca la porta e duella con i centrali.', baseMax: 34 },
+      { id: 320, role: 'A', name: 'Simeone', team: 'Torino', fvm: 82, quot: 15, status: 'TITOLARE D\'ATTACCO', tag: 'TOP', note: 'Opportunismo puro in area e generosità per i compagni.', baseMax: 32 },
+      { id: 321, role: 'A', name: 'Pellegrino M.', team: 'Parma', fvm: 81, quot: 15, status: 'CENTRAVANTI PARMA', tag: 'SCOMMESSA', note: 'Perno offensivo dei ducali, ottima presenza aerea.', baseMax: 32 },
+      { id: 322, role: 'A', name: 'Dybala', team: 'Roma', fvm: 67, quot: 14, status: 'QUALITÀ PURA & GESTIONE', tag: 'RISCHIO', note: 'Classe assoluta e rigori ma minutaggio da gestire con cautela.', baseMax: 28 },
+      { id: 323, role: 'A', name: 'Colombo', team: 'Genoa', fvm: 63, quot: 11, status: 'TITOLARE GENOA', tag: 'SCOMMESSA', note: 'Punta di riferimento a Marassi, rigorista alternativo.', baseMax: 24 },
+      { id: 324, role: 'A', name: 'Raspadori', team: 'Atalanta', fvm: 62, quot: 13, status: 'JOLLY D\'ATTACCO', tag: 'SCOMMESSA', note: 'Duttilità tattica, spacca le difese partendo da dietro.', baseMax: 22 },
+      { id: 325, role: 'A', name: 'Pinamonti', team: 'Sassuolo', fvm: 58, quot: 13, status: 'RIGORISTA & TITOLARE', tag: 'RIGORISTA', note: 'Centravanti fisso del Sassuolo, freddo dal dischetto.', baseMax: 20 },
+      { id: 326, role: 'A', name: 'Soulè', team: 'Roma', fvm: 55, quot: 12, status: 'ESTRO & DRIBBLING', tag: 'SCOMMESSA', note: 'Mancino educato, rientra e calcia con precisione.', baseMax: 20 },
+      { id: 327, role: 'A', name: 'Nkunku', team: 'Milan', fvm: 52, quot: 13, status: 'QUALITÀ D\'ELITE', tag: 'TOP', note: 'Rapidità e tecnica superiore nelle rotazioni offensive.', baseMax: 18 },
+      { id: 328, role: 'A', name: 'Esposito Se.', team: 'Cagliari', fvm: 50, quot: 13, status: 'RIGORISTA CAGLIARI', tag: 'RIGORISTA', note: 'Specialista sui calci da fermo e rigori per i sardi.', baseMax: 16 },
+      { id: 329, role: 'A', name: 'Diao', team: 'Como', fvm: 50, quot: 11, status: 'ALA ESPLOSIVA', tag: 'SCOMMESSA', note: 'Progressione atletica e inserimenti veloci sul secondo palo.', baseMax: 14 },
+      { id: 330, role: 'A', name: 'Adams A.', team: 'Venezia', fvm: 52, quot: 12, status: 'TITOLARE VENEZIA', tag: 'SCOMMESSA', note: 'Punta di movimento con buon fiuto per la rete.', baseMax: 14 },
+      { id: 331, role: 'A', name: 'Dia', team: 'Lazio', fvm: 31, quot: 10, status: 'ATTACCO PROFONDITÀ', tag: 'SCOMMESSA', note: 'Micidiale in contropiede negli spazi aperti.', baseMax: 10 },
+      { id: 332, role: 'A', name: 'Bonny', team: 'Inter', fvm: 21, quot: 7, status: 'SCOMMESSA D\'AREA', tag: 'SCOMMESSA', note: 'Fisicità e protezione palla nei finali di gara.', baseMax: 5 },
+      { id: 333, role: 'A', name: 'Albarracin', team: 'Cagliari', fvm: 1, quot: 1, status: 'SCOMMESSA 1 CR', tag: '1 CR', note: 'Consigliato da Sisal come jolly giovane per il 6° slot.', baseMax: 1 },
+      { id: 334, role: 'A', name: 'Lisman', team: 'Venezia', fvm: 1, quot: 1, status: 'SCOMMESSA 1 CR', tag: '1 CR', note: 'Copertura economica a 1 credito per chiudere l\'attacco.', baseMax: 1 }
+    ];
+
+    let myRoster = JSON.parse(localStorage.getItem('myFantaRosterMultiLink')) || [];
+    let activeRole = 'ALL';
+    let activeTag = 'ALL';
+
+    function initGridDropdowns() {
+      const selectA = document.getElementById('grid-team-a');
+      const selectB = document.getElementById('grid-team-b');
+      selectA.innerHTML = '';
+      selectB.innerHTML = '';
+      
+      teamsList.forEach(t => {
+        selectA.innerHTML += `<option value="${t}">${t}</option>`;
+        selectB.innerHTML += `<option value="${t}">${t}</option>`;
+      });
+      selectA.value = 'INT';
+      selectB.value = 'MIL';
+      calculateGridPairing();
+    }
+
+    function calculateGridPairing() {
+      const a = document.getElementById('grid-team-a').value;
+      const b = document.getElementById('grid-team-b').value;
+      if (a === b) {
+        document.getElementById('grid-result-val').innerText = 'Stessa';
+        document.getElementById('grid-result-text').innerText = 'Seleziona due squadre distinte';
+        return;
+      }
+      const val = gridMatrix[a] ? gridMatrix[a][b] : '-';
+      document.getElementById('grid-result-val').innerText = val;
+      
+      if (val === 0) {
+        document.getElementById('grid-result-text').innerText = 'Perfetto (100% Alternanza Casa)';
+      } else if (val <= 5) {
+        document.getElementById('grid-result-text').innerText = 'Incrocio Eccellente';
+      } else if (val <= 7) {
+        document.getElementById('grid-result-text').innerText = 'Incrocio Buono / Consigliato';
+      } else {
+        document.getElementById('grid-result-text').innerText = 'Incrocio Sconsigliato';
+      }
+    }
+
+    function calculateDynamicBudget() {
+      const initialBudget = 500;
+      const spent = myRoster.reduce((sum, p) => sum + p.paid, 0);
+      const remainingBudget = initialBudget - spent;
+      
+      const counts = { P: 0, D: 0, C: 0, A: 0 };
+      myRoster.forEach(p => counts[p.role]++);
+
+      const missing = {
+        P: Math.max(0, 2 - counts.P),
+        D: Math.max(0, 8 - counts.D),
+        C: Math.max(0, 8 - counts.C),
+        A: Math.max(0, 6 - counts.A)
+      };
+      
+      const totalMissing = missing.P + missing.D + missing.C + missing.A;
+      const reserveForOthers = Math.max(0, totalMissing - 1);
+
+      const maxBidA = missing.A > 0 ? Math.max(1, remainingBudget - reserveForOthers) : 0;
+      const maxBidC = missing.C > 0 ? Math.max(1, Math.min(Math.round(remainingBudget * 0.40), remainingBudget - reserveForOthers)) : 0;
+
+      document.getElementById('budget-left').innerText = remainingBudget;
+      document.getElementById('slots-count').innerText = myRoster.length;
+      document.getElementById('max-bid-a').innerText = maxBidA;
+      document.getElementById('max-bid-c').innerText = maxBidC;
+      document.getElementById('role-summary-badge').innerText = `${counts.P}/2 P • ${counts.D}/8 D • ${counts.C}/8 C • ${counts.A}/6 A`;
+
+      return { remainingBudget, missing };
+    }
+
+    function renderList() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const tbody = document.getElementById('players-table-body');
+      tbody.innerHTML = '';
+
+      const { remainingBudget } = calculateDynamicBudget();
+      const budgetFactor = Math.max(0.2, remainingBudget / 500);
+
+      const filtered = playersDB
+        .filter(p => activeRole === 'ALL' || p.role === activeRole)
+        .filter(p => activeTag === 'ALL' || p.tag.includes(activeTag) || p.status.includes(activeTag))
+        .filter(p => p.name.toLowerCase().includes(query) || p.team.toLowerCase().includes(query) || p.status.toLowerCase().includes(query) || p.note.toLowerCase().includes(query));
+
+      filtered.forEach(p => {
+        const isBought = myRoster.some(r => r.id === p.id);
+        const dynamicMax = Math.max(1, Math.round(p.baseMax * budgetFactor));
+
+        const tr = document.createElement('tr');
+        tr.className = isBought ? 'opacity-35 bg-slate-950/60' : 'hover:bg-slate-800/40 transition duration-150';
+        
+        const roleColor = p.role === 'P' ? 'text-amber-400' : p.role === 'D' ? 'text-emerald-400' : p.role === 'C' ? 'text-blue-400' : 'text-rose-400';
+        
+        let badgeStyle = 'bg-indigo-950 text-indigo-300 border border-indigo-800/60';
+        if (p.tag === 'TOP' || p.status.includes('SUPER TOP')) {
+          badgeStyle = 'bg-amber-950 text-amber-300 border border-amber-800/60 font-bold';
+        } else if (p.tag === 'RIGORISTA') {
+          badgeStyle = 'bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-bold';
+        } else if (p.tag === '1 CR') {
+          badgeStyle = 'bg-teal-950 text-teal-300 border border-teal-800/60';
+        } else if (p.tag === 'RISCHIO') {
+          badgeStyle = 'bg-rose-950 text-rose-300 border border-rose-800/60';
+        }
+
+        tr.innerHTML = `
+          <td class="p-3 font-black ${roleColor}">${p.role}</td>
+          <td class="p-3 font-semibold text-white">${p.name}</td>
+          <td class="p-3 text-slate-400">${p.team}</td>
+          <td class="p-3 text-center">
+            <span class="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800/60 text-slate-300 border border-slate-700/50">${p.fvm} / ${p.quot}</span>
+          </td>
+          <td class="p-3">
+            <span class="text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider ${badgeStyle}">${p.status}</span>
+            <p class="text-[11px] text-slate-400 mt-1">${p.note}</p>
+          </td>
+          <td class="p-3 text-center font-black text-amber-300 text-sm">${dynamicMax} cr</td>
+          <td class="p-3 text-right">
+            ${isBought ? '<span class="text-[11px] text-slate-500 font-bold tracking-wider">PRESO</span>' : `<button onclick="buyPlayer(${p.id}, ${dynamicMax})" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md hover:shadow-indigo-500/20 transition">Acquista</button>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderRoster();
+    }
+
+    function buyPlayer(id, suggestedMax) {
+      const player = playersDB.find(p => p.id === id);
+      const paidStr = prompt(`A quanto hai acquistato ${player.name}?\nPrezzo max consigliato attuale: ${suggestedMax} crediti.`, suggestedMax);
+      if (paidStr === null) return;
+      const paid = parseInt(paidStr, 10);
+      if (isNaN(paid) || paid < 1) {
+        alert("Inserisci un importo valido (minimo 1 credito).");
+        return;
+      }
+
+      myRoster.push({ ...player, paid });
+      localStorage.setItem('myFantaRosterMultiLink', JSON.stringify(myRoster));
+      renderList();
+    }
+
+    function removePlayer(index) {
+      myRoster.splice(index, 1);
+      localStorage.setItem('myFantaRosterMultiLink', JSON.stringify(myRoster));
+      renderList();
+    }
+
+    function renderRoster() {
+      const rosterDiv = document.getElementById('roster-list');
+      rosterDiv.innerHTML = '';
+      if (myRoster.length === 0) {
+        rosterDiv.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs italic">Nessun calciatore registrato in rosa.</div>';
+        return;
+      }
+      myRoster.forEach((p, idx) => {
+        const item = document.createElement('div');
+        item.className = 'flex justify-between items-center bg-slate-950/80 p-2 rounded-xl border border-slate-800 text-xs';
+        const roleColor = p.role === 'P' ? 'text-amber-400' : p.role === 'D' ? 'text-emerald-400' : p.role === 'C' ? 'text-blue-400' : 'text-rose-400';
+        item.innerHTML = `
+          <div class="flex items-center gap-2 truncate pr-2">
+            <span class="font-black ${roleColor}">${p.role}</span>
+            <span class="font-semibold text-slate-200 truncate">${p.name}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-emerald-400 font-black">${p.paid} cr</span>
+            <button onclick="removePlayer(${idx})" class="text-slate-500 hover:text-rose-400 transition" title="Rimuovi"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+        `;
+        rosterDiv.appendChild(item);
+      });
+    }
+
+    function filterRole(role) {
+      activeRole = role;
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600');
+        btn.classList.add('bg-slate-800');
+      });
+      event.target.classList.remove('bg-slate-800');
+      event.target.classList.add('bg-indigo-600');
+      renderList();
+    }
+
+    function setTagFilter(tag) {
+      activeTag = tag;
+      document.querySelectorAll('.tag-filter-btn').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-indigo-500', 'bg-slate-700');
+      });
+      event.target.classList.add('ring-2', 'ring-indigo-500', 'bg-slate-700');
+      renderList();
+    }
+
+    function resetAuction() {
+      if (confirm("Vuoi davvero azzerare l'asta e resettare tutti i crediti?")) {
+        myRoster = [];
+        localStorage.removeItem('myFantaRosterMultiLink');
+        renderList();
+      }
+    }
+
+    document.getElementById('search-input').addEventListener('input', renderList);
+    initGridDropdowns();
+    renderList();
+  </script>
+</body>
+</html>
