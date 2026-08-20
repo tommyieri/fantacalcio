@@ -1164,70 +1164,87 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
 
     const VALUTAZIONI_CACHE = new Map();
 
+    function erf(x) {
+      const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+      const sign = x < 0 ? -1 : 1;
+      const absX = Math.abs(x);
+      const t = 1.0 / (1.0 + p * absX);
+      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+      return sign * y;
+    }
+
+    function normalCdf(x, mean, std) {
+      return 0.5 * (1 + erf((x - mean) / (std * Math.sqrt(2))));
+    }
+
     function inizializzaValutazioni() {
       VALUTAZIONI_CACHE.clear();
+
+      // Raggruppamento per ruolo per determinare la baseline di rimpiazzo e il monte crediti chiuso (Nessun double counting)
+      const perRuolo = { P: [], D: [], C: [], A: [] };
+      for (const p of PLAYERS) perRuolo[p.ruolo].push(p);
+      for (const r of RUOLI) perRuolo[r].sort((a, b) => b.fvm - a.fvm);
+
+      const nSquadreBase = 8;
+      const budgetTotLega = nSquadreBase * BUDGET; // 4000 cr
+
+      const roleStats = {};
+      for (const r of RUOLI) {
+        const nDrafted = nSquadreBase * TARGET[r];
+        const drafted = perRuolo[r].slice(0, nDrafted);
+        const baselineFvm = drafted.length ? drafted[drafted.length - 1].fvm : 1;
+        const roleBudget = (budgetTotLega * PRIORI[r]) / 100;
+        
+        let excessSum = 0;
+        for (const p of drafted) {
+          excessSum += Math.max(0, p.fvm - baselineFvm);
+        }
+        excessSum = Math.max(1, excessSum);
+        const excessPool = Math.max(0, roleBudget - nDrafted);
+
+        roleStats[r] = { nDrafted, baselineFvm, roleBudget, excessSum, excessPool };
+      }
+
       for (const p of PLAYERS) {
+        const r = p.ruolo;
+        const stRole = roleStats[r];
+        
         let tit = 0.50;
         if (p.tag.includes('TITOLARE')) tit = 0.90;
         else if (p.tag.includes('SCOMMESSA')) tit = 0.65;
-        else if (p.tag.includes('LOWCOST')) tit = 0.25;
-        if (p.tag.includes('RISCHIO')) tit *= 0.65;
+        else if (p.tag.includes('LOWCOST')) tit = 0.30;
+        if (p.tag.includes('RISCHIO')) tit *= 0.70;
 
+        // Media Voto base e Bonus attesi modellati con continuita' monotonicamente dal listone
         let mv = 6.00;
-        let bonusGol = 0;
-        let bonusAssist = 0;
-        let malus = 0;
-
-        if (p.ruolo === 'P') {
-          mv = p.tag.includes('TOP') ? 6.22 : p.fascia === 2 ? 6.10 : p.fascia === 3 ? 5.95 : 5.80;
-          const golSubiti = p.tag.includes('TOP') ? 0.90 : p.fascia <= 3 ? 1.35 : 1.75;
-          malus = golSubiti;
-          bonusGol = p.tag.includes('RIGORISTA') ? 0.05 : 0;
-        } else if (p.ruolo === 'D') {
-          if (p.tag.includes('MODIFICATORE')) mv = 6.25 + (p.fvm / 200) * 0.20;
-          else if (p.tag.includes('TOP')) mv = 6.15 + (p.fvm / 200) * 0.15;
-          else if (p.tag.includes('TITOLARE')) mv = 5.98 + (p.quot / 20) * 0.10;
-          else mv = 5.75 + (p.quot / 20) * 0.10;
-
-          if (p.fvm >= 80) { bonusGol = 0.12; bonusAssist = 0.15; }
-          else if (p.fvm >= 40) { bonusGol = 0.06; bonusAssist = 0.08; }
-          else if (p.tag.includes('RIGORISTA')) { bonusGol = 0.08; bonusAssist = 0.03; }
-          else if (p.fascia <= 3) { bonusGol = 0.03; bonusAssist = 0.04; }
-          else { bonusGol = 0.01; bonusAssist = 0.01; }
-        } else if (p.ruolo === 'C') {
-          mv = p.tag.includes('TOP') ? 6.28 : p.tag.includes('TITOLARE') ? 6.05 : 5.85;
-          if (p.fvm >= 100) { bonusGol = 0.26; bonusAssist = 0.16; }
-          else if (p.fvm >= 45) { bonusGol = 0.14; bonusAssist = 0.10; }
-          else if (p.fascia <= 3) { bonusGol = 0.06; bonusAssist = 0.05; }
-          else { bonusGol = 0.02; bonusAssist = 0.02; }
-          if (p.tag.includes('RIGORISTA')) bonusGol += 0.08;
-        } else if (p.ruolo === 'A') {
-          mv = p.tag.includes('TOP') ? 6.30 : p.tag.includes('TITOLARE') ? 6.02 : 5.80;
-          if (p.fvm >= 150) { bonusGol = 0.52; bonusAssist = 0.14; }
-          else if (p.fvm >= 80) { bonusGol = 0.34; bonusAssist = 0.10; }
-          else if (p.fvm >= 40) { bonusGol = 0.20; bonusAssist = 0.06; }
-          else if (p.fascia <= 3) { bonusGol = 0.10; bonusAssist = 0.04; }
-          else { bonusGol = 0.04; bonusAssist = 0.02; }
-          if (p.tag.includes('RIGORISTA')) bonusGol += 0.10;
+        let bonusNet = 0;
+        if (r === 'P') {
+          mv = 5.85 + 0.35 * Math.min(1, p.fvm / 60);
+          bonusNet = -(1.60 - 0.70 * Math.min(1, p.fvm / 60)); // malus gol subiti tra -0.90 e -1.60
+        } else if (r === 'D') {
+          mv = 5.80 + 0.50 * Math.min(1, p.fvm / 150);
+          bonusNet = 0.05 + 0.55 * Math.min(1, p.fvm / 200);
+        } else if (r === 'C') {
+          mv = 5.85 + 0.50 * Math.min(1, p.fvm / 150);
+          bonusNet = 0.08 + 0.95 * Math.min(1, p.fvm / 180);
+        } else if (r === 'A') {
+          mv = 5.85 + 0.55 * Math.min(1, p.fvm / 200);
+          bonusNet = 0.15 + 1.85 * Math.min(1, p.fvm / 260);
         }
 
-        const fma = Number((mv + (bonusGol * 3) + (bonusAssist * 1) - malus).toFixed(2));
+        const fma = Number((mv + bonusNet).toFixed(2));
         const puntiMatch = fma;
         const presenzeAttese = Math.round(38 * tit);
         const puntiStagione = Number((presenzeAttese * fma).toFixed(1));
 
-        let baseCrediti = 1;
-        if (p.ruolo === 'A') {
-          baseCrediti = p.fvm >= 150 ? 110 + (p.fvm - 150) * 0.45 : p.fvm >= 80 ? 55 + (p.fvm - 80) * 0.70 : p.fvm >= 30 ? 20 + (p.fvm - 30) * 0.70 : Math.max(1, Math.round(p.fvm * 0.6));
-        } else if (p.ruolo === 'C') {
-          baseCrediti = p.fvm >= 100 ? 60 + (p.fvm - 100) * 0.35 : p.fvm >= 45 ? 25 + (p.fvm - 45) * 0.60 : p.fvm >= 20 ? 10 + (p.fvm - 20) * 0.60 : Math.max(1, Math.round(p.fvm * 0.45));
-        } else if (p.ruolo === 'D') {
-          baseCrediti = p.fvm >= 100 ? 50 + (p.fvm - 100) * 0.25 : p.fvm >= 45 ? 24 + (p.fvm - 45) * 0.50 : p.fvm >= 20 ? 10 + (p.fvm - 20) * 0.50 : Math.max(1, Math.round(p.fvm * 0.45));
-        } else if (p.ruolo === 'P') {
-          baseCrediti = p.fvm >= 50 ? 25 + (p.fvm - 50) * 0.40 : p.fvm >= 25 ? 12 + (p.fvm - 25) * 0.50 : Math.max(1, Math.round(p.fvm * 0.40));
+        // Valore puro a economia chiusa (Value Over Replacement)
+        const excess = Math.max(0, p.fvm - stRole.baselineFvm);
+        let rawVal = 1;
+        if (excess > 0) {
+          rawVal = 1 + (excess / stRole.excessSum) * stRole.excessPool;
         }
-
-        const valorePuro = Math.max(1, Math.round(baseCrediti));
+        if (p.tag.includes('RISCHIO')) rawVal *= 0.80;
+        const valorePuro = Math.max(1, Math.round(rawVal));
 
         VALUTAZIONI_CACHE.set(p.id, {
           tit, mv: Number(mv.toFixed(2)), fma, puntiMatch, presenzeAttese, puntiStagione, valorePuro
@@ -1275,10 +1292,19 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     function andamento(asseg) {
       const speso = { P: 0, D: 0, C: 0, A: 0 };
       const quanti = { P: 0, D: 0, C: 0, A: 0 };
+      const vendutiPerRuoloEFascia = {
+        P: { 1: [], 2: [], 3: [], 4: [] },
+        D: { 1: [], 2: [], 3: [], 4: [] },
+        C: { 1: [], 2: [], 3: [], 4: [] },
+        A: { 1: [], 2: [], 3: [], 4: [] }
+      };
+
       for (const [id, a] of asseg) {
-        const r = PER_ID.get(id).ruolo;
+        const p = PER_ID.get(id);
+        const r = p.ruolo;
         speso[r] += a.pagato;
         quanti[r]++;
+        vendutiPerRuoloEFascia[r][p.fascia].push(a.pagato);
       }
 
       const budgetLega = BUDGET * squadre.length;
@@ -1286,11 +1312,26 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       for (const r of RUOLI) {
         const slotTotali = TARGET[r] * squadre.length;
         const priori = (budgetLega * PRIORI[r] / 100) / slotTotali;
+
+        // Calcolo per fascia con media winsorizzata (evita distorsioni da singoli outlier)
+        const fasceStats = {};
+        for (let f = 1; f <= 4; f++) {
+          const list = vendutiPerRuoloEFascia[r][f].slice().sort((a, b) => a - b);
+          let meanFascia = null;
+          if (list.length >= 3) {
+            const trimmed = list.slice(1, list.length - 1);
+            meanFascia = trimmed.reduce((s, v) => s + v, 0) / trimmed.length;
+          } else if (list.length > 0) {
+            meanFascia = list.reduce((s, v) => s + v, 0) / list.length;
+          }
+          fasceStats[f] = { count: list.length, mean: meanFascia };
+        }
+
         const osservato = quanti[r] ? speso[r] / quanti[r] : null;
         const w = Math.min(1, quanti[r] / Math.max(4, slotTotali * 0.25));
         out[r] = {
           medio: osservato === null ? priori : w * osservato + (1 - w) * priori,
-          osservato, quanti: quanti[r], speso: speso[r], priori
+          osservato, quanti: quanti[r], speso: speso[r], priori, fasceStats
         };
       }
       return out;
@@ -1369,8 +1410,9 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         const sc = slots === 0 ? 0 : Math.min(100, Math.max(0, Math.round(100 * (1 - (validi - slots) / Math.max(1, slots)))));
         scarsita[r] = { score: sc, slots, validi, totLiberi: liberi.length };
 
-        const baseIndex = Math.min(liberi.length - 1, Math.max(0, slots - 1));
-        const basePlayer = liberi[baseIndex];
+        // Realistic Replacement Index: non l'ultimo slot teorico, ma il giocatore al 130% degli slot o la base titolari
+        const realisticIndex = Math.min(liberi.length - 1, Math.max(0, Math.round(slots * 1.30) - 1));
+        const basePlayer = liberi[realisticIndex] ?? liberi[liberi.length - 1];
         const baseVal = basePlayer ? (VALUTAZIONI_CACHE.get(basePlayer.id)?.puntiMatch ?? 5.5) : 5.0;
         baselinePunti[r] = baseVal;
 
@@ -1406,13 +1448,13 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
           continue;
         }
 
-        const q = quantoPosso(st, r, and);
         const prezzoConsigliato = Math.max(1, Math.min(mkt.atteso, st.capienza));
         prezzi.set(p.id, prezzoConsigliato);
 
-        const pesoBudget = Math.min(1.5, Math.max(0.6, (st.residuo / BUDGET) * (SLOT_TOT / Math.max(1, st.mancantiTot))));
-        let rawMax = trueVal * pesoBudget;
-        if (p.tag.includes('TOP') && st.mancanti[r] >= 1) rawMax *= 1.15;
+        // Proporzionalita' diretta col budget residuo e l'urgenza di reparto, SENZA doppio conteggio per tag TOP
+        const budgetRatio = (st.residuo / BUDGET) * (SLOT_TOT / Math.max(1, st.mancantiTot));
+        const roleNeedBoost = 0.85 + 0.30 * (st.mancanti[r] / TARGET[r]);
+        const rawMax = trueVal * Math.min(1.4, Math.max(0.65, budgetRatio)) * roleNeedBoost;
         const mioMax = Math.max(1, Math.min(st.capienza, Math.round(rawMax)));
         mioMaxMap.set(p.id, mioMax);
 
@@ -1422,7 +1464,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         let sem = 'ATTENDI';
         if (mkt.atteso > st.capienza || (p.tag.includes('RISCHIO') && margine < 0)) {
           sem = 'LASCIA';
-        } else if (margine >= 4 && mioMax >= mkt.atteso) {
+        } else if (margine >= 3 && mioMax >= mkt.atteso) {
           sem = 'COMPRA';
         } else if (margine <= -5) {
           sem = 'LASCIA';
@@ -1442,29 +1484,41 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       });
 
       if (difensori.length < 3 || !portieri.length) {
-        return { bonusAtteso: 0, mvMedia: 0, stagionale: 0, topDif: difensori.slice(0, 3) };
+        return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: difensori.slice(0, 3) };
       }
 
       const gkMv = VALUTAZIONI_CACHE.get(portieri[0].id)?.mv ?? 6.0;
       const top3Mv = difensori.slice(0, 3).map(d => VALUTAZIONI_CACHE.get(d.id)?.mv ?? 6.0);
       const media = (gkMv + top3Mv.reduce((s, v) => s + v, 0)) / 4;
 
-      let bonus = 0;
-      if (media >= 7.00) bonus = 6.0;
-      else if (media >= 6.75) bonus = 4.0;
-      else if (media >= 6.50) bonus = 3.0;
-      else if (media >= 6.25) bonus = 2.0;
-      else if (media >= 6.00) bonus = 1.0;
+      // Scaglione Base Esatto (Regole Ufficiali Serie A Classic)
+      let scaglioneBase = 0;
+      if (media >= 7.00) scaglioneBase = 6.0;
+      else if (media >= 6.75) scaglioneBase = 4.0;
+      else if (media >= 6.50) scaglioneBase = 3.0;
+      else if (media >= 6.25) scaglioneBase = 2.0;
+      else if (media >= 6.00) scaglioneBase = 1.0;
 
-      let bonusContinuo = 0;
-      if (media >= 6.40) bonusContinuo = 2.2 + (media - 6.40) * 4.5;
-      else if (media >= 6.15) bonusContinuo = 1.1 + (media - 6.15) * 4.4;
-      else if (media >= 5.90) bonusContinuo = 0.35 + (media - 5.90) * 3.0;
-      else bonusContinuo = Math.max(0, (media - 5.5) * 0.8);
+      // Rendimento atteso su 38 giornate integrando la varianza voto partita (sigma = 0.28)
+      const sigma = 0.28;
+      const pGeq700 = 1 - normalCdf(7.00, media, sigma);
+      const pGeq675 = 1 - normalCdf(6.75, media, sigma);
+      const pGeq650 = 1 - normalCdf(6.50, media, sigma);
+      const pGeq625 = 1 - normalCdf(6.25, media, sigma);
+      const pGeq600 = 1 - normalCdf(6.00, media, sigma);
 
-      const bonusFinale = Number(bonusContinuo.toFixed(2));
+      const p6 = pGeq700;
+      const p4 = pGeq675 - pGeq700;
+      const p3 = pGeq650 - pGeq675;
+      const p2 = pGeq625 - pGeq650;
+      const p1 = pGeq600 - pGeq625;
+
+      const expectedBonus = (1 * p1) + (2 * p2) + (3 * p3) + (4 * p4) + (6 * p6);
+      const bonusFinale = Number(expectedBonus.toFixed(2));
+
       return {
         bonusAtteso: bonusFinale,
+        scaglioneBase,
         mvMedia: Number(media.toFixed(2)),
         stagionale: Math.round(bonusFinale * 38),
         topDif: difensori.slice(0, 3)
@@ -1547,20 +1601,61 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     function chiPuoRilanciare(ruolo, prezzoOfferta) {
       const inCorsa = [];
       const eliminati = [];
+      const asseg = assegnazioni();
+      const and = andamento(asseg);
 
       for (let i = 1; i < squadre.length; i++) {
         const sq = squadre[i];
         const st = statoSquadra(sq);
         const cap = capienzaRuolo(st, ruolo);
-        if (cap >= prezzoOfferta + 1 && st.mancanti[ruolo] > 0) {
-          inCorsa.push({ idx: i, nome: sq.nome, maxBid: cap, residuo: st.residuo, mancanti: st.mancanti[ruolo] });
+        const mancRuolo = st.mancanti[ruolo];
+
+        if (mancRuolo > 0 && cap >= prezzoOfferta + 1) {
+          const mancAltri = st.mancantiTot - mancRuolo;
+          const costoMinAltri = mancAltri * 1.5;
+          const maxRealistico = Math.max(1, Math.min(cap, Math.round(st.residuo - costoMinAltri)));
+
+          // Pressione d'acquisto specifica per ruolo
+          const quotaSpesaRuolo = (mancRuolo * and[ruolo].medio) / Math.max(1, st.residuo);
+          let pressureScore = Math.min(100, Math.max(15, Math.round(100 * quotaSpesaRuolo * (mancRuolo / TARGET[ruolo]))));
+          if (st.residuo >= 100 && mancRuolo >= 2) pressureScore = Math.min(100, pressureScore + 20);
+
+          let pressureBadge = '🟢 Bassa';
+          let pressureClass = 'text-emerald-400';
+          if (pressureScore >= 70) {
+            pressureBadge = '🔥🔥🔥 Alta';
+            pressureClass = 'text-rose-400 font-black';
+          } else if (pressureScore >= 35) {
+            pressureBadge = '🟡 Media';
+            pressureClass = 'text-amber-400 font-bold';
+          }
+
+          inCorsa.push({
+            idx: i,
+            nome: sq.nome,
+            maxBid: cap,
+            maxRealistico,
+            residuo: st.residuo,
+            mancanti: mancRuolo,
+            pressureScore,
+            pressureBadge,
+            pressureClass
+          });
         } else {
-          eliminati.push({ idx: i, nome: sq.nome, maxBid: cap, residuo: st.residuo, motivo: st.mancanti[ruolo] === 0 ? 'reparto pieno' : `budget max ${cap} cr` });
+          eliminati.push({
+            idx: i,
+            nome: sq.nome,
+            maxBid: cap,
+            residuo: st.residuo,
+            motivo: mancRuolo === 0 ? 'reparto pieno' : `budget max ${cap} cr`
+          });
         }
       }
 
-      inCorsa.sort((a, b) => b.maxBid - a.maxBid);
-      return { inCorsa, eliminati, count: inCorsa.length };
+      inCorsa.sort((a, b) => b.pressureScore - a.pressureScore || b.maxBid - a.maxBid);
+      const topRival = inCorsa[0] ?? null;
+
+      return { inCorsa, eliminati, count: inCorsa.length, topRival };
     }
 
     function generaSuggerimentiNomine(asseg, st, mercato, semaforiMap, marginiMap) {
@@ -1608,7 +1703,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and);
       renderRosa();
       renderSimulatore(miaRosaPlayers, bestXI, modRes);
-      renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap);
+      renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap, and);
       renderFormazioni(asseg);
       renderCoppie(asseg);
       aggiornaFiltriAttivi();
@@ -1884,30 +1979,38 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
                  : mkt.min > qCap.medio
                    ? '<span class="block text-[10px] text-amber-400 mt-0.5">dovrai risparmiare altrove</span>'
                    : ''}
-               <span class="block text-[9px] text-slate-600 mt-0.5 tabular-nums">${
-                 avv.cr > 0
-                   ? `${avv.quanti} in corsa, fino a ${avv.cr} (${esc(avv.nome)})`
-                   : 'nessun rivale puo\' piu\' prenderlo'}</span>
-             </td>
-             <td class="p-2.5 text-right align-top">
-               <button type="button" data-apri="${p.id}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">Assegna</button>
-             </td>`;
+                <span class="block text-[9px] text-slate-600 mt-0.5 tabular-nums">${
+                  avv.cr > 0
+                    ? `${avv.quanti} in corsa, fino a ${avv.cr} (${esc(avv.nome)})`
+                    : "nessun rivale puo' piu' prenderlo"}</span>
+              </td>
+              <td class="p-2.5 text-right align-top">
+                <button type="button" data-apri="${p.id}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">Assegna</button>
+              </td>`;
 
         let radarHtml = '';
         if (apertaRiga === p.id && !preso) {
           const radar = chiPuoRilanciare(p.ruolo, prezzo);
           radarHtml = `
             <div class="w-full mt-3 pt-2.5 border-t border-slate-800 flex flex-col gap-2 text-xs">
-              <div class="flex items-center justify-between">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <span class="font-bold text-slate-300 flex items-center gap-1.5">
                   <svg class="fa-svg text-indigo-400" style="width:1.0000em" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 0c17.7 0 32 14.3 32 32V42.4c93.7 13.9 167.7 88 181.6 181.6H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H469.6c-13.9 93.7-88 167.7-181.6 181.6V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V469.6C130.3 455.7 56.3 381.7 42.4 288H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H42.4C56.3 130.3 130.3 56.3 224 42.4V32c0-17.7 14.3-32 32-32zM107.4 288c12.5 58.3 58.4 104.1 116.6 116.6V384c0-17.7 14.3-32 32-32s32 14.3 32 32v20.6c58.3-12.5 104.1-58.4 116.6-116.6H384c-17.7 0-32-14.3-32-32s14.3-32 32-32h20.6C392.1 165.7 346.3 119.9 288 107.4V128c0 17.7-14.3 32-32 32s-32-14.3-32-32V107.4C165.7 119.9 119.9 165.7 107.4 224H128c17.7 0 32 14.3 32 32s-14.3 32-32 32H107.4zM256 224a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg> Radar Rilanci a quota <span id="radar-quota" class="text-amber-300 font-black">${prezzo}</span> cr:
                 </span>
                 <span id="radar-messaggio" class="text-[11px] ${radar.count <= 2 ? 'text-emerald-400 font-semibold' : 'text-slate-400'}">
-                  ${radar.count === 0 ? 'Nessun rivale puo\' piu\' rilanciare!' : `${radar.count} avversari capaci di rilanciare`}
+                  ${radar.count === 0 ? "Nessun rivale puo' piu' rilanciare!" : `${radar.count} avversari con capienza sufficiente`}
                 </span>
               </div>
+              ${radar.topRival ? `
+                <div class="bg-slate-900/90 border border-indigo-900/50 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px]">
+                  <span class="text-indigo-300"><svg class="fa-svg text-rose-400 mr-1" style="width:0.8750em" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M159.3 5.4c7.8-7.3 19.9-7.2 27.7 .1c27.6 25.9 53.5 53.8 77.7 84c11-14.4 23.5-30.1 37-42.9c7.9-7.4 20.1-7.4 28 .1c34.6 33 63.9 76.6 84.5 118c20.3 40.8 33.8 82.5 33.8 111.9C448 404.2 348.2 512 224 512C98.4 512 0 404.1 0 276.5c0-38.4 17.8-85.3 45.4-131.7C73.3 97.7 112.7 48.6 159.3 5.4zM225.7 416c25.3 0 47.7-7 68.8-21c42.1-29.4 53.4-88.2 28.1-134.4c-4.5-9-16-9.6-22.5-2l-25.2 29.3c-6.6 7.6-18.5 7.4-24.7-.5c-16.5-21-46-58.5-62.8-79.8c-6.3-8-18.3-8.1-24.7-.1c-33.8 42.5-50.8 69.3-50.8 99.4C112 375.4 162.6 416 225.7 416z"/></svg> Principale minaccia: <strong>${esc(radar.topRival.nome)}</strong> (Pressione ${radar.topRival.pressureBadge})</span>
+                  <span class="text-slate-400">Capienza: <strong class="text-white">${radar.topRival.maxBid}</strong> cr • Realistico: <strong class="text-amber-300">${radar.topRival.maxRealistico}</strong> cr</span>
+                </div>` : ''}
               <div id="radar-rivali-list" class="flex flex-wrap gap-1.5">
-                ${radar.inCorsa.map(r => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[11px] text-slate-300">${esc(r.nome)}: <strong class="text-white font-bold">${r.maxBid}</strong> max</span>`).join('')}
+                ${radar.inCorsa.map(r => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1">
+                  ${esc(r.nome)}: <strong class="text-white font-bold">${r.maxBid}</strong> max
+                  <span class="text-[9px] ${r.pressureClass}">(${r.pressureBadge})</span>
+                </span>`).join('')}
                 ${radar.eliminati.map(r => `<span class="px-2 py-0.5 rounded bg-slate-950/60 border border-slate-800 text-[10px] text-slate-600 line-through" title="${r.motivo}">${esc(r.nome)}</span>`).join('')}
               </div>
             </div>`;
@@ -1929,7 +2032,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
                         !puo ? 'bg-slate-900 text-slate-700 cursor-not-allowed'
                         : i === 0 ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/40'
                         : 'bg-slate-800 hover:bg-slate-700 text-slate-200'}"
-                      title="${puo ? `capienza ${s.capienza} cr` : `ha gia' tutti gli slot ${p.ruolo}`}">${esc(sq.nome)}</button>`;
+                      title="${puo ? `capienza ${s.capienza} cr` : `ha gia tutti gli slot ${p.ruolo}`}">${esc(sq.nome)}</button>`;
                   }).join('')}
                 </div>
                 <button type="button" data-chiudi="1" class="text-[11px] text-slate-500 hover:text-slate-300 pb-2 ml-auto">Annulla</button>
@@ -1996,11 +2099,14 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
             const listEl = document.getElementById('radar-rivali-list');
             if (qEl) qEl.textContent = val;
             if (msgEl) {
-              msgEl.textContent = r.count === 0 ? 'Nessun rivale puo\' piu\' rilanciare!' : `${r.count} avversari capaci di rilanciare`;
+              msgEl.textContent = r.count === 0 ? "Nessun rivale puo' piu' rilanciare!" : `${r.count} avversari capaci di rilanciare`;
               msgEl.className = `text-[11px] ${r.count <= 2 ? 'text-emerald-400 font-semibold' : 'text-slate-400'}`;
             }
             if (listEl) {
-              listEl.innerHTML = r.inCorsa.map(x => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[11px] text-slate-300">${esc(x.nome)}: <strong class="text-white font-bold">${x.maxBid}</strong> max</span>`).join('')
+              listEl.innerHTML = r.inCorsa.map(x => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1">
+                ${esc(x.nome)}: <strong class="text-white font-bold">${x.maxBid}</strong> max
+                <span class="text-[9px] ${x.pressureClass}">(${x.pressureBadge})</span>
+              </span>`).join('')
                 + r.eliminati.map(x => `<span class="px-2 py-0.5 rounded bg-slate-950/60 border border-slate-800 text-[10px] text-slate-600 line-through" title="${x.motivo}">${esc(x.nome)}</span>`).join('');
             }
           }
@@ -2118,7 +2224,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       }
 
       document.getElementById('sim-mod-bonus').textContent = (simCorrente.modBonus > 0 ? '+' : '') + simCorrente.modBonus.toFixed(2) + ' pt';
-      document.getElementById('sim-mod-mv').textContent = modRes.mvMedia > 0 ? modRes.mvMedia.toFixed(2) : '0.00';
+      document.getElementById('sim-mod-mv').textContent = modRes.mvMedia > 0 ? `${modRes.mvMedia.toFixed(2)} (Scaglione +${modRes.scaglioneBase} pt)` : '0.00';
       document.getElementById('sim-mod-tot-stagione').textContent = `~${Math.round(simCorrente.modBonus * 38)} pt totali`;
 
       const modConsiglio = document.getElementById('sim-mod-consiglio');
@@ -2147,7 +2253,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       }).join('');
     }
 
-    function renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap) {
+    function renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap, and) {
       const formatNomina = (p, tipo, titolo, icona, badgeClass) => {
         if (!p) return '<div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-slate-500 text-xs">Nessun suggerimento.</div>';
         const val = VALUTAZIONI_CACHE.get(p.id);
@@ -2213,9 +2319,11 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         const urgenza = r => {
           const m = s.mancanti[r];
           if (m === 0) return '<span class="text-[10px] font-bold text-slate-600">0</span>';
-          if (r === 'A' && m >= 3) return `<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-950 text-rose-400 border border-rose-800/60">${m} 🔴</span>`;
-          if (m >= 4) return `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800/60">${m} 🟡</span>`;
-          return `<span class="text-[10px] font-semibold text-slate-400">${m} 🟢</span>`;
+          const quota = (m * and[r].medio) / Math.max(1, s.residuo);
+          const pScore = Math.min(100, Math.max(10, Math.round(100 * quota * (m / TARGET[r]))));
+          if (pScore >= 60 || (r === 'A' && m >= 3)) return `<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-950 text-rose-400 border border-rose-800/60" title="Pressione alta: ${pScore}%">${m} 🔥</span>`;
+          if (pScore >= 35 || m >= 4) return `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800/60" title="Pressione media: ${pScore}%">${m} 🟡</span>`;
+          return `<span class="text-[10px] font-semibold text-slate-400" title="Pressione bassa: ${pScore}%">${m} 🟢</span>`;
         };
 
         const statoStrategico = s.mancantiTot === 0
@@ -2223,7 +2331,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
           : s.residuo < s.mancantiTot * 3
             ? '<span class="text-rose-400 font-bold">In Emergenza Crediti</span>'
             : s.mancanti.A >= 3
-              ? '<span class="text-amber-400 font-semibold">Cerca Bomber</span>'
+              ? '<span class="text-amber-400 font-semibold">Cerca Bomber (Alta Pressione)</span>'
               : '<span class="text-emerald-400">In Piena Corsa</span>';
 
         return `
