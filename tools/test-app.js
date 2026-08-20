@@ -227,7 +227,7 @@ function check(nome, atteso, ottenuto) {
     !!document.getElementById('campo-difesa') && !!document.getElementById('campo-portiere')));
   check('selettore moduli presente con 8 moduli', 8, await page.evaluate(() => document.querySelectorAll('#moduli-selettore button').length));
   check('scheda modificatore difesa calcola bonus', true, await page.evaluate(() => document.getElementById('sim-mod-bonus').textContent.includes('pt')));
-  check('copertura 11 a voto calcolata', true, await page.evaluate(() => document.getElementById('sim-copertura-pct').textContent.includes('%')));
+  check('copertura 11 a voto calcolata', true, await page.evaluate(() => document.getElementById('sim-copertura-pct').textContent.includes('/100')));
 
   await page.click('[data-vista="strategia"]');
   check('vista strategia visibile', false, await page.evaluate(() => document.getElementById('vista-strategia').classList.contains('hidden')));
