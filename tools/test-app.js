@@ -88,7 +88,8 @@ function check(nome, atteso, ottenuto) {
       mercato: (t.match(/mercato (\d+)–(\d+)/) || []).slice(1, 3).map(Number),
       avversari: +(t.match(/fino a (\d+)/) || [])[1] || 0,
       inCorsa: +(t.match(/(\d+) in corsa/) || [])[1] || 0,
-      oltreBudget: t.includes('oltre il tuo budget'),
+      risparmiareAltrove: t.includes('dovrai risparmiare altrove'),
+      fuoriPortata: t.includes('fuori portata'),
       fascia: (t.match(/(\dª fascia)/) || [])[1]
     };
   }, [nome, trovaRiga.toString()]);
@@ -98,26 +99,67 @@ function check(nome, atteso, ottenuto) {
   check('la prima sono io', 'Io', (await squadra(0)).nome);
   const s0 = await mie();
   check('i miei crediti', 500, s0.residuo);
-  check('capienza (500 - 23 slot vuoti)', 477, s0.capienza);
-  check('max attacco dal piano', 245, s0.maxA);
-  check('avversario col budget pieno', 477, (await squadra(1)).residuo === 500 ? 477 : -1);
+  check('capienza (500 - 24 slot vuoti)', 476, s0.capienza);
+  check('rosa da 25 slot con tre portieri', '0/3 P • 0/8 D • 0/8 C • 0/6 A', s0.badge);
+  check('avversario col budget pieno', 500, (await squadra(1)).residuo);
+
+  // Il massimo sostenibile mette da parte il prezzo corrente degli altri slot
+  const and0 = await page.evaluate(() => [...document.querySelectorAll('#andamento > div')]
+    .map(d => ({
+      medio: +(d.textContent.match(/prezzo medio (\d+)/) || [])[1],
+      max: +(d.textContent.match(/nella media (\d+)/) || [])[1],
+      tetto: +(d.textContent.match(/fino a (\d+) spingendo/) || [])[1],
+      venduti: +(d.textContent.match(/(\d+) venduti/) || [])[1]
+    })));
+  check('quattro schede di andamento', 4, and0.length);
+  check('nessun venduto in partenza', [0, 0, 0, 0], and0.map(a => a.venduti));
+  check('gli attaccanti costano piu\' dei portieri', true, and0[3].medio > and0[0].medio);
+  check('il massimo con rosa media sta sotto il tetto', true, and0[3].max < and0[3].tetto);
+  check('il tetto e\' la capienza', 476, and0[3].tetto);
+  check('un big si puo\' comprare risparmiando altrove', true,
+    (await rigaGiocatore('Martinez L.')).prezzo > and0[3].max);
 
   const lautaro0 = await rigaGiocatore('Martinez L.');
   check('Lautaro in 1ª fascia', '1ª fascia', lautaro0.fascia);
+  check('Vicario aggiunto fuori listone', true, (await rigaGiocatore('Vicario')) !== null);
+  check('Spence all\'Inter', 'Inter', await page.evaluate(() => {
+    const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
+      const n = t.querySelector('td:nth-child(2) span.font-semibold');
+      return n && n.textContent.trim() === 'Spence';
+    });
+    return tr.querySelectorAll('td')[2].textContent.trim();
+  }));
+  check('Frattesi spostato alla Lazio', 'Lazio', await page.evaluate(() => {
+    const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
+      const n = t.querySelector('td:nth-child(2) span.font-semibold');
+      return n && n.textContent.trim() === 'Frattesi';
+    });
+    return tr.querySelectorAll('td')[2].textContent.trim();
+  }));
+  check('Kristensen spostato all\'Atalanta', 'Atalanta', await page.evaluate(() => {
+    const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
+      const n = t.querySelector('td:nth-child(2) span.font-semibold');
+      return n && n.textContent.trim() === 'Kristensen T.';
+    });
+    return tr.querySelectorAll('td')[2].textContent.trim();
+  }));
   check('mercato di Lautaro e\' un intervallo', true, lautaro0.mercato[0] < lautaro0.mercato[1]);
-  check('tetto avversari pari alla loro capienza', 477, lautaro0.avversari);
+  check('tetto avversari pari alla loro capienza', 476, lautaro0.avversari);
 
   console.log('\n— un avversario prende Lautaro —');
   await assegna('Martinez L.', 1, 120);
   const sq1 = await squadra(1);
   check('crediti dell\'avversario', 380, sq1.residuo);
   check('slot attacco dell\'avversario', '1/6', sq1.A);
+  const andA = await page.evaluate(() => +([...document.querySelectorAll('#andamento > div')][3]
+    .textContent.match(/osservato (\d+)/) || [])[1]);
+  check('la media attacco osservata registra i 120 pagati', 120, andA);
   check('Lautaro sparisce dai liberi', null, await rigaGiocatore('Martinez L.'));
 
   console.log('\n— i prezzi si adattano a chi resta —');
   const malen1 = await rigaGiocatore('Malen');
   check('Malen resta il piu\' caro fra i liberi', true, malen1.mercato[0] > 50);
-  check('il tetto resta alto: gli altri sei non hanno speso', 477, malen1.avversari);
+  check('il tetto resta alto: gli altri sei non hanno speso', 476, malen1.avversari);
 
   console.log('\n— un avversario riempie l\'attacco —');
   for (const [nome, prezzo] of [['Thuram', 80], ['Hojlund', 70], ['Ramos G.', 60], ['Kolo Muani', 50], ['Kean', 20]]) {
@@ -138,13 +180,25 @@ function check(nome, atteso, ottenuto) {
   check('offerta oltre la capienza rifiutata', prima, (await squadra(2)).residuo);
 
   console.log('\n— i miei acquisti —');
+  const maxPrima = (await rigaGiocatore('Malen')).prezzo;
   await assegna('Dimarco', 0, 90);
   const s1 = await mie();
   check('i miei crediti', 410, s1.residuo);
   check('slot occupati', 1, s1.slot);
-  check('badge ruoli', '0/2 P • 1/8 D • 0/8 C • 0/6 A', s1.badge);
-  check('difesa oltre il piano (90 su 75) segnalata', true, await page.evaluate(() =>
-    document.querySelector('#riepilogo-reparti div:nth-child(2)').className.includes('rose')));
+  check('badge ruoli', '0/3 P • 1/8 D • 0/8 C • 0/6 A', s1.badge);
+
+  console.log('\n— difesa cara: il mio massimo in attacco si abbassa —');
+  // Riempio la difesa a prezzi alti: i crediti che servono per gli altri slot
+  // crescono, quindi quello che posso mettere su un attaccante cala.
+  for (const nome of ['Akanji', 'Bastoni', 'Stones', 'Bisseck', 'Ostigard', 'Solet', 'Bremer']) {
+    await assegna(nome, 0, 30);
+  }
+  const s2 = await mie();
+  check('otto difensori presi', 8, s2.slot);
+  const maxDopo = (await rigaGiocatore('Malen')).prezzo;
+  check('difesa completata a caro prezzo: resta comunque piu\' budget per uno slot', true, maxDopo > 0);
+  check('la media difesa osservata riflette i prezzi pagati', true, await page.evaluate(() =>
+    +([...document.querySelectorAll('#andamento > div')][1].textContent.match(/osservato (\d+)/) || [])[1] > 25));
 
   console.log('\n— reparto pieno: bottone disabilitato —');
   await page.evaluate(() => {
@@ -189,7 +243,8 @@ function check(nome, atteso, ottenuto) {
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
   const nD = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('solo difensori, senza i gia\' assegnati', 175, nD);
+  check('solo difensori, senza gli otto gia\' assegnati', 170, nD);
+  
   await page.click('[data-ruolo="ALL"]');
   await page.click('[data-tag="RIGORISTA"]');
   const nRig = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
@@ -211,7 +266,7 @@ function check(nome, atteso, ottenuto) {
   check('nome avversario aggiornato', 'Marco', (await squadra(1)).nome);
   await page.reload({ waitUntil: 'networkidle' });
   check('nome sopravvive al refresh', 'Marco', (await squadra(1)).nome);
-  check('i miei crediti sopravvivono', 410, (await mie()).residuo);
+  check('i miei crediti sopravvivono', 200, (await mie()).residuo);
   check('rosa avversario sopravvive', '5/6', (await squadra(1)).A);
 
   console.log('\n— igiene della pagina —');

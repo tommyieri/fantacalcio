@@ -3,8 +3,8 @@
  * Converte il listone ufficiale (data/listone.tsv, trascritto dal PDF
  * Fantacalcio.it 2026/27) nell'array PLAYERS usato da index.html.
  *
- * I portieri vengono raggruppati in blocchi squadra, perche' la lega
- * assegna l'intero pacchetto portieri di una squadra a un solo slot.
+ * I portieri sono singoli: la lega assegna tre slot di portiere e possono
+ * venire da tre squadre diverse.
  *
  * I tag ricavabili dai numeri (TOP, LOWCOST) vengono calcolati qui dal FVM.
  * Quelli che dipendono da valutazioni esterne (RIGORISTA, RISCHIO, TITOLARE,
@@ -21,6 +21,8 @@ const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'data/listone.tsv');
 const ANALISI = path.join(ROOT, 'data/analisi.tsv');
 const SQUADRE = path.join(ROOT, 'data/squadre.tsv');
+const AGGIUNTE = path.join(ROOT, 'data/aggiunte.tsv');
+const TRASFERIMENTI = path.join(ROOT, 'data/trasferimenti.tsv');
 const GRIGLIA = path.join(ROOT, 'data/griglia.json');
 
 const CODICI = {
@@ -46,57 +48,66 @@ for (const r of dati) {
   }
 }
 
-/* --- Portieri: un blocco per squadra ------------------------------------- */
+/* --- Giocatori ------------------------------------------------------------ */
 
 const giocatori = [];
 let id = 1;
 
-for (const [squadra, cod] of Object.entries(CODICI)) {
-  const portieri = dati.filter(r => r.squadra === squadra && r.ruolo === 'P')
-    .sort((a, b) => b.fvm - a.fvm);
-  if (!portieri.length) throw new Error(`nessun portiere per ${squadra}`);
-
-  // Il valore del blocco e' quello del titolare: e' lui a prendere i voti.
-  const titolare = portieri[0];
-  giocatori.push({
-    id: id++,
-    nome: `Blocco ${squadra}`,
-    squadra, cod,
-    ruolo: 'P',
-    mantra: ['Por'],
-    fvm: titolare.fvm, fvmM: titolare.fvm_m,
-    quot: portieri.reduce((s, p) => s + p.quot, 0),
-    quotM: portieri.reduce((s, p) => s + p.quot_m, 0),
-    blocco: portieri.map(p => p.nome),
-    tag: []
-  });
-}
-
-for (const r of dati.filter(r => r.ruolo !== 'P')) {
-  giocatori.push({
+function voce(r, squadra) {
+  return {
     id: id++,
     nome: r.nome,
-    squadra: r.squadra,
-    cod: CODICI[r.squadra],
+    squadra,
+    cod: CODICI[squadra],
     ruolo: r.ruolo,
-    mantra: r.mantra.split(';'),
-    fvm: r.fvm, fvmM: r.fvm_m,
-    quot: r.quot, quotM: r.quot_m,
+    mantra: typeof r.mantra === 'string' ? r.mantra.split(';') : r.mantra,
+    fvm: r.fvm, fvmM: r.fvm_m ?? r.fvm,
+    quot: r.quot, quotM: r.quot_m ?? r.quot,
     tag: []
-  });
+  };
+}
+
+for (const r of dati) giocatori.push(voce(r, r.squadra));
+
+/* --- Trasferimenti non ancora recepiti dal listone ------------------------ */
+
+let spostati = 0;
+for (const riga of fs.readFileSync(TRASFERIMENTI, 'utf8').trim().split('\n').slice(1)) {
+  const [nome, da, a, nota, fonti] = riga.split('\t');
+  const g = giocatori.find(x => x.nome === nome && x.squadra === da);
+  if (!g) throw new Error(`trasferimenti.tsv: "${nome}" non risulta al ${da}`);
+  if (!CODICI[a]) throw new Error(`trasferimenti.tsv: squadra sconosciuta "${a}"`);
+  g.squadra = a;
+  g.cod = CODICI[a];
+  g.fuoriListone = 'squadra';
+  g.nota = nota;
+  g.fonti = fonti.split(';');
+  spostati++;
+}
+
+/* --- Giocatori non ancora presenti nel listone ---------------------------- */
+
+let aggiunti = 0;
+for (const riga of fs.readFileSync(AGGIUNTE, 'utf8').trim().split('\n').slice(1)) {
+  const [nome, squadra, ruolo, mantra, fvm, quot, stimato, nota, fonti] = riga.split('\t');
+  if (!CODICI[squadra]) throw new Error(`aggiunte.tsv: squadra sconosciuta "${squadra}"`);
+  if (giocatori.some(x => x.nome === nome && x.squadra === squadra)) {
+    throw new Error(`aggiunte.tsv: "${nome}" e' gia' nel listone`);
+  }
+  const g = voce({ nome, ruolo, mantra, fvm: Number(fvm), quot: Number(quot) }, squadra);
+  g.fuoriListone = 'voce';
+  g.stimato = stimato.split(';');   // quali numeri sono una stima, non ufficiali
+  g.nota = nota;
+  g.fonti = fonti.split(';');
+  giocatori.push(g);
+  aggiunti++;
 }
 
 /* --- Analisi dalle fonti -------------------------------------------------- */
 
 const TAG_VALIDI = new Set(['RIGORISTA', 'RISCHIO', 'TITOLARE', 'SCOMMESSA', 'MODIFICATORE', 'NUOVO']);
 
-const perNome = new Map();
-for (const g of giocatori) {
-  perNome.set(`${g.nome}||${g.squadra}`, g);
-  // Un'annotazione su un portiere si applica al blocco che lo contiene:
-  // e' il blocco a occupare lo slot in asta.
-  for (const portiere of g.blocco ?? []) perNome.set(`${portiere}||${g.squadra}`, g);
-}
+const perNome = new Map(giocatori.map(g => [`${g.nome}||${g.squadra}`, g]));
 
 const analisi = fs.readFileSync(ANALISI, 'utf8').trim().split('\n').slice(1);
 let annotati = 0;
@@ -111,8 +122,6 @@ for (const riga of analisi) {
     if (!g.tag.includes(t)) g.tag.push(t);
   }
   if (!nota || !fonti) throw new Error(`analisi.tsv: nota o fonti mancanti per ${nome}`);
-  // Un blocco puo' ricevere l'annotazione del titolare: la prima vince, e le
-  // successive si accodano invece di sovrascriverla.
   g.nota = g.nota ? `${g.nota} ${nota}` : nota;
   g.fonti = [...new Set([...(g.fonti ?? []), ...fonti.split(';')])];
   annotati++;
@@ -120,14 +129,14 @@ for (const riga of analisi) {
 
 /* --- Tag ricavabili dai numeri ------------------------------------------- */
 
-const SLOT = { P: 2, D: 8, C: 8, A: 6 };
+const SLOT = { P: 3, D: 8, C: 8, A: 6 };
 
 for (const ruolo of ['P', 'D', 'C', 'A']) {
   const delRuolo = giocatori.filter(p => p.ruolo === ruolo).sort((a, b) => b.fvm - a.fvm);
 
   // TOP = i primi per FVM, tanti quanti servono a coprire il primo slot di
   // ogni partecipante in una lega da 10: sono i nomi contesi davvero.
-  const nTop = SLOT[ruolo] === 2 ? 6 : SLOT[ruolo] * 2;
+  const nTop = SLOT[ruolo] * 2;
   delRuolo.slice(0, nTop).forEach(p => p.tag.push('TOP'));
 
   // LOWCOST = i tappabuchi da 1-2 crediti.
@@ -180,6 +189,7 @@ for (const p of giocatori) conteggi[p.ruolo] = (conteggi[p.ruolo] ?? 0) + 1;
 console.log(`righe listone:   ${dati.length}`);
 console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).map(([k, v]) => k + ':' + v).join(', ')})`);
 console.log(`annotati:        ${annotati}`);
+console.log(`fuori listone:   ${aggiunti} aggiunti, ${spostati} spostati di squadra`);
 for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {
   console.log(`  ${t.padEnd(13)}${giocatori.filter(p => p.tag.includes(t)).length}`);
 }
