@@ -166,8 +166,8 @@
     const store = (() => {
       try {
         const k = '__fs_probe__';
-        store.setItem(k, '1');
-        store.removeItem(k);
+        localStorage.setItem(k, '1');
+        localStorage.removeItem(k);
         return localStorage;
       } catch (e) {
         const mem = {};

@@ -84,10 +84,16 @@ const storageShim = `
     })();
 `;
 
-body = body.replace('<script>', `<script>${storageShim}`);
+// Prima si riscrivono le chiamate dell'app, poi si inserisce lo shim: al
+// contrario la riscrittura colpirebbe anche il probe interno dello shim,
+// trasformandolo in un riferimento a `store` prima della sua inizializzazione.
 const storageCalls = (body.match(/\blocalStorage\.(getItem|setItem|removeItem)\(/g) || []).length;
-body = body.replace(/\blocalStorage\.(getItem|setItem|removeItem)\(/g, 'store.$1(');
 if (!storageCalls) throw new Error('nessuna chiamata a localStorage trovata: shim inutile');
+body = body.replace(/\blocalStorage\.(getItem|setItem|removeItem)\(/g, 'store.$1(');
+body = body.replace('<script>', `<script>${storageShim}`);
+if (/\bstore\.(setItem|removeItem)\(k\b/.test(body.slice(0, body.indexOf('teamsList')))) {
+  throw new Error('il probe dello shim e\' stato riscritto: persistenza reale disattivata');
+}
 
 const wrapped = `<div class="${bodyClasses}">\n${body}\n</div>\n`;
 const scanFile = path.join(TMP, 'scan.html');
