@@ -197,3 +197,9 @@ console.log('fasce (dalla quotazione ufficiale):');
 for (const f of [1, 2, 3, 4]) {
   console.log(`  ${String(f).padEnd(13)}${giocatori.filter(p => p.fascia === f).length}`);
 }
+
+try {
+  require('./build-app.js');
+} catch (e) {
+  console.error('Attenzione: impossibile sincronizzare index.html:', e.message);
+}
