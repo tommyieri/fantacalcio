@@ -289,8 +289,8 @@
             </h3>
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2">
               <div class="flex justify-between items-center">
-                <span class="text-xs text-slate-400">Probabilita' 11 a Voto:</span>
-                <span id="sim-copertura-pct" class="text-base font-black text-emerald-400 tabular-nums">100%</span>
+                <span class="text-xs text-slate-400">Indice Copertura Rosa:</span>
+                <span id="sim-copertura-pct" class="text-base font-black text-emerald-400 tabular-nums">100/100 (Alta)</span>
               </div>
               <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
                 <div id="sim-copertura-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 100%"></div>
@@ -1414,7 +1414,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       return { scarsita, mvarMap, baselinePunti };
     }
 
-    function calcolaPrezziEMioMax(st, mercato, asseg, and) {
+    function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap) {
       const prezzi = new Map();
       const mioMaxMap = new Map();
       const marginiMap = new Map();
@@ -1438,10 +1438,17 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         const prezzoConsigliato = Math.max(1, Math.min(mkt.atteso, st.capienza));
         prezzi.set(p.id, prezzoConsigliato);
 
-        // Proporzionalita' diretta col budget residuo e l'urgenza di reparto, SENZA doppio conteggio per tag TOP
+        // Integrazione rigorosa di Scarsita' e MVAR nel MAX BID
+        const scScore = scarsita?.[r]?.score ?? 50;
+        const scarcityMultiplier = 1 + (scScore / 100) * 0.15;
+
+        const mvar = mvarMap?.get(p.id);
+        const diffSeason = mvar?.diffSeason ?? 0;
+        const mvarBoost = 1 + Math.min(0.20, Math.max(-0.10, (diffSeason - 20) / 150));
+
         const budgetRatio = (st.residuo / BUDGET) * (SLOT_TOT / Math.max(1, st.mancantiTot));
         const roleNeedBoost = 0.85 + 0.30 * (st.mancanti[r] / TARGET[r]);
-        const rawMax = trueVal * Math.min(1.4, Math.max(0.65, budgetRatio)) * roleNeedBoost;
+        const rawMax = trueVal * Math.min(1.4, Math.max(0.65, budgetRatio)) * roleNeedBoost * scarcityMultiplier * mvarBoost;
         const mioMax = Math.max(1, Math.min(st.capienza, Math.round(rawMax)));
         mioMaxMap.set(p.id, mioMax);
 
@@ -1675,8 +1682,8 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       const st = statoSquadra(squadre[0]);
       const and = andamento(asseg);
       const mercato = prezziMercato(asseg, and);
-      const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and);
       const { scarsita, mvarMap } = calcolaMVAR_e_Scarsita(asseg);
+      const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap);
 
       const miaRosaPlayers = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
       const bestXI = trovaBestXI(miaRosaPlayers);
@@ -1994,8 +2001,9 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
                   <span class="text-slate-400">Capienza: <strong class="text-white">${radar.topRival.maxBid}</strong> cr • Realistico: <strong class="text-amber-300">${radar.topRival.maxRealistico}</strong> cr</span>
                 </div>` : ''}
               <div id="radar-rivali-list" class="flex flex-wrap gap-1.5">
-                ${radar.inCorsa.map(r => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1">
-                  ${esc(r.nome)}: <strong class="text-white font-bold">${r.maxBid}</strong> max
+                ${radar.inCorsa.map(r => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1" title="Capienza max: ${r.maxBid} cr | Rilancio stimato: ~${r.maxRealistico} cr">
+                  ${esc(r.nome)}: <strong class="text-white font-bold" title="Max possibile">${r.maxBid}</strong> max
+                  <span class="text-[9px] text-amber-300 font-semibold" title="Max probabile / Rilancio stimato">(~${r.maxRealistico})</span>
                   <span class="text-[9px] ${r.pressureClass}">(${r.pressureBadge})</span>
                 </span>`).join('')}
                 ${radar.eliminati.map(r => `<span class="px-2 py-0.5 rounded bg-slate-950/60 border border-slate-800 text-[10px] text-slate-600 line-through" title="${r.motivo}">${esc(r.nome)}</span>`).join('')}
@@ -2223,7 +2231,8 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         modConsiglio.innerHTML = `<span class="text-sky-400 font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Potenziale di crescita:</span> la tua difesa genera +${modRes.bonusAtteso} pt/giornata. Investire su 1 centrale da 6.3+ di MV puo' raddoppiare il bonus a +1.40 pt.`;
       }
 
-      document.getElementById('sim-copertura-pct').textContent = `${simCorrente.coperturaPct}%`;
+      const livelloCop = simCorrente.coperturaPct >= 85 ? 'Alta' : simCorrente.coperturaPct >= 65 ? 'Media' : 'Bassa';
+      document.getElementById('sim-copertura-pct').textContent = `${simCorrente.coperturaPct}/100 (${livelloCop})`;
       document.getElementById('sim-copertura-bar').style.width = `${simCorrente.coperturaPct}%`;
       document.getElementById('sim-copertura-nota').textContent = simCorrente.titolariCompleti
         ? 'Rosa completa per questo modulo con rischio voto minimo.'
