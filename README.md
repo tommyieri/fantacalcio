@@ -7,7 +7,21 @@ Budget 500 crediti, rosa da 24 slot (2 blocchi portiere, 8 difensori, 8 centroca
 
 `index.html` e' l'applicazione: una pagina sola, HTML + Tailwind + JavaScript, nessun
 passaggio di compilazione. Si apre con un doppio clic oppure si pubblica su GitHub Pages
-cosi' com'e'. La rosa viene salvata nel browser.
+cosi' com'e'. Lo stato dell'asta viene salvato nel browser.
+
+## Come funziona
+
+L'app e' un tabellone d'asta per tutta la lega, non solo per la tua rosa. Registri ogni
+giocatore che viene aggiudicato — tuo o di un avversario — e da li' derivano crediti residui,
+slot occupati e capienza di ognuno.
+
+E' quello che serve davvero in asta: il vincolo non e' quanto puoi spendere tu, ma quanto puo'
+ancora rilanciare chi ti sta contro. Ogni riga del listone dice quanti avversari possono
+ancora contendere quel ruolo e fino a che cifra puo' spingersi il piu' ricco fra loro. Chi ha
+riempito un reparto sparisce dal conteggio, e il pulsante che lo assegna si disattiva.
+
+Tre viste: **Asta** (tabellone e listone), **Formazioni tipo** (i titolari delle 20 squadre con
+lo stato in asta di ciascuno) e **Griglia portieri** (incroci e migliori coppie ancora libere).
 
 ## Il motore del budget
 
@@ -35,10 +49,13 @@ La **fascia** viene dalla quotazione ufficiale, secondo la lettura classica del 
 1ª da 30 crediti in su, 2ª da 15 a 29, 3ª da 6 a 14, 4ª da 1 a 5.
 
 Il **prezzo di mercato** e' una stima costruita su due dati pubblici, non un prezzo rilevato:
-i crediti in gioco in tutta la lega si dividono per reparto secondo la ripartizione mediana
-misurata sulle aste reali 2026/27 (7% portieri, 19% difesa, 32% centrocampo, 42% attacco) e
-dentro ogni reparto si distribuiscono sui giocatori che verranno davvero comprati, in
-proporzione al FVM ufficiale. Dipende dal numero di partecipanti, impostabile nell'interfaccia.
+i crediti **ancora in mano a tutti** si dividono per reparto secondo la ripartizione mediana
+misurata sulle aste reali 2026/27 (7% portieri, 19% difesa, 32% centrocampo, 42% attacco),
+ripesata sugli slot che restano davvero da riempire, e dentro ogni reparto si distribuiscono
+sui giocatori ancora liberi in proporzione al FVM ufficiale.
+
+Ricalcolandosi a ogni assegnazione segue l'asta vera: se gli avversari hanno gia' bruciato i
+crediti, i big rimasti costano meno.
 
 L'intervallo mostrato e' la stima centrale meno 20% e piu' 25%, per tenere conto di quanto le
 aste vere si discostano dalla mediana.
