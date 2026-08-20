@@ -131,8 +131,31 @@ function check(nome, atteso, ottenuto) {
   check('ricerca "napoli" non vuota', true, nNap > 0 && nNap < 457);
   await page.fill('#ricerca', '');
 
+  console.log('\n— fasce e prezzo di mercato —');
+  const mercato = await page.evaluate(() => {
+    const riga = n => [...document.querySelectorAll('#tabella tr')].find(tr => tr.textContent.includes(n));
+    const leggi = n => {
+      const t = riga(n).textContent;
+      return { fascia: (t.match(/(\dª fascia)/) || [])[1], mercato: (t.match(/mercato (\d+)–(\d+)/) || []).slice(1, 3).map(Number) };
+    };
+    return { lautaro: leggi('Martinez L.'), dimarco: leggi('Dimarco'), gallo: leggi('Gallo') };
+  });
+  check('Lautaro in 1ª fascia (quotazione 35)', '1ª fascia', mercato.lautaro.fascia);
+  check('Dimarco in 1ª fascia (quotazione 32)', '1ª fascia', mercato.dimarco.fascia);
+  check('Gallo in 4ª fascia (quotazione 6 -> 3ª)', '3ª fascia', mercato.gallo.fascia);
+  check('mercato Lautaro coerente col reparto attacco', true,
+    mercato.lautaro.mercato[0] > 50 && mercato.lautaro.mercato[1] < 300);
+  check('mercato e\' un intervallo crescente', true, mercato.lautaro.mercato[0] < mercato.lautaro.mercato[1]);
+
+  console.log('\n— il mercato dipende dai partecipanti —');
+  await page.click('text=Impostazioni asta');
+  await page.fill('#partecipanti', '14');
+  const con14 = await page.evaluate(() =>
+    Number(([...document.querySelectorAll('#tabella tr')].find(tr => tr.textContent.includes('Martinez L.')).textContent.match(/mercato (\d+)–/) || [])[1]));
+  check('con 14 partecipanti il prezzo di mercato sale', true, con14 > mercato.lautaro.mercato[0]);
+  await page.fill('#partecipanti', '10');
+
   console.log('\n— piano di spesa modificabile —');
-  await page.click('text=Piano di spesa per ruolo');
   await page.fill('#piano-A', '70');
   const s5 = await m();
   check('alzando A al 70% il max attacco cresce', true, s5.maxA > s4.maxA);

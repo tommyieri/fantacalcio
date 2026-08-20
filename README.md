@@ -21,8 +21,27 @@ ogni scostamento dal preventivo si redistribuisce da solo sugli altri reparti, n
 direzioni: pagare un portiere 30 crediti invece di 1 abbassa subito il massimo consigliato
 per gli attaccanti, chiudere il reparto portieri sotto budget lo alza.
 
+Il prezzo consigliato per il singolo giocatore parte dal prezzo di mercato e viene poi
+limitato da due tetti: quanto il piano concede oggi a un giocatore di quel reparto, e la
+capienza massima. Non e' una divisione della quota di reparto fra i migliori: nessuno compra
+i sei attaccanti piu' cari, e spalmare il budget su di loro produceva cifre irreali.
+
 Sopra a tutto sta la salvaguardia: nessuna offerta puo' scendere sotto 1 credito residuo
 per ciascuno slot ancora vuoto, e la capienza massima e' mostrata sempre in chiaro.
+
+## Fasce e prezzo di mercato
+
+La **fascia** viene dalla quotazione ufficiale, secondo la lettura classica del listone:
+1ª da 30 crediti in su, 2ª da 15 a 29, 3ª da 6 a 14, 4ª da 1 a 5.
+
+Il **prezzo di mercato** e' una stima costruita su due dati pubblici, non un prezzo rilevato:
+i crediti in gioco in tutta la lega si dividono per reparto secondo la ripartizione mediana
+misurata sulle aste reali 2026/27 (7% portieri, 19% difesa, 32% centrocampo, 42% attacco) e
+dentro ogni reparto si distribuiscono sui giocatori che verranno davvero comprati, in
+proporzione al FVM ufficiale. Dipende dal numero di partecipanti, impostabile nell'interfaccia.
+
+L'intervallo mostrato e' la stima centrale meno 20% e piu' 25%, per tenere conto di quanto le
+aste vere si discostano dalla mediana.
 
 ## Comandi
 

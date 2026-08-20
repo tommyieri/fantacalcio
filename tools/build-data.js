@@ -131,6 +131,12 @@ for (const ruolo of ['P', 'D', 'C', 'A']) {
   // LOWCOST = i tappabuchi da 1-2 crediti.
   for (const p of delRuolo) if (p.quot <= 2) p.tag.push('LOWCOST');
 
+  // Fascia secondo la lettura classica delle quotazioni ufficiali:
+  // Top da 30 crediti in su, Semitop 15-29, terza fascia 6-14, scommesse 1-5.
+  for (const p of delRuolo) {
+    p.fascia = p.quot >= 30 ? 1 : p.quot >= 15 ? 2 : p.quot >= 6 ? 3 : 4;
+  }
+
   delRuolo.forEach((p, i) => { p.rank = i + 1; p.rankTot = delRuolo.length; });
 }
 
@@ -150,4 +156,8 @@ console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).ma
 console.log(`annotati:        ${annotati}`);
 for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {
   console.log(`  ${t.padEnd(13)}${giocatori.filter(p => p.tag.includes(t)).length}`);
+}
+console.log('fasce (dalla quotazione ufficiale):');
+for (const f of [1, 2, 3, 4]) {
+  console.log(`  ${String(f).padEnd(13)}${giocatori.filter(p => p.fascia === f).length}`);
 }
