@@ -83,15 +83,38 @@
     </header>
 
     <!-- Avviso sulla provenienza dei dati: nessuno deve fidarsi al buio in asta -->
-    <div id="avviso-dati" class="bg-slate-900 border border-slate-800 rounded-2xl p-3 text-[11px] text-slate-400 flex items-start gap-2">
-      <i class="fa-solid fa-circle-info mt-0.5 text-indigo-400"></i>
-      <span>
-        Ruoli Classic e Mantra, FVM e quotazioni vengono dal <strong class="text-slate-200">listone ufficiale
-        Fantacalcio.it 2026/27</strong>; la griglia portieri e' quella ufficiale della stessa fonte.
-        Mancano ancora i tag che dipendono da valutazioni esterne — rigoristi, modificatore di difesa,
-        giocatori a rischio — in attesa della verifica sulle cinque fonti.
-      </span>
-    </div>
+    <details id="avviso-dati" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] text-slate-400">
+      <summary class="cursor-pointer font-semibold text-slate-300 flex items-center gap-2">
+        <i class="fa-solid fa-circle-info text-indigo-400"></i>
+        Da dove vengono i dati, e le tre cose da controllare il giorno dell'asta
+      </summary>
+      <div class="mt-3 space-y-3 leading-relaxed">
+        <p>
+          Ruoli Classic e Mantra, FVM e quotazioni vengono dal <strong class="text-slate-200">listone ufficiale
+          Fantacalcio.it 2026/27</strong>; la griglia portieri e' quella ufficiale della stessa fonte, verificata
+          per simmetria su tutte le 400 caselle. Rigoristi, titolari, infortuni, scommesse e nuovi arrivi vengono
+          da una ricognizione su Sky Sport, SOS Fanta, Gazzetta, Goal, Sisal, SNAI, FantaMaster, Fantacalcio.it,
+          TuttoMercatoWeb e CalcioD'Angolo: ogni riga della tabella porta le proprie fonti.
+        </p>
+        <p class="text-amber-300 font-semibold">Tre cose che il listone non sa (mercato aperto fino al 1° settembre):</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>
+            <strong class="text-slate-200">Vicario alla Juventus.</strong> Ufficiale dal 18 agosto, prestito dal
+            Tottenham con riscatto a 8 milioni, ed e' il nuovo titolare al posto di Di Gregorio. Non compare nel
+            listone: il blocco Juventus vale piu' di quanto dica il suo FVM.
+          </li>
+          <li>
+            <strong class="text-slate-200">Frattesi alla Lazio.</strong> Due fonti lo danno titolare nel 4-2-3-1
+            di Gattuso, il listone lo ha ancora all'Inter.
+          </li>
+          <li>
+            <strong class="text-slate-200">Nomi non nel listone</strong> visti nelle formazioni tipo: Spence
+            (Inter), Molina (Roma), Moreira (Milan), Kristensen all'Atalanta invece che all'Udinese.
+            Verifica sulla piattaforma della tua lega prima di puntarci.
+          </li>
+        </ul>
+      </div>
+    </details>
 
     <!-- Griglia incroci portieri -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
@@ -212,90 +235,90 @@
     };
 
     const PLAYERS = [
-      {"id":16,"nome":"Blocco Roma","squadra":"Roma","cod":"ROM","ruolo":"P","mantra":["Por"],"fvm":65,"fvmM":65,"quot":20,"quotM":20,"blocco":["Svilar","De Marzi","Gollini"],"tag":["TOP"],"rank":1,"rankTot":20},
-      {"id":8,"nome":"Blocco Inter","squadra":"Inter","cod":"INT","ruolo":"P","mantra":["Por"],"fvm":63,"fvmM":63,"quot":20,"quotM":20,"blocco":["Martinez Jo.","Provedel","Di Gennaro"],"tag":["TOP"],"rank":2,"rankTot":20},
-      {"id":4,"nome":"Blocco Como","squadra":"Como","cod":"COM","ruolo":"P","mantra":["Por"],"fvm":56,"fvmM":56,"quot":18,"quotM":18,"blocco":["Butez","Tornqvist","Vigorito"],"tag":["TOP"],"rank":3,"rankTot":20},
-      {"id":1,"nome":"Blocco Atalanta","squadra":"Atalanta","cod":"ATA","ruolo":"P","mantra":["Por"],"fvm":52,"fvmM":52,"quot":18,"quotM":18,"blocco":["Carnesecchi","Sportiello","Vismara"],"tag":["TOP"],"rank":4,"rankTot":20},
-      {"id":12,"nome":"Blocco Milan","squadra":"Milan","cod":"MIL","ruolo":"P","mantra":["Por"],"fvm":50,"fvmM":50,"quot":17,"quotM":17,"blocco":["Maignan","Terracciano","Torriani"],"tag":["TOP"],"rank":5,"rankTot":20},
-      {"id":5,"nome":"Blocco Fiorentina","squadra":"Fiorentina","cod":"FIO","ruolo":"P","mantra":["Por"],"fvm":45,"fvmM":45,"quot":15,"quotM":15,"blocco":["De Gea","Christensen O.","Lezzerini"],"tag":["TOP"],"rank":6,"rankTot":20},
-      {"id":14,"nome":"Blocco Napoli","squadra":"Napoli","cod":"NAP","ruolo":"P","mantra":["Por"],"fvm":45,"fvmM":45,"quot":17,"quotM":17,"blocco":["Meret","Milinkovic-Savic V.","Contini"],"tag":[],"rank":7,"rankTot":20},
+      {"id":16,"nome":"Blocco Roma","squadra":"Roma","cod":"ROM","ruolo":"P","mantra":["Por"],"fvm":65,"fvmM":65,"quot":20,"quotM":20,"blocco":["Svilar","De Marzi","Gollini"],"tag":["TITOLARE","TOP"],"nota":"Portiere titolare, fra i piu' quotati del ruolo.","fonti":["Sky","MAM-e"],"rank":1,"rankTot":20},
+      {"id":8,"nome":"Blocco Inter","squadra":"Inter","cod":"INT","ruolo":"P","mantra":["Por"],"fvm":63,"fvmM":63,"quot":20,"quotM":20,"blocco":["Martinez Jo.","Provedel","Di Gennaro"],"tag":["TITOLARE","TOP"],"nota":"Portiere titolare dell'Inter campione d'Italia.","fonti":["DAZN"],"rank":2,"rankTot":20},
+      {"id":4,"nome":"Blocco Como","squadra":"Como","cod":"COM","ruolo":"P","mantra":["Por"],"fvm":56,"fvmM":56,"quot":18,"quotM":18,"blocco":["Butez","Tornqvist","Vigorito"],"tag":["TITOLARE","TOP"],"nota":"Titolare confermato nel Como di Fabregas.","fonti":["bet365","MAM-e"],"rank":3,"rankTot":20},
+      {"id":1,"nome":"Blocco Atalanta","squadra":"Atalanta","cod":"ATA","ruolo":"P","mantra":["Por"],"fvm":52,"fvmM":52,"quot":18,"quotM":18,"blocco":["Carnesecchi","Sportiello","Vismara"],"tag":["TITOLARE","TOP"],"nota":"Indicato da Sky fra i portieri di prima fascia.","fonti":["Sky"],"rank":4,"rankTot":20},
+      {"id":12,"nome":"Blocco Milan","squadra":"Milan","cod":"MIL","ruolo":"P","mantra":["Por"],"fvm":50,"fvmM":50,"quot":17,"quotM":17,"blocco":["Maignan","Terracciano","Torriani"],"tag":["TITOLARE","TOP"],"nota":"Titolare confermato nel 3-4-2-1 di Amorim.","fonti":["Sky","MAM-e"],"rank":5,"rankTot":20},
+      {"id":5,"nome":"Blocco Fiorentina","squadra":"Fiorentina","cod":"FIO","ruolo":"P","mantra":["Por"],"fvm":45,"fvmM":45,"quot":15,"quotM":15,"blocco":["De Gea","Christensen O.","Lezzerini"],"tag":["TITOLARE","TOP"],"nota":"Titolare confermato, voto alto costante.","fonti":["MAM-e","bet365"],"rank":6,"rankTot":20},
+      {"id":14,"nome":"Blocco Napoli","squadra":"Napoli","cod":"NAP","ruolo":"P","mantra":["Por"],"fvm":45,"fvmM":45,"quot":17,"quotM":17,"blocco":["Meret","Milinkovic-Savic V.","Contini"],"tag":["TITOLARE"],"nota":"Titolare fra i pali nel Napoli di Allegri.","fonti":["Sky"],"rank":7,"rankTot":20},
       {"id":9,"nome":"Blocco Juventus","squadra":"Juventus","cod":"JUV","ruolo":"P","mantra":["Por"],"fvm":40,"fvmM":40,"quot":16,"quotM":16,"blocco":["Di Gregorio","Perin","Pinsoglio"],"tag":[],"rank":8,"rankTot":20},
-      {"id":2,"nome":"Blocco Bologna","squadra":"Bologna","cod":"BOL","ruolo":"P","mantra":["Por"],"fvm":37,"fvmM":37,"quot":12,"quotM":12,"blocco":["Skorupski","Happonen","Pessina Mas."],"tag":[],"rank":9,"rankTot":20},
-      {"id":10,"nome":"Blocco Lazio","squadra":"Lazio","cod":"LAZ","ruolo":"P","mantra":["Por"],"fvm":30,"fvmM":30,"quot":11,"quotM":11,"blocco":["Mandas","Motta","Renzetti"],"tag":[],"rank":10,"rankTot":20},
-      {"id":19,"nome":"Blocco Udinese","squadra":"Udinese","cod":"UDI","ruolo":"P","mantra":["Por"],"fvm":29,"fvmM":29,"quot":11,"quotM":11,"blocco":["Okoye","Padelli","Piana"],"tag":[],"rank":11,"rankTot":20},
-      {"id":3,"nome":"Blocco Cagliari","squadra":"Cagliari","cod":"CAG","ruolo":"P","mantra":["Por"],"fvm":27,"fvmM":27,"quot":11,"quotM":11,"blocco":["Caprile","Ciocci","Sherri"],"tag":[],"rank":12,"rankTot":20},
-      {"id":11,"nome":"Blocco Lecce","squadra":"Lecce","cod":"LEC","ruolo":"P","mantra":["Por"],"fvm":25,"fvmM":25,"quot":9,"quotM":9,"blocco":["Falcone","Samooja"],"tag":[],"rank":13,"rankTot":20},
-      {"id":15,"nome":"Blocco Parma","squadra":"Parma","cod":"PAR","ruolo":"P","mantra":["Por"],"fvm":20,"fvmM":20,"quot":15,"quotM":15,"blocco":["Suzuki","Daffara","Corvi"],"tag":[],"rank":14,"rankTot":20},
-      {"id":7,"nome":"Blocco Genoa","squadra":"Genoa","cod":"GEN","ruolo":"P","mantra":["Por"],"fvm":18,"fvmM":18,"quot":10,"quotM":10,"blocco":["Bijlow","Sommariva","Stolz"],"tag":[],"rank":15,"rankTot":20},
-      {"id":17,"nome":"Blocco Sassuolo","squadra":"Sassuolo","cod":"SAS","ruolo":"P","mantra":["Por"],"fvm":15,"fvmM":15,"quot":9,"quotM":9,"blocco":["Muric","Turati","Russo A."],"tag":[],"rank":16,"rankTot":20},
-      {"id":20,"nome":"Blocco Venezia","squadra":"Venezia","cod":"VEN","ruolo":"P","mantra":["Por"],"fvm":14,"fvmM":14,"quot":8,"quotM":8,"blocco":["Stankovic F.","Grandi","Pozzi"],"tag":[],"rank":17,"rankTot":20},
-      {"id":13,"nome":"Blocco Monza","squadra":"Monza","cod":"MON","ruolo":"P","mantra":["Por"],"fvm":12,"fvmM":12,"quot":7,"quotM":7,"blocco":["Thiam","Pizzignacco","Strajnar"],"tag":[],"rank":18,"rankTot":20},
+      {"id":2,"nome":"Blocco Bologna","squadra":"Bologna","cod":"BOL","ruolo":"P","mantra":["Por"],"fvm":37,"fvmM":37,"quot":12,"quotM":12,"blocco":["Skorupski","Happonen","Pessina Mas."],"tag":["TITOLARE"],"nota":"Confermato fra i pali nel 4-3-3 di Tedesco.","fonti":["SOS Fanta","bet365"],"rank":9,"rankTot":20},
+      {"id":10,"nome":"Blocco Lazio","squadra":"Lazio","cod":"LAZ","ruolo":"P","mantra":["Por"],"fvm":30,"fvmM":30,"quot":11,"quotM":11,"blocco":["Mandas","Motta","Renzetti"],"tag":["TITOLARE"],"nota":"Tornato alla Lazio, si candida come titolare fra i pali.","fonti":["SOS Fanta","FantaMaster"],"rank":10,"rankTot":20},
+      {"id":19,"nome":"Blocco Udinese","squadra":"Udinese","cod":"UDI","ruolo":"P","mantra":["Por"],"fvm":29,"fvmM":29,"quot":11,"quotM":11,"blocco":["Okoye","Padelli","Piana"],"tag":["TITOLARE"],"nota":"Portiere titolare del 3-5-2 di Runjaic.","fonti":["MAM-e"],"rank":11,"rankTot":20},
+      {"id":3,"nome":"Blocco Cagliari","squadra":"Cagliari","cod":"CAG","ruolo":"P","mantra":["Por"],"fvm":27,"fvmM":27,"quot":11,"quotM":11,"blocco":["Caprile","Ciocci","Sherri"],"tag":["TITOLARE"],"nota":"Portiere titolare nel 3-5-2 di Pisacane.","fonti":["bet365","MAM-e"],"rank":12,"rankTot":20},
+      {"id":11,"nome":"Blocco Lecce","squadra":"Lecce","cod":"LEC","ruolo":"P","mantra":["Por"],"fvm":25,"fvmM":25,"quot":9,"quotM":9,"blocco":["Falcone","Samooja"],"tag":["TITOLARE"],"nota":"Portiere titolare del 4-3-3 di Di Francesco.","fonti":["MAM-e"],"rank":13,"rankTot":20},
+      {"id":15,"nome":"Blocco Parma","squadra":"Parma","cod":"PAR","ruolo":"P","mantra":["Por"],"fvm":20,"fvmM":20,"quot":15,"quotM":15,"blocco":["Suzuki","Daffara","Corvi"],"tag":["TITOLARE"],"nota":"Portiere titolare del 3-5-2 di Cuesta.","fonti":["MAM-e"],"rank":14,"rankTot":20},
+      {"id":7,"nome":"Blocco Genoa","squadra":"Genoa","cod":"GEN","ruolo":"P","mantra":["Por"],"fvm":18,"fvmM":18,"quot":10,"quotM":10,"blocco":["Bijlow","Sommariva","Stolz"],"tag":["TITOLARE"],"nota":"Nuovo portiere titolare del Genoa di De Rossi.","fonti":["MAM-e"],"rank":15,"rankTot":20},
+      {"id":17,"nome":"Blocco Sassuolo","squadra":"Sassuolo","cod":"SAS","ruolo":"P","mantra":["Por"],"fvm":15,"fvmM":15,"quot":9,"quotM":9,"blocco":["Muric","Turati","Russo A."],"tag":["TITOLARE"],"nota":"Portiere titolare del Sassuolo di Aquilani.","fonti":["MAM-e"],"rank":16,"rankTot":20},
+      {"id":20,"nome":"Blocco Venezia","squadra":"Venezia","cod":"VEN","ruolo":"P","mantra":["Por"],"fvm":14,"fvmM":14,"quot":8,"quotM":8,"blocco":["Stankovic F.","Grandi","Pozzi"],"tag":["TITOLARE"],"nota":"Portiere titolare del Venezia neopromosso di Stroppa.","fonti":["SOS Fanta"],"rank":17,"rankTot":20},
+      {"id":13,"nome":"Blocco Monza","squadra":"Monza","cod":"MON","ruolo":"P","mantra":["Por"],"fvm":12,"fvmM":12,"quot":7,"quotM":7,"blocco":["Thiam","Pizzignacco","Strajnar"],"tag":["TITOLARE"],"nota":"Portiere titolare del Monza neopromosso.","fonti":["MAM-e"],"rank":18,"rankTot":20},
       {"id":6,"nome":"Blocco Frosinone","squadra":"Frosinone","cod":"FRO","ruolo":"P","mantra":["Por"],"fvm":8,"fvmM":8,"quot":7,"quotM":7,"blocco":["Palmisani","Desplanches","Lolic"],"tag":[],"rank":19,"rankTot":20},
-      {"id":18,"nome":"Blocco Torino","squadra":"Torino","cod":"TOR","ruolo":"P","mantra":["Por"],"fvm":1,"fvmM":1,"quot":3,"quotM":3,"blocco":["Mascardi","Paleari","Siviero"],"tag":[],"rank":20,"rankTot":20},
-      {"id":179,"nome":"Dimarco","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["E","W"],"fvm":265,"fvmM":265,"quot":32,"quotM":30,"tag":["TOP"],"rank":1,"rankTot":176},
-      {"id":350,"nome":"Wesley","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["E"],"fvm":84,"fvmM":84,"quot":17,"quotM":16,"tag":["TOP"],"rank":2,"rankTot":176},
-      {"id":180,"nome":"Akanji","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":55,"fvmM":55,"quot":16,"quotM":16,"tag":["TOP"],"rank":3,"rankTot":176},
-      {"id":199,"nome":"Bremer","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dc"],"fvm":50,"fvmM":50,"quot":15,"quotM":15,"tag":["TOP"],"rank":4,"rankTot":176},
-      {"id":351,"nome":"Mancini","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":49,"fvmM":49,"quot":15,"quotM":15,"tag":["TOP"],"rank":5,"rankTot":176},
+      {"id":18,"nome":"Blocco Torino","squadra":"Torino","cod":"TOR","ruolo":"P","mantra":["Por"],"fvm":1,"fvmM":1,"quot":3,"quotM":3,"blocco":["Mascardi","Paleari","Siviero"],"tag":["TITOLARE"],"nota":"Indicato come portiere titolare del Torino di Abate.","fonti":["MAM-e"],"rank":20,"rankTot":20},
+      {"id":179,"nome":"Dimarco","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["E","W"],"fvm":265,"fvmM":265,"quot":32,"quotM":30,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Listato difensore ma di fatto un esterno offensivo: top assoluto del ruolo, miglior fantamedia della scorsa stagione fra i difensori.","fonti":["FantaMaster","Sky"],"rank":1,"rankTot":176},
+      {"id":350,"nome":"Wesley","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["E"],"fvm":84,"fvmM":84,"quot":17,"quotM":16,"tag":["TITOLARE","TOP"],"nota":"Esterno a tutta fascia titolare nel 3-4-2-1 di Gasperini.","fonti":["MAM-e"],"rank":2,"rankTot":176},
+      {"id":180,"nome":"Akanji","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":55,"fvmM":55,"quot":16,"quotM":16,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Braccetto destro del terzetto che unisce fisicita', letture preventive e impostazione.","fonti":["DAZN"],"rank":3,"rankTot":176},
+      {"id":199,"nome":"Bremer","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dc"],"fvm":50,"fvmM":50,"quot":15,"quotM":15,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Primo slot: dopo Dimarco e' stato il difensore con la miglior fantamedia della scorsa stagione.","fonti":["FantaMaster"],"rank":4,"rankTot":176},
+      {"id":351,"nome":"Mancini","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":49,"fvmM":49,"quot":15,"quotM":15,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Fantamedia 6.51 con 4 gol e 2 assist nell'ultima Serie A: uno dei migliori per il modificatore.","fonti":["SOS Fanta"],"rank":5,"rankTot":176},
       {"id":263,"nome":"Pavlovic","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":48,"fvmM":48,"quot":14,"quotM":14,"tag":["TOP"],"rank":6,"rankTot":176},
-      {"id":305,"nome":"Rrahmani","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":47,"fvmM":47,"quot":14,"quotM":14,"tag":["TOP"],"rank":7,"rankTot":176},
-      {"id":200,"nome":"Kalulu","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dd","Dc"],"fvm":46,"fvmM":48,"quot":13,"quotM":14,"tag":["TOP"],"rank":8,"rankTot":176},
-      {"id":409,"nome":"Solet","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dc"],"fvm":46,"fvmM":46,"quot":13,"quotM":13,"tag":["TOP"],"rank":9,"rankTot":176},
-      {"id":181,"nome":"Bastoni","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":44,"fvmM":44,"quot":14,"quotM":14,"tag":["TOP"],"rank":10,"rankTot":176},
-      {"id":352,"nome":"N'Dicka","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":44,"fvmM":44,"quot":13,"quotM":13,"tag":["TOP"],"rank":11,"rankTot":176},
+      {"id":305,"nome":"Rrahmani","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":47,"fvmM":47,"quot":14,"quotM":14,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Fantamedia 6.48 con 2 gol e solo due ammonizioni: profilo ideale per il modificatore di difesa.","fonti":["SOS Fanta"],"rank":7,"rankTot":176},
+      {"id":200,"nome":"Kalulu","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dd","Dc"],"fvm":46,"fvmM":48,"quot":13,"quotM":14,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Definito una garanzia sicura per il modificatore di difesa.","fonti":["SOS Fanta"],"rank":8,"rankTot":176},
+      {"id":409,"nome":"Solet","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dc"],"fvm":46,"fvmM":46,"quot":13,"quotM":13,"tag":["RIGORISTA","MODIFICATORE","TITOLARE","TOP"],"nota":"Seconda opzione dal dischetto, caso raro di difensore nelle gerarchie dei rigori.","fonti":["SNAI","MAM-e"],"rank":9,"rankTot":176},
+      {"id":181,"nome":"Bastoni","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":44,"fvmM":44,"quot":14,"quotM":14,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Titolare fisso nella difesa a tre campione d'Italia.","fonti":["DAZN"],"rank":10,"rankTot":176},
+      {"id":352,"nome":"N'Dicka","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":44,"fvmM":44,"quot":13,"quotM":13,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Centrale titolare della difesa a tre.","fonti":["MAM-e"],"rank":11,"rankTot":176},
       {"id":156,"nome":"Ostigard","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dc"],"fvm":40,"fvmM":40,"quot":11,"quotM":11,"tag":["TOP"],"rank":12,"rankTot":176},
-      {"id":306,"nome":"Di Lorenzo","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dd","E"],"fvm":40,"fvmM":40,"quot":12,"quotM":12,"tag":["TOP"],"rank":13,"rankTot":176},
-      {"id":182,"nome":"Stones","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":38,"fvmM":38,"quot":12,"quotM":12,"tag":["TOP"],"rank":14,"rankTot":176},
+      {"id":306,"nome":"Di Lorenzo","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dd","E"],"fvm":40,"fvmM":40,"quot":12,"quotM":12,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Terzino destro inamovibile nel 4-3-3 di Allegri.","fonti":["Sky"],"rank":13,"rankTot":176},
+      {"id":182,"nome":"Stones","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":38,"fvmM":38,"quot":12,"quotM":12,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Centrale del terzetto titolare di Chivu.","fonti":["DAZN"],"rank":14,"rankTot":176},
       {"id":157,"nome":"Vasquez","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Ds","Dc"],"fvm":33,"fvmM":35,"quot":9,"quotM":10,"tag":["TOP"],"rank":15,"rankTot":176},
       {"id":183,"nome":"Bisseck","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":33,"fvmM":33,"quot":11,"quotM":11,"tag":["TOP"],"rank":16,"rankTot":176},
       {"id":88,"nome":"Ramon","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dc"],"fvm":32,"fvmM":32,"quot":10,"quotM":10,"tag":[],"rank":17,"rankTot":176},
-      {"id":264,"nome":"Gila","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":31,"fvmM":31,"quot":12,"quotM":12,"tag":[],"rank":18,"rankTot":176},
+      {"id":264,"nome":"Gila","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":31,"fvmM":31,"quot":12,"quotM":12,"tag":["MODIFICATORE","TITOLARE"],"nota":"Ottimo impatto nelle amichevoli: consigliato come secondo o terzo slot per le garanzie sul modificatore.","fonti":["SOS Fanta"],"rank":18,"rankTot":176},
       {"id":114,"nome":"Dodò","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dd","E"],"fvm":30,"fvmM":30,"quot":10,"quotM":10,"tag":[],"rank":19,"rankTot":176},
       {"id":21,"nome":"Scalvini","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dc"],"fvm":28,"fvmM":28,"quot":10,"quotM":10,"tag":[],"rank":20,"rankTot":176},
-      {"id":90,"nome":"Couto","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dd","E"],"fvm":27,"fvmM":27,"quot":8,"quotM":8,"tag":[],"rank":21,"rankTot":176},
-      {"id":115,"nome":"Dragusin","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dc"],"fvm":27,"fvmM":27,"quot":8,"quotM":8,"tag":[],"rank":22,"rankTot":176},
+      {"id":90,"nome":"Couto","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dd","E"],"fvm":27,"fvmM":27,"quot":8,"quotM":8,"tag":["MODIFICATORE","TITOLARE"],"nota":"Titolare a destra: terzino di grande spinta, porta bonus da cross e assist.","fonti":["SOS Fanta","FantaMaster"],"rank":21,"rankTot":176},
+      {"id":115,"nome":"Dragusin","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dc"],"fvm":27,"fvmM":27,"quot":8,"quotM":8,"tag":["NUOVO","TITOLARE"],"nota":"Dal Tottenham, centrale titolare della difesa a quattro.","fonti":["MAM-e"],"rank":22,"rankTot":176},
       {"id":184,"nome":"Carlos Augusto","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["B","Ds","E"],"fvm":27,"fvmM":30,"quot":7,"quotM":8,"tag":[],"rank":23,"rankTot":176},
       {"id":201,"nome":"Cambiaso","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":27,"fvmM":30,"quot":9,"quotM":10,"tag":[],"rank":24,"rankTot":176},
       {"id":89,"nome":"Chalobah T.","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dd","Dc"],"fvm":26,"fvmM":28,"quot":9,"quotM":10,"tag":[],"rank":25,"rankTot":176},
       {"id":353,"nome":"Hermoso","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":26,"fvmM":26,"quot":10,"quotM":10,"tag":[],"rank":26,"rankTot":176},
-      {"id":265,"nome":"Bartesaghi","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Ds","E"],"fvm":25,"fvmM":25,"quot":8,"quotM":8,"tag":[],"rank":27,"rankTot":176},
-      {"id":23,"nome":"Zappacosta","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dd","E"],"fvm":24,"fvmM":24,"quot":8,"quotM":8,"tag":[],"rank":28,"rankTot":176},
+      {"id":265,"nome":"Bartesaghi","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Ds","E"],"fvm":25,"fvmM":25,"quot":8,"quotM":8,"tag":["TITOLARE"],"nota":"Quinto di sinistra a tutta fascia nello schema di Amorim.","fonti":["Sky","MAM-e"],"rank":27,"rankTot":176},
+      {"id":23,"nome":"Zappacosta","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dd","E"],"fvm":24,"fvmM":24,"quot":8,"quotM":8,"tag":["RISCHIO"],"nota":"Sarri passa alla difesa a quattro: l'esterno perde il ruolo di quinto a tutta fascia su cui si fondava il suo rendimento.","fonti":["Sky","CalcioD'Angolo"],"rank":28,"rankTot":176},
       {"id":43,"nome":"Miranda J.","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Ds","E"],"fvm":24,"fvmM":24,"quot":8,"quotM":8,"tag":[],"rank":29,"rankTot":176},
       {"id":222,"nome":"Romagnoli","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dc"],"fvm":24,"fvmM":24,"quot":7,"quotM":7,"tag":[],"rank":30,"rankTot":176},
-      {"id":307,"nome":"Spinazzola","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Ds","E"],"fvm":24,"fvmM":24,"quot":8,"quotM":8,"tag":[],"rank":31,"rankTot":176},
+      {"id":307,"nome":"Spinazzola","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Ds","E"],"fvm":24,"fvmM":24,"quot":8,"quotM":8,"tag":["TITOLARE"],"nota":"Titolare sulla corsia mancina.","fonti":["Sky"],"rank":31,"rankTot":176},
       {"id":330,"nome":"Valeri","squadra":"Parma","cod":"PAR","ruolo":"D","mantra":["Ds","E"],"fvm":24,"fvmM":24,"quot":8,"quotM":8,"tag":[],"rank":32,"rankTot":176},
       {"id":91,"nome":"Kaiki","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Ds","E"],"fvm":23,"fvmM":23,"quot":7,"quotM":7,"tag":[],"rank":33,"rankTot":176},
-      {"id":116,"nome":"Jimenez A.","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":23,"fvmM":25,"quot":8,"quotM":9,"tag":[],"rank":34,"rankTot":176},
+      {"id":116,"nome":"Jimenez A.","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":23,"fvmM":25,"quot":8,"quotM":9,"tag":["NUOVO","TITOLARE"],"nota":"Dal Bournemouth, titolare sulla corsia mancina.","fonti":["MAM-e"],"rank":34,"rankTot":176},
       {"id":266,"nome":"Gabbia","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":23,"fvmM":23,"quot":7,"quotM":7,"tag":[],"rank":35,"rankTot":176},
       {"id":158,"nome":"Norton-Cuffy","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dd","E"],"fvm":22,"fvmM":22,"quot":8,"quotM":8,"tag":[],"rank":36,"rankTot":176},
-      {"id":221,"nome":"Doekhi","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dc"],"fvm":22,"fvmM":22,"quot":7,"quotM":7,"tag":[],"rank":37,"rankTot":176},
+      {"id":221,"nome":"Doekhi","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dc"],"fvm":22,"fvmM":22,"quot":7,"quotM":7,"tag":["NUOVO","SCOMMESSA","MODIFICATORE"],"nota":"Centrale dall'Union Berlino: fisicita' e fiuto del gol, fra 6 e 8 reti nell'ultima stagione, a prezzo basso. Sostituisce Gila.","fonti":["Goal","Fantacalcio.it"],"rank":37,"rankTot":176},
       {"id":202,"nome":"Celik","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["B","Dd","E"],"fvm":21,"fvmM":23,"quot":8,"quotM":9,"tag":[],"rank":38,"rankTot":176},
-      {"id":329,"nome":"Delprato","squadra":"Parma","cod":"PAR","ruolo":"D","mantra":["B","Dd","E"],"fvm":21,"fvmM":24,"quot":8,"quotM":8,"tag":[],"rank":39,"rankTot":176},
+      {"id":329,"nome":"Delprato","squadra":"Parma","cod":"PAR","ruolo":"D","mantra":["B","Dd","E"],"fvm":21,"fvmM":24,"quot":8,"quotM":8,"tag":["TITOLARE"],"nota":"Capitano, titolare come esterno destro nel 3-5-2.","fonti":["MAM-e"],"rank":39,"rankTot":176},
       {"id":65,"nome":"Mina","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":8,"quotM":8,"tag":[],"rank":40,"rankTot":176},
-      {"id":223,"nome":"Marusic","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":20,"fvmM":23,"quot":6,"quotM":6,"tag":[],"rank":41,"rankTot":176},
+      {"id":223,"nome":"Marusic","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":20,"fvmM":23,"quot":6,"quotM":6,"tag":["MODIFICATORE","TITOLARE"],"nota":"Terzino destro titolare di Gattuso, atteso a una spinta piu' continua e quindi a un contributo assist.","fonti":["SOS Fanta"],"rank":41,"rankTot":176},
       {"id":267,"nome":"Tomori","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":7,"quotM":7,"tag":[],"rank":42,"rankTot":176},
       {"id":354,"nome":"Koulierakis","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":8,"quotM":8,"tag":[],"rank":43,"rankTot":176},
       {"id":45,"nome":"Zortea","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dd","E"],"fvm":19,"fvmM":19,"quot":6,"quotM":6,"tag":[],"rank":44,"rankTot":176},
-      {"id":118,"nome":"Viery","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":19,"fvmM":21,"quot":6,"quotM":7,"tag":[],"rank":45,"rankTot":176},
+      {"id":118,"nome":"Viery","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":19,"fvmM":21,"quot":6,"quotM":7,"tag":["NUOVO","TITOLARE"],"nota":"Dal Gremio, coppia centrale con Dragusin.","fonti":["MAM-e"],"rank":45,"rankTot":176},
       {"id":368,"nome":"Idzes","squadra":"Sassuolo","cod":"SAS","ruolo":"D","mantra":["Dc"],"fvm":19,"fvmM":19,"quot":7,"quotM":7,"tag":[],"rank":46,"rankTot":176},
-      {"id":410,"nome":"Vojvoda","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dd","E"],"fvm":19,"fvmM":19,"quot":8,"quotM":8,"tag":[],"rank":47,"rankTot":176},
+      {"id":410,"nome":"Vojvoda","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dd","E"],"fvm":19,"fvmM":19,"quot":8,"quotM":8,"tag":["SCOMMESSA","TITOLARE"],"nota":"Cinque crediti per un jolly tattico capace di ricoprire piu' ruoli, titolare nel 3-5-2.","fonti":["Sisal","MAM-e"],"rank":47,"rankTot":176},
       {"id":42,"nome":"Lucumì","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":8,"quotM":8,"tag":[],"rank":48,"rankTot":176},
       {"id":92,"nome":"Valle","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Ds","E"],"fvm":18,"fvmM":18,"quot":6,"quotM":6,"tag":[],"rank":49,"rankTot":176},
-      {"id":117,"nome":"Valdepenas","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":18,"fvmM":20,"quot":6,"quotM":7,"tag":[],"rank":50,"rankTot":176},
+      {"id":117,"nome":"Valdepenas","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":18,"fvmM":20,"quot":6,"quotM":7,"tag":["NUOVO","SCOMMESSA"],"nota":"Terzino sinistro dal Real Madrid, gia' titolare in Coppa Italia a due crediti.","fonti":["Sisal"],"rank":50,"rankTot":176},
       {"id":185,"nome":"Pavard","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dd","Dc"],"fvm":18,"fvmM":20,"quot":6,"quotM":7,"tag":[],"rank":51,"rankTot":176},
-      {"id":308,"nome":"Buongiorno","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":7,"quotM":7,"tag":[],"rank":52,"rankTot":176},
+      {"id":308,"nome":"Buongiorno","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":7,"quotM":7,"tag":["RISCHIO"],"nota":"Operato al menisco: rientro previsto a fine novembre.","fonti":["Goal"],"rank":52,"rankTot":176},
       {"id":331,"nome":"Circati","squadra":"Parma","cod":"PAR","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":6,"quotM":6,"tag":[],"rank":53,"rankTot":176},
-      {"id":388,"nome":"Coco","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":7,"quotM":7,"tag":[],"rank":54,"rankTot":176},
+      {"id":388,"nome":"Coco","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":7,"quotM":7,"tag":["TITOLARE"],"nota":"Centrale titolare della difesa a tre granata.","fonti":["MAM-e"],"rank":54,"rankTot":176},
       {"id":389,"nome":"Ismajli","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":7,"quotM":7,"tag":[],"rank":55,"rankTot":176},
       {"id":27,"nome":"Bernasconi","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Ds","E"],"fvm":17,"fvmM":17,"quot":6,"quotM":6,"tag":[],"rank":56,"rankTot":176},
       {"id":224,"nome":"Tavares N.","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Ds","E"],"fvm":17,"fvmM":17,"quot":6,"quotM":6,"tag":[],"rank":57,"rankTot":176},
       {"id":243,"nome":"Tiago Gabriel","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Dc"],"fvm":17,"fvmM":17,"quot":7,"quotM":7,"tag":[],"rank":58,"rankTot":176},
-      {"id":22,"nome":"Hien","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dc"],"fvm":16,"fvmM":16,"quot":8,"quotM":8,"tag":[],"rank":59,"rankTot":176},
+      {"id":22,"nome":"Hien","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dc"],"fvm":16,"fvmM":16,"quot":8,"quotM":8,"tag":["RISCHIO"],"nota":"Infortunio muscolare, rientro atteso a ottobre: salta le prime giornate.","fonti":["Goal","SOS Fanta"],"rank":59,"rankTot":176},
       {"id":24,"nome":"Djimsiti","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dc"],"fvm":16,"fvmM":16,"quot":7,"quotM":7,"tag":[],"rank":60,"rankTot":176},
       {"id":25,"nome":"Ahanor","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["B","Ds","E"],"fvm":16,"fvmM":18,"quot":6,"quotM":7,"tag":[],"rank":61,"rankTot":176},
-      {"id":309,"nome":"Beukema","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":16,"fvmM":16,"quot":6,"quotM":6,"tag":[],"rank":62,"rankTot":176},
+      {"id":309,"nome":"Beukema","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":16,"fvmM":16,"quot":6,"quotM":6,"tag":["RISCHIO","TITOLARE"],"nota":"Problema al tendine d'Achille: rientro fra fine agosto e inizio settembre.","fonti":["IlNapoliOnline","SOS Fanta"],"rank":62,"rankTot":176},
       {"id":355,"nome":"Rensch","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["B","Dd","E"],"fvm":16,"fvmM":18,"quot":5,"quotM":6,"tag":[],"rank":63,"rankTot":176},
-      {"id":26,"nome":"Bellanova","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dd","E"],"fvm":15,"fvmM":15,"quot":6,"quotM":6,"tag":[],"rank":64,"rankTot":176},
+      {"id":26,"nome":"Bellanova","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dd","E"],"fvm":15,"fvmM":15,"quot":6,"quotM":6,"tag":["TITOLARE"],"nota":"Confermato titolare anche nella difesa a quattro di Sarri, sulla corsia destra.","fonti":["Sky"],"rank":64,"rankTot":176},
       {"id":44,"nome":"Heggem","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Ds","Dc"],"fvm":15,"fvmM":17,"quot":6,"quotM":7,"tag":[],"rank":65,"rankTot":176},
       {"id":160,"nome":"Martin","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Ds","E"],"fvm":15,"fvmM":15,"quot":5,"quotM":5,"tag":[],"rank":66,"rankTot":176},
       {"id":225,"nome":"Pedraza","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Ds","E"],"fvm":15,"fvmM":15,"quot":5,"quotM":5,"tag":[],"rank":67,"rankTot":176},
@@ -305,7 +328,7 @@
       {"id":134,"nome":"Monterisi","squadra":"Frosinone","cod":"FRO","ruolo":"D","mantra":["Dc"],"fvm":14,"fvmM":14,"quot":6,"quotM":6,"tag":[],"rank":71,"rankTot":176},
       {"id":46,"nome":"Holm","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dd","E"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":[],"rank":72,"rankTot":176},
       {"id":93,"nome":"Kempf","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dc"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":[],"rank":73,"rankTot":176},
-      {"id":159,"nome":"Marcandalli","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dc"],"fvm":13,"fvmM":13,"quot":6,"quotM":6,"tag":[],"rank":74,"rankTot":176},
+      {"id":159,"nome":"Marcandalli","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dc"],"fvm":13,"fvmM":13,"quot":6,"quotM":6,"tag":["TITOLARE"],"nota":"Fra i nuovi su cui punta De Rossi nella difesa a tre.","fonti":["MAM-e"],"rank":74,"rankTot":176},
       {"id":203,"nome":"Kelly L.","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Ds","Dc"],"fvm":13,"fvmM":15,"quot":5,"quotM":6,"tag":[],"rank":75,"rankTot":176},
       {"id":244,"nome":"Gallo","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Ds","E"],"fvm":13,"fvmM":13,"quot":6,"quotM":6,"tag":[],"rank":76,"rankTot":176},
       {"id":310,"nome":"Olivera","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["B","Ds","E"],"fvm":13,"fvmM":15,"quot":5,"quotM":6,"tag":[],"rank":77,"rankTot":176},
@@ -378,7 +401,7 @@
       {"id":229,"nome":"Pellegrini Lu.","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Ds","E"],"fvm":5,"fvmM":5,"quot":2,"quotM":2,"tag":["LOWCOST"],"rank":144,"rankTot":176},
       {"id":312,"nome":"Marianucci","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":5,"fvmM":5,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":145,"rankTot":176},
       {"id":393,"nome":"Biraghi","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["B","Ds","E"],"fvm":5,"fvmM":6,"quot":2,"quotM":2,"tag":["LOWCOST"],"rank":146,"rankTot":176},
-      {"id":418,"nome":"Palma","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dc"],"fvm":5,"fvmM":5,"quot":2,"quotM":2,"tag":["LOWCOST"],"rank":147,"rankTot":176},
+      {"id":418,"nome":"Palma","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dc"],"fvm":5,"fvmM":5,"quot":2,"quotM":2,"tag":["SCOMMESSA","LOWCOST"],"nota":"Un credito, scommessa a costo minimo con potenziale di crescita negli spazi.","fonti":["Sisal"],"rank":147,"rankTot":176},
       {"id":51,"nome":"De Silvestri","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dd","E"],"fvm":4,"fvmM":4,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":148,"rankTot":176},
       {"id":205,"nome":"Cabal","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["B","Ds","E"],"fvm":4,"fvmM":4,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":149,"rankTot":176},
       {"id":230,"nome":"Patric","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","Dc"],"fvm":4,"fvmM":4,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":150,"rankTot":176},
@@ -408,59 +431,59 @@
       {"id":250,"nome":"Perez M.","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Dd","Dc"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":174,"rankTot":176},
       {"id":373,"nome":"Pieragnolo","squadra":"Sassuolo","cod":"SAS","ruolo":"D","mantra":["Ds","E"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":175,"rankTot":176},
       {"id":444,"nome":"Gomes","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Ds","Dc"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":176,"rankTot":176},
-      {"id":98,"nome":"Paz N.","squadra":"Como","cod":"COM","ruolo":"C","mantra":["T","A"],"fvm":250,"fvmM":250,"quot":30,"quotM":28,"tag":["TOP"],"rank":1,"rankTot":174},
-      {"id":314,"nome":"Mctominay","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["C","T"],"fvm":240,"fvmM":240,"quot":28,"quotM":28,"tag":["TOP"],"rank":2,"rankTot":174},
-      {"id":186,"nome":"Calhanoglu","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["M","C"],"fvm":230,"fvmM":260,"quot":27,"quotM":28,"tag":["TOP"],"rank":3,"rankTot":174},
-      {"id":52,"nome":"Orsolini","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","A"],"fvm":200,"fvmM":200,"quot":26,"quotM":25,"tag":["TOP"],"rank":4,"rankTot":174},
-      {"id":272,"nome":"Pulisic","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["T","A"],"fvm":180,"fvmM":174,"quot":25,"quotM":23,"tag":["TOP"],"rank":5,"rankTot":174},
-      {"id":273,"nome":"Rabiot","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["C","T"],"fvm":128,"fvmM":128,"quot":22,"quotM":22,"tag":["TOP"],"rank":6,"rankTot":174},
+      {"id":98,"nome":"Paz N.","squadra":"Como","cod":"COM","ruolo":"C","mantra":["T","A"],"fvm":250,"fvmM":250,"quot":30,"quotM":28,"tag":["TITOLARE","TOP"],"nota":"Uno dei tre primi slot veri di centrocampo insieme a McTominay e Orsolini: nessuna criticita' fantacalcistica secondo Sky.","fonti":["Sky","FantaMaster"],"rank":1,"rankTot":174},
+      {"id":314,"nome":"Mctominay","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["C","T"],"fvm":240,"fvmM":240,"quot":28,"quotM":28,"tag":["TITOLARE","TOP"],"nota":"Secondo nome consigliato da Sky in assoluto: Allegri predilige il suo profilo, potrebbe essere il nuovo Rabiot. In doppia cifra la scorsa stagione.","fonti":["Sky","FantaMaster"],"rank":2,"rankTot":174},
+      {"id":186,"nome":"Calhanoglu","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["M","C"],"fvm":230,"fvmM":260,"quot":27,"quotM":28,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista senza discussioni davanti a Lautaro e Zielinski: tiro da fuori, punizioni e rigori.","fonti":["SNAI","Sky","FantaMaster"],"rank":3,"rankTot":174},
+      {"id":52,"nome":"Orsolini","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","A"],"fvm":200,"fvmM":200,"quot":26,"quotM":25,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista e ala offensiva pura: in doppia cifra la scorsa stagione, e' uno dei veri primi slot di centrocampo.","fonti":["SNAI","FantaMaster","Goal"],"rank":4,"rankTot":174},
+      {"id":272,"nome":"Pulisic","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["T","A"],"fvm":180,"fvmM":174,"quot":25,"quotM":23,"tag":["RIGORISTA","RISCHIO","TITOLARE","TOP"],"nota":"Trequartista titolare e secondo rigorista, ma microfrattura tibia-perone con edema osseo: convocazione molto difficile per la prima.","fonti":["SNAI","SOS Fanta","CalcioD'Angolo"],"rank":5,"rankTot":174},
+      {"id":273,"nome":"Rabiot","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["C","T"],"fvm":128,"fvmM":128,"quot":22,"quotM":22,"tag":["TITOLARE","TOP"],"nota":"Titolare in mediana nel nuovo Milan.","fonti":["Sky"],"rank":6,"rankTot":174},
       {"id":99,"nome":"Baturina","squadra":"Como","cod":"COM","ruolo":"C","mantra":["T"],"fvm":102,"fvmM":100,"quot":19,"quotM":18,"tag":["TOP"],"rank":7,"rankTot":174},
-      {"id":315,"nome":"De Bruyne","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["T"],"fvm":100,"fvmM":94,"quot":15,"quotM":14,"tag":["TOP"],"rank":8,"rankTot":174},
-      {"id":231,"nome":"Zaccagni","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["W","A"],"fvm":91,"fvmM":88,"quot":16,"quotM":15,"tag":["TOP"],"rank":9,"rankTot":174},
-      {"id":100,"nome":"Da Cunha","squadra":"Como","cod":"COM","ruolo":"C","mantra":["C","T"],"fvm":90,"fvmM":90,"quot":18,"quotM":18,"tag":["TOP"],"rank":10,"rankTot":174},
-      {"id":421,"nome":"Zaniolo","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["T","A"],"fvm":90,"fvmM":88,"quot":18,"quotM":17,"tag":["TOP"],"rank":11,"rankTot":174},
-      {"id":123,"nome":"Atta","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C","T"],"fvm":87,"fvmM":87,"quot":17,"quotM":17,"tag":["TOP"],"rank":12,"rankTot":174},
-      {"id":187,"nome":"Barella","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["C"],"fvm":82,"fvmM":82,"quot":17,"quotM":17,"tag":["TOP"],"rank":13,"rankTot":174},
-      {"id":394,"nome":"Vlasic","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["T"],"fvm":80,"fvmM":77,"quot":14,"quotM":13,"tag":["TOP"],"rank":14,"rankTot":174},
+      {"id":315,"nome":"De Bruyne","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["T"],"fvm":100,"fvmM":94,"quot":15,"quotM":14,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Rigorista designato quando in campo, con Hojlund alternativa.","fonti":["SNAI","Sky"],"rank":8,"rankTot":174},
+      {"id":231,"nome":"Zaccagni","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["W","A"],"fvm":91,"fvmM":88,"quot":16,"quotM":15,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista e capitano, con Cataldi come alternativa piu' che credibile.","fonti":["SNAI","Sky"],"rank":9,"rankTot":174},
+      {"id":100,"nome":"Da Cunha","squadra":"Como","cod":"COM","ruolo":"C","mantra":["C","T"],"fvm":90,"fvmM":90,"quot":18,"quotM":18,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Ha scavalcato Nico Paz nelle gerarchie dal dischetto: rigori a un centrocampista gia' da bonus.","fonti":["SNAI","SOS Fanta"],"rank":10,"rankTot":174},
+      {"id":421,"nome":"Zaniolo","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["T","A"],"fvm":90,"fvmM":88,"quot":18,"quotM":17,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Perno offensivo dell'Udinese e terza opzione dal dischetto.","fonti":["SNAI","MAM-e"],"rank":11,"rankTot":174},
+      {"id":123,"nome":"Atta","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C","T"],"fvm":87,"fvmM":87,"quot":17,"quotM":17,"tag":["TITOLARE","TOP"],"nota":"Titolare nel tridente di Grosso dopo l'arrivo dall'Udinese.","fonti":["MAM-e"],"rank":12,"rankTot":174},
+      {"id":187,"nome":"Barella","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["C"],"fvm":82,"fvmM":82,"quot":17,"quotM":17,"tag":["TITOLARE","TOP"],"nota":"Inamovibile nel 3-5-2 di Chivu.","fonti":["DAZN"],"rank":13,"rankTot":174},
+      {"id":394,"nome":"Vlasic","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["T"],"fvm":80,"fvmM":77,"quot":14,"quotM":13,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Rigorista ormai stabile davanti a Zapata e Simeone, trequartista titolare del 3-4-2-1 di Abate.","fonti":["SNAI","MAM-e"],"rank":14,"rankTot":174},
       {"id":207,"nome":"Mckennie","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C"],"fvm":68,"fvmM":68,"quot":17,"quotM":17,"tag":["TOP"],"rank":15,"rankTot":174},
-      {"id":232,"nome":"Taylor K.","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["C","T"],"fvm":64,"fvmM":64,"quot":13,"quotM":13,"tag":["TOP"],"rank":16,"rankTot":174},
-      {"id":124,"nome":"Gudmundsson A.","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["T","A"],"fvm":61,"fvmM":58,"quot":13,"quotM":12,"tag":[],"rank":17,"rankTot":174},
+      {"id":232,"nome":"Taylor K.","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["C","T"],"fvm":64,"fvmM":64,"quot":13,"quotM":13,"tag":["TITOLARE","TOP"],"nota":"Titolare in mediana accanto a Rovella.","fonti":["FantaMaster"],"rank":16,"rankTot":174},
+      {"id":124,"nome":"Gudmundsson A.","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["T","A"],"fvm":61,"fvmM":58,"quot":13,"quotM":12,"tag":["RIGORISTA","TITOLARE"],"nota":"Primo rigorista viola davanti a Mandragora e Kean.","fonti":["SNAI","Sky","Goal"],"rank":17,"rankTot":174},
       {"id":209,"nome":"Conceicao","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["W","A"],"fvm":60,"fvmM":57,"quot":12,"quotM":11,"tag":[],"rank":18,"rankTot":174},
-      {"id":125,"nome":"Mastantuono","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["W","T"],"fvm":58,"fvmM":58,"quot":12,"quotM":12,"tag":[],"rank":19,"rankTot":174},
-      {"id":208,"nome":"Alajbegovic","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["W","T"],"fvm":57,"fvmM":57,"quot":12,"quotM":12,"tag":[],"rank":20,"rankTot":174},
+      {"id":125,"nome":"Mastantuono","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["W","T"],"fvm":58,"fvmM":58,"quot":12,"quotM":12,"tag":["NUOVO","TITOLARE"],"nota":"Arriva dal Real Madrid, inserito nel tridente titolare di Grosso.","fonti":["MAM-e","bet365"],"rank":19,"rankTot":174},
+      {"id":208,"nome":"Alajbegovic","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["W","T"],"fvm":57,"fvmM":57,"quot":12,"quotM":12,"tag":["SCOMMESSA"],"nota":"Talento cristallino con bonus nelle gambe: giovanissimo che incide anche da subentrato.","fonti":["Fantacalcio.it"],"rank":20,"rankTot":174},
       {"id":316,"nome":"Zambo Anguissa","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["C"],"fvm":55,"fvmM":55,"quot":11,"quotM":11,"tag":[],"rank":21,"rankTot":174},
-      {"id":274,"nome":"Modric","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["M","C"],"fvm":50,"fvmM":60,"quot":12,"quotM":13,"tag":[],"rank":22,"rankTot":174},
-      {"id":317,"nome":"Politano","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["W"],"fvm":47,"fvmM":43,"quot":10,"quotM":9,"tag":[],"rank":23,"rankTot":174},
-      {"id":30,"nome":"Ederson D.S.","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["M","C"],"fvm":45,"fvmM":48,"quot":12,"quotM":13,"tag":[],"rank":24,"rankTot":174},
-      {"id":275,"nome":"Saelemaekers","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["E","W"],"fvm":43,"fvmM":45,"quot":10,"quotM":11,"tag":[],"rank":25,"rankTot":174},
+      {"id":274,"nome":"Modric","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["M","C"],"fvm":50,"fvmM":60,"quot":12,"quotM":13,"tag":["TITOLARE"],"nota":"Insieme a Rabiot ha rivoluzionato il centrocampo rossonero.","fonti":["Sky"],"rank":22,"rankTot":174},
+      {"id":317,"nome":"Politano","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["W"],"fvm":47,"fvmM":43,"quot":10,"quotM":9,"tag":["TITOLARE"],"nota":"Titolare nel tridente offensivo.","fonti":["Sky"],"rank":23,"rankTot":174},
+      {"id":30,"nome":"Ederson D.S.","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["M","C"],"fvm":45,"fvmM":48,"quot":12,"quotM":13,"tag":["TITOLARE"],"nota":"Rinnovo fino al 2031 dopo il mancato passaggio allo United: perno del centrocampo di Sarri fin da subito.","fonti":["Sky"],"rank":24,"rankTot":174},
+      {"id":275,"nome":"Saelemaekers","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["E","W"],"fvm":43,"fvmM":45,"quot":10,"quotM":11,"tag":["TITOLARE"],"nota":"Trequartista titolare accanto a Pulisic nel 3-4-2-1.","fonti":["Sky","MAM-e"],"rank":25,"rankTot":174},
       {"id":31,"nome":"Samardzic","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["C","T"],"fvm":42,"fvmM":42,"quot":12,"quotM":12,"tag":[],"rank":26,"rankTot":174},
-      {"id":358,"nome":"Konè M.","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["M","C"],"fvm":42,"fvmM":45,"quot":10,"quotM":11,"tag":[],"rank":27,"rankTot":174},
+      {"id":358,"nome":"Konè M.","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["M","C"],"fvm":42,"fvmM":45,"quot":10,"quotM":11,"tag":["TITOLARE"],"nota":"Titolare in mediana accanto a Cristante.","fonti":["MAM-e"],"rank":27,"rankTot":174},
       {"id":188,"nome":"Zielinski","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["C"],"fvm":41,"fvmM":41,"quot":10,"quotM":10,"tag":[],"rank":28,"rankTot":174},
-      {"id":210,"nome":"Thuram K.","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C"],"fvm":41,"fvmM":41,"quot":10,"quotM":10,"tag":[],"rank":29,"rankTot":174},
+      {"id":210,"nome":"Thuram K.","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C"],"fvm":41,"fvmM":41,"quot":10,"quotM":10,"tag":["RISCHIO"],"nota":"Antiscommessa: concorrenza folta in mediana, stagione scorsa opaca e preparazione estiva saltata per problemi fisici.","fonti":["Fantacalcio.it"],"rank":29,"rankTot":174},
       {"id":374,"nome":"Thorstvedt","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["C","T"],"fvm":41,"fvmM":41,"quot":10,"quotM":10,"tag":[],"rank":30,"rankTot":174},
-      {"id":422,"nome":"Ekkelenkamp","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["C","T"],"fvm":41,"fvmM":41,"quot":10,"quotM":10,"tag":[],"rank":31,"rankTot":174},
+      {"id":422,"nome":"Ekkelenkamp","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["C","T"],"fvm":41,"fvmM":41,"quot":10,"quotM":10,"tag":["TITOLARE"],"nota":"Titolare in mediana nel centrocampo a cinque.","fonti":["MAM-e"],"rank":31,"rankTot":174},
       {"id":102,"nome":"Perrone","squadra":"Como","cod":"COM","ruolo":"C","mantra":["M","C"],"fvm":38,"fvmM":41,"quot":10,"quotM":11,"tag":[],"rank":32,"rankTot":174},
       {"id":53,"nome":"Rowe","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","T"],"fvm":37,"fvmM":40,"quot":11,"quotM":11,"tag":[],"rank":33,"rankTot":174},
       {"id":189,"nome":"Diouf","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["E","C"],"fvm":37,"fvmM":40,"quot":8,"quotM":9,"tag":[],"rank":34,"rankTot":174},
       {"id":395,"nome":"Casadei","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["C","T"],"fvm":37,"fvmM":37,"quot":10,"quotM":10,"tag":[],"rank":35,"rankTot":174},
-      {"id":337,"nome":"Bernabè","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["C"],"fvm":36,"fvmM":36,"quot":7,"quotM":7,"tag":[],"rank":36,"rankTot":174},
-      {"id":318,"nome":"Vergara","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["W","T"],"fvm":34,"fvmM":34,"quot":8,"quotM":8,"tag":[],"rank":37,"rankTot":174},
+      {"id":337,"nome":"Bernabè","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["C"],"fvm":36,"fvmM":36,"quot":7,"quotM":7,"tag":["TITOLARE"],"nota":"Faro tecnico del centrocampo ducale.","fonti":["MAM-e"],"rank":36,"rankTot":174},
+      {"id":318,"nome":"Vergara","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["W","T"],"fvm":34,"fvmM":34,"quot":8,"quotM":8,"tag":["SCOMMESSA"],"nota":"Parte dietro De Bruyne ma puo' avere parecchio spazio ed essere decisivo anche dalla panchina.","fonti":["Fantacalcio.it"],"rank":37,"rankTot":174},
       {"id":32,"nome":"Pasalic","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["C","T"],"fvm":32,"fvmM":32,"quot":9,"quotM":9,"tag":[],"rank":38,"rankTot":174},
       {"id":101,"nome":"Rodriguez Je.","squadra":"Como","cod":"COM","ruolo":"C","mantra":["W","A"],"fvm":32,"fvmM":31,"quot":12,"quotM":11,"tag":[],"rank":39,"rankTot":174},
-      {"id":211,"nome":"Locatelli","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["M","C"],"fvm":32,"fvmM":35,"quot":8,"quotM":9,"tag":[],"rank":40,"rankTot":174},
+      {"id":211,"nome":"Locatelli","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["M","C"],"fvm":32,"fvmM":35,"quot":8,"quotM":9,"tag":["RIGORISTA","TITOLARE"],"nota":"Contende i rigori a Yildiz, titolare in mediana.","fonti":["SNAI"],"rank":40,"rankTot":174},
       {"id":166,"nome":"Baldanzi","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["T"],"fvm":30,"fvmM":27,"quot":11,"quotM":10,"tag":[],"rank":41,"rankTot":174},
       {"id":360,"nome":"Cristante","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["M","C"],"fvm":29,"fvmM":32,"quot":8,"quotM":9,"tag":[],"rank":42,"rankTot":174},
-      {"id":126,"nome":"Mandragora","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C"],"fvm":28,"fvmM":28,"quot":9,"quotM":9,"tag":[],"rank":43,"rankTot":174},
+      {"id":126,"nome":"Mandragora","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C"],"fvm":28,"fvmM":28,"quot":9,"quotM":9,"tag":["RIGORISTA","RISCHIO"],"nota":"Seconda opzione dal dischetto ma in dubbio per la prima giornata.","fonti":["SNAI","FantaMaster"],"rank":43,"rankTot":174},
       {"id":233,"nome":"Cancellieri","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["W","A"],"fvm":28,"fvmM":26,"quot":9,"quotM":8,"tag":[],"rank":44,"rankTot":174},
       {"id":359,"nome":"Pellegrini Lo.","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["C","T"],"fvm":28,"fvmM":28,"quot":10,"quotM":10,"tag":[],"rank":45,"rankTot":174},
       {"id":396,"nome":"Oristanio","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["W","T"],"fvm":27,"fvmM":27,"quot":7,"quotM":7,"tag":[],"rank":46,"rankTot":174},
       {"id":190,"nome":"Sucic P.","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["C"],"fvm":26,"fvmM":26,"quot":8,"quotM":8,"tag":[],"rank":47,"rankTot":174},
       {"id":55,"nome":"Cambiaghi","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","A"],"fvm":25,"fvmM":25,"quot":8,"quotM":7,"tag":[],"rank":48,"rankTot":174},
       {"id":128,"nome":"Ndour","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C"],"fvm":25,"fvmM":25,"quot":8,"quotM":8,"tag":[],"rank":49,"rankTot":174},
-      {"id":144,"nome":"Calò","squadra":"Frosinone","cod":"FRO","ruolo":"C","mantra":["M","C"],"fvm":25,"fvmM":28,"quot":7,"quotM":8,"tag":[],"rank":50,"rankTot":174},
-      {"id":234,"nome":"Isaksen","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["W","A"],"fvm":25,"fvmM":23,"quot":9,"quotM":8,"tag":[],"rank":51,"rankTot":174},
-      {"id":295,"nome":"Colpani","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["T"],"fvm":25,"fvmM":22,"quot":8,"quotM":7,"tag":[],"rank":52,"rankTot":174},
-      {"id":33,"nome":"Gaetano","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["M","C"],"fvm":24,"fvmM":27,"quot":7,"quotM":8,"tag":[],"rank":53,"rankTot":174},
+      {"id":144,"nome":"Calò","squadra":"Frosinone","cod":"FRO","ruolo":"C","mantra":["M","C"],"fvm":25,"fvmM":28,"quot":7,"quotM":8,"tag":["RIGORISTA","SCOMMESSA"],"nota":"Primo rigorista, infallibile dal dischetto in Serie B.","fonti":["SNAI","SOS Fanta"],"rank":50,"rankTot":174},
+      {"id":234,"nome":"Isaksen","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["W","A"],"fvm":25,"fvmM":23,"quot":9,"quotM":8,"tag":["RISCHIO"],"nota":"Operato di pubalgia: rientro fra fine agosto e inizio settembre, salta le prime giornate.","fonti":["Goal","SOS Fanta"],"rank":51,"rankTot":174},
+      {"id":295,"nome":"Colpani","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["T"],"fvm":25,"fvmM":22,"quot":8,"quotM":7,"tag":["TITOLARE"],"nota":"Trequartista titolare nel 3-4-2-1 di Juric.","fonti":["MAM-e"],"rank":52,"rankTot":174},
+      {"id":33,"nome":"Gaetano","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["M","C"],"fvm":24,"fvmM":27,"quot":7,"quotM":8,"tag":["TITOLARE"],"nota":"Arrivato dal Cagliari, Sarri lo vede in cabina di regia nel 4-3-3.","fonti":["Sky","Goal"],"rank":53,"rankTot":174},
       {"id":127,"nome":"Fagioli","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["M","C"],"fvm":23,"fvmM":25,"quot":8,"quotM":9,"tag":[],"rank":54,"rankTot":174},
       {"id":277,"nome":"Fofana Y.","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["M","C"],"fvm":23,"fvmM":26,"quot":5,"quotM":6,"tag":[],"rank":55,"rankTot":174},
       {"id":376,"nome":"Volpato","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["W","T"],"fvm":23,"fvmM":23,"quot":7,"quotM":7,"tag":[],"rank":56,"rankTot":174},
@@ -468,17 +491,17 @@
       {"id":56,"nome":"Odgaard","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["T"],"fvm":22,"fvmM":20,"quot":8,"quotM":7,"tag":[],"rank":58,"rankTot":174},
       {"id":104,"nome":"Liberali","squadra":"Como","cod":"COM","ruolo":"C","mantra":["T"],"fvm":22,"fvmM":20,"quot":6,"quotM":5,"tag":[],"rank":59,"rankTot":174},
       {"id":34,"nome":"Zalewski","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["W"],"fvm":21,"fvmM":19,"quot":6,"quotM":5,"tag":[],"rank":60,"rankTot":174},
-      {"id":54,"nome":"Bernardeschi","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","T"],"fvm":21,"fvmM":21,"quot":9,"quotM":9,"tag":[],"rank":61,"rankTot":174},
+      {"id":54,"nome":"Bernardeschi","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","T"],"fvm":21,"fvmM":21,"quot":9,"quotM":9,"tag":["RIGORISTA","TITOLARE"],"nota":"Terza opzione dal dischetto, ma titolare nel tridente di Tedesco.","fonti":["SNAI"],"rank":61,"rankTot":174},
       {"id":103,"nome":"Caqueret","squadra":"Como","cod":"COM","ruolo":"C","mantra":["C","T"],"fvm":20,"fvmM":20,"quot":6,"quotM":6,"tag":[],"rank":62,"rankTot":174},
-      {"id":129,"nome":"Oulai","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":22,"quot":6,"quotM":7,"tag":[],"rank":63,"rankTot":174},
-      {"id":296,"nome":"Pessina","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":22,"quot":7,"quotM":8,"tag":[],"rank":64,"rankTot":174},
-      {"id":319,"nome":"Lobotka","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":22,"quot":7,"quotM":8,"tag":[],"rank":65,"rankTot":174},
-      {"id":375,"nome":"Konè I.","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["C"],"fvm":20,"fvmM":20,"quot":9,"quotM":9,"tag":[],"rank":66,"rankTot":174},
+      {"id":129,"nome":"Oulai","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":22,"quot":6,"quotM":7,"tag":["NUOVO","SCOMMESSA","TITOLARE"],"nota":"Ivoriano classe 2006, rivelazione del Mondiale 2026, pagato circa 30 milioni: titolare fisso, puo' fare mezzala destra o sinistra.","fonti":["Goal"],"rank":63,"rankTot":174},
+      {"id":296,"nome":"Pessina","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":22,"quot":7,"quotM":8,"tag":["RIGORISTA","RISCHIO"],"nota":"Primo rigorista e capitano, ma operato per lussazione rotulea: in dubbio addirittura per la nona giornata.","fonti":["Goal","SOS Fanta","CalcioD'Angolo"],"rank":64,"rankTot":174},
+      {"id":319,"nome":"Lobotka","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":22,"quot":7,"quotM":8,"tag":["TITOLARE"],"nota":"Regista titolare del centrocampo azzurro.","fonti":["Sky"],"rank":65,"rankTot":174},
+      {"id":375,"nome":"Konè I.","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["C"],"fvm":20,"fvmM":20,"quot":9,"quotM":9,"tag":["RISCHIO"],"nota":"Frattura di tibia e perone con intervento di riduzione: rientro previsto a gennaio 2027.","fonti":["Goal","CalcioD'Angolo"],"rank":66,"rankTot":174},
       {"id":424,"nome":"Karlstrom","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":23,"quot":6,"quotM":7,"tag":[],"rank":67,"rankTot":174},
-      {"id":73,"nome":"Fazzini","squadra":"Cagliari","cod":"CAG","ruolo":"C","mantra":["C","T"],"fvm":19,"fvmM":21,"quot":7,"quotM":8,"tag":[],"rank":68,"rankTot":174},
+      {"id":73,"nome":"Fazzini","squadra":"Cagliari","cod":"CAG","ruolo":"C","mantra":["C","T"],"fvm":19,"fvmM":21,"quot":7,"quotM":8,"tag":["RIGORISTA","TITOLARE"],"nota":"Si candida come nuovo rigorista dopo l'uscita di Esposito, con Mina e Deiola alle spalle.","fonti":["SNAI","SOS Fanta"],"rank":68,"rankTot":174},
       {"id":167,"nome":"Frendrup","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["M","C"],"fvm":19,"fvmM":21,"quot":7,"quotM":8,"tag":[],"rank":69,"rankTot":174},
       {"id":192,"nome":"Mkhitaryan","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["C"],"fvm":19,"fvmM":19,"quot":5,"quotM":5,"tag":[],"rank":70,"rankTot":174},
-      {"id":252,"nome":"Pierotti","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["W"],"fvm":19,"fvmM":17,"quot":6,"quotM":5,"tag":[],"rank":71,"rankTot":174},
+      {"id":252,"nome":"Pierotti","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["W"],"fvm":19,"fvmM":17,"quot":6,"quotM":5,"tag":["TITOLARE"],"nota":"Titolare nel tridente, terza opzione dal dischetto.","fonti":["MAM-e","SOS Fanta"],"rank":71,"rankTot":174},
       {"id":445,"nome":"Basic","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["M","C"],"fvm":19,"fvmM":20,"quot":6,"quotM":7,"tag":[],"rank":72,"rankTot":174},
       {"id":57,"nome":"Ferguson","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["M","C"],"fvm":18,"fvmM":21,"quot":7,"quotM":8,"tag":[],"rank":73,"rankTot":174},
       {"id":169,"nome":"Ellertsson","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["E","C"],"fvm":18,"fvmM":21,"quot":6,"quotM":7,"tag":[],"rank":74,"rankTot":174},
@@ -488,7 +511,7 @@
       {"id":362,"nome":"El Aynaoui","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["M","C"],"fvm":18,"fvmM":20,"quot":4,"quotM":5,"tag":[],"rank":78,"rankTot":174},
       {"id":397,"nome":"Cacciamani","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["E","W"],"fvm":18,"fvmM":20,"quot":5,"quotM":6,"tag":[],"rank":79,"rankTot":174},
       {"id":361,"nome":"Pisilli","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["C"],"fvm":17,"fvmM":17,"quot":5,"quotM":5,"tag":[],"rank":80,"rankTot":174},
-      {"id":235,"nome":"Rovella","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["M","C"],"fvm":16,"fvmM":19,"quot":6,"quotM":7,"tag":[],"rank":81,"rankTot":174},
+      {"id":235,"nome":"Rovella","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["M","C"],"fvm":16,"fvmM":19,"quot":6,"quotM":7,"tag":["TITOLARE"],"nota":"Play titolare nel 4-2-3-1 di Gattuso.","fonti":["FantaMaster"],"rank":81,"rankTot":174},
       {"id":253,"nome":"Berisha M.","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["C","T"],"fvm":16,"fvmM":16,"quot":5,"quotM":5,"tag":[],"rank":82,"rankTot":174},
       {"id":297,"nome":"Akinsanmiro","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["C"],"fvm":16,"fvmM":16,"quot":6,"quotM":6,"tag":[],"rank":83,"rankTot":174},
       {"id":378,"nome":"Bakola","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["C","T"],"fvm":16,"fvmM":16,"quot":5,"quotM":5,"tag":[],"rank":84,"rankTot":174},
@@ -500,7 +523,7 @@
       {"id":106,"nome":"Milla","squadra":"Como","cod":"COM","ruolo":"C","mantra":["M","C"],"fvm":14,"fvmM":16,"quot":5,"quotM":5,"tag":[],"rank":90,"rankTot":174},
       {"id":168,"nome":"Sow","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["M","C"],"fvm":14,"fvmM":17,"quot":7,"quotM":8,"tag":[],"rank":91,"rankTot":174},
       {"id":170,"nome":"Meichtry","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["W","T"],"fvm":14,"fvmM":14,"quot":5,"quotM":5,"tag":[],"rank":92,"rankTot":174},
-      {"id":213,"nome":"Koopmeiners","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C","T"],"fvm":14,"fvmM":14,"quot":5,"quotM":5,"tag":[],"rank":93,"rankTot":174},
+      {"id":213,"nome":"Koopmeiners","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C","T"],"fvm":14,"fvmM":14,"quot":5,"quotM":5,"tag":["RISCHIO"],"nota":"Bocciato: difficilmente Spalletti gli concedera' spazio con continuita'.","fonti":["FantaMaster"],"rank":93,"rankTot":174},
       {"id":251,"nome":"Coulibaly L.","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["M","C"],"fvm":14,"fvmM":16,"quot":6,"quotM":7,"tag":[],"rank":94,"rankTot":174},
       {"id":254,"nome":"Gandelman","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["C","T"],"fvm":14,"fvmM":14,"quot":5,"quotM":5,"tag":[],"rank":95,"rankTot":174},
       {"id":341,"nome":"Almqvist","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["W","A"],"fvm":14,"fvmM":12,"quot":4,"quotM":3,"tag":[],"rank":96,"rankTot":174},
@@ -536,7 +559,7 @@
       {"id":280,"nome":"Ricci S.","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["M","C"],"fvm":11,"fvmM":13,"quot":4,"quotM":4,"tag":[],"rank":126,"rankTot":174},
       {"id":60,"nome":"Moro N.","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":12,"quot":4,"quotM":4,"tag":[],"rank":127,"rankTot":174},
       {"id":76,"nome":"Felici","squadra":"Cagliari","cod":"CAG","ruolo":"C","mantra":["W"],"fvm":10,"fvmM":8,"quot":5,"quotM":4,"tag":[],"rank":128,"rankTot":174},
-      {"id":105,"nome":"Addai","squadra":"Como","cod":"COM","ruolo":"C","mantra":["W","A"],"fvm":10,"fvmM":8,"quot":5,"quotM":4,"tag":[],"rank":129,"rankTot":174},
+      {"id":105,"nome":"Addai","squadra":"Como","cod":"COM","ruolo":"C","mantra":["W","A"],"fvm":10,"fvmM":8,"quot":5,"quotM":4,"tag":["RISCHIO"],"nota":"Rottura del tendine d'Achille sinistro, gia' operato: salta tutta la prima parte di stagione.","fonti":["Goal","SOS Fanta"],"rank":129,"rankTot":174},
       {"id":194,"nome":"Stankovic A.","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":11,"quot":3,"quotM":3,"tag":[],"rank":130,"rankTot":174},
       {"id":320,"nome":"Folorunsho","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["C","T"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"rank":131,"rankTot":174},
       {"id":400,"nome":"Ilkhan","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":12,"quot":4,"quotM":5,"tag":[],"rank":132,"rankTot":174},
@@ -547,7 +570,7 @@
       {"id":130,"nome":"Fabbian","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C","T"],"fvm":8,"fvmM":8,"quot":4,"quotM":4,"tag":[],"rank":137,"rankTot":174},
       {"id":149,"nome":"Gelli F.","squadra":"Frosinone","cod":"FRO","ruolo":"C","mantra":["C","T"],"fvm":8,"fvmM":8,"quot":3,"quotM":3,"tag":[],"rank":138,"rankTot":174},
       {"id":173,"nome":"Messias","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["W","T"],"fvm":8,"fvmM":8,"quot":3,"quotM":3,"tag":[],"rank":139,"rankTot":174},
-      {"id":36,"nome":"Sulemana I.","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["M","C"],"fvm":7,"fvmM":8,"quot":3,"quotM":3,"tag":[],"rank":140,"rankTot":174},
+      {"id":36,"nome":"Sulemana I.","squadra":"Atalanta","cod":"ATA","ruolo":"C","mantra":["M","C"],"fvm":7,"fvmM":8,"quot":3,"quotM":3,"tag":["RISCHIO"],"nota":"Le fonti segnalano un Sulemana dell'Atalanta fuori per lesione al collaterale fino a meta' ottobre, senza distinguere fra i due omonimi: verifica prima di puntarci.","fonti":["Goal","SOS Fanta"],"rank":140,"rankTot":174},
       {"id":78,"nome":"Prati","squadra":"Cagliari","cod":"CAG","ruolo":"C","mantra":["M","C"],"fvm":7,"fvmM":7,"quot":4,"quotM":4,"tag":[],"rank":141,"rankTot":174},
       {"id":131,"nome":"Brescianini","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C","T"],"fvm":7,"fvmM":7,"quot":3,"quotM":3,"tag":[],"rank":142,"rankTot":174},
       {"id":298,"nome":"Colombo L.","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["M","C"],"fvm":7,"fvmM":8,"quot":3,"quotM":3,"tag":[],"rank":143,"rankTot":174},
@@ -582,78 +605,78 @@
       {"id":257,"nome":"Fofana Sa.","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["M","C"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":172,"rankTot":174},
       {"id":382,"nome":"Iannoni","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["M","C"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":173,"rankTot":174},
       {"id":451,"nome":"Dagasso","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["C"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":174,"rankTot":174},
-      {"id":195,"nome":"Martinez L.","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":370,"fvmM":370,"quot":35,"quotM":35,"tag":["TOP"],"rank":1,"rankTot":87},
-      {"id":363,"nome":"Malen","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["Pc"],"fvm":365,"fvmM":365,"quot":34,"quotM":34,"tag":["TOP"],"rank":2,"rankTot":87},
-      {"id":196,"nome":"Thuram","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":280,"fvmM":280,"quot":29,"quotM":29,"tag":["TOP"],"rank":3,"rankTot":87},
-      {"id":322,"nome":"Hojlund","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["Pc"],"fvm":271,"fvmM":271,"quot":28,"quotM":28,"tag":["TOP"],"rank":4,"rankTot":87},
-      {"id":282,"nome":"Ramos G.","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["Pc"],"fvm":240,"fvmM":240,"quot":27,"quotM":27,"tag":["TOP"],"rank":5,"rankTot":87},
-      {"id":216,"nome":"Kolo Muani","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["Pc"],"fvm":225,"fvmM":225,"quot":26,"quotM":26,"tag":["TOP"],"rank":6,"rankTot":87},
-      {"id":132,"nome":"Kean","squadra":"Fiorentina","cod":"FIO","ruolo":"A","mantra":["Pc"],"fvm":212,"fvmM":212,"quot":25,"quotM":25,"tag":["TOP"],"rank":7,"rankTot":87},
-      {"id":217,"nome":"Yildiz","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":200,"fvmM":205,"quot":23,"quotM":24,"tag":["TOP"],"rank":8,"rankTot":87},
-      {"id":109,"nome":"Douvikas","squadra":"Como","cod":"COM","ruolo":"A","mantra":["Pc"],"fvm":157,"fvmM":154,"quot":20,"quotM":20,"tag":["TOP"],"rank":9,"rankTot":87},
-      {"id":37,"nome":"Scamacca","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["Pc"],"fvm":128,"fvmM":125,"quot":19,"quotM":18,"tag":["TOP"],"rank":10,"rankTot":87},
-      {"id":430,"nome":"Davis K.","squadra":"Udinese","cod":"UDI","ruolo":"A","mantra":["Pc"],"fvm":121,"fvmM":121,"quot":19,"quotM":19,"tag":["TOP"],"rank":11,"rankTot":87},
-      {"id":283,"nome":"Leao","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["A"],"fvm":120,"fvmM":123,"quot":18,"quotM":19,"tag":["TOP"],"rank":12,"rankTot":87},
-      {"id":383,"nome":"Berardi","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["A"],"fvm":115,"fvmM":118,"quot":18,"quotM":19,"tag":[],"rank":13,"rankTot":87},
-      {"id":39,"nome":"De Ketelaere","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":106,"fvmM":108,"quot":17,"quotM":18,"tag":[],"rank":14,"rankTot":87},
+      {"id":195,"nome":"Martinez L.","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":370,"fvmM":370,"quot":35,"quotM":35,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Capitano e attaccante piu' completo del campionato: gol, assist e continuita'. Secondo rigorista. E' il nome che prosciuga il budget.","fonti":["Sky","FantaMaster","Goal"],"rank":1,"rankTot":87},
+      {"id":363,"nome":"Malen","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["Pc"],"fvm":365,"fvmM":365,"quot":34,"quotM":34,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Nel primo semestre 2026 ha segnato il doppio dei gol dell'esperienza inglese con meta' delle presenze; ora insidia Dybala anche dal dischetto. Insieme a Lautaro e' il nome che prosciuga il budget.","fonti":["Sky","SNAI","FantaMaster"],"rank":2,"rankTot":87},
+      {"id":196,"nome":"Thuram","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":280,"fvmM":280,"quot":29,"quotM":29,"tag":["TITOLARE","RISCHIO","TOP"],"nota":"Recuperato dall'infortunio al polpaccio ma con la titolarita' della prima giornata ancora a rischio.","fonti":["FantaMaster"],"rank":3,"rankTot":87},
+      {"id":322,"nome":"Hojlund","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["Pc"],"fvm":271,"fvmM":271,"quot":28,"quotM":28,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Punta centrale del 4-3-3 di Allegri, seconda opzione dal dischetto.","fonti":["SNAI","Sky"],"rank":4,"rankTot":87},
+      {"id":282,"nome":"Ramos G.","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["Pc"],"fvm":240,"fvmM":240,"quot":27,"quotM":27,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista con 11 su 13 in carriera: Amorim punta tutto sulla sua forza fisica come punta unica del 3-4-2-1.","fonti":["SNAI","Sky","FantaMaster"],"rank":5,"rankTot":87},
+      {"id":216,"nome":"Kolo Muani","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["Pc"],"fvm":225,"fvmM":225,"quot":26,"quotM":26,"tag":["TITOLARE","TOP"],"nota":"Spalletti costruisce la Juve su misura per lui: impatto gia' positivo nel semestre da gennaio a giugno 2025.","fonti":["Sky"],"rank":6,"rankTot":87},
+      {"id":132,"nome":"Kean","squadra":"Fiorentina","cod":"FIO","ruolo":"A","mantra":["Pc"],"fvm":212,"fvmM":212,"quot":25,"quotM":25,"tag":["TITOLARE","TOP"],"nota":"Terminale offensivo unico del 4-3-3 di Grosso, terza opzione dal dischetto.","fonti":["SNAI","MAM-e"],"rank":7,"rankTot":87},
+      {"id":217,"nome":"Yildiz","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":200,"fvmM":205,"quot":23,"quotM":24,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"In ballottaggio con Locatelli per i rigori, con Kolo Muani outsider: numero 10 titolare del 4-2-3-1.","fonti":["SNAI","Sky"],"rank":8,"rankTot":87},
+      {"id":109,"nome":"Douvikas","squadra":"Como","cod":"COM","ruolo":"A","mantra":["Pc"],"fvm":157,"fvmM":154,"quot":20,"quotM":20,"tag":["TITOLARE","TOP"],"nota":"Punta centrale del 4-2-3-1 di Fabregas, terza opzione dal dischetto.","fonti":["SNAI","bet365"],"rank":9,"rankTot":87},
+      {"id":37,"nome":"Scamacca","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["Pc"],"fvm":128,"fvmM":125,"quot":19,"quotM":18,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista, favorito su Krstovic come riferimento centrale del 4-3-3 di Sarri.","fonti":["SNAI","Sky","SOS Fanta"],"rank":10,"rankTot":87},
+      {"id":430,"nome":"Davis K.","squadra":"Udinese","cod":"UDI","ruolo":"A","mantra":["Pc"],"fvm":121,"fvmM":121,"quot":19,"quotM":19,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista bianconero, con Solet e Zaniolo alle spalle: fa reparto da solo.","fonti":["SNAI","MAM-e"],"rank":11,"rankTot":87},
+      {"id":283,"nome":"Leao","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["A"],"fvm":120,"fvmM":123,"quot":18,"quotM":19,"tag":["RISCHIO","TITOLARE","TOP"],"nota":"Risentimento muscolare: forte dubbio per la prima giornata.","fonti":["CalcioD'Angolo","FantaMaster"],"rank":12,"rankTot":87},
+      {"id":383,"nome":"Berardi","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["A"],"fvm":115,"fvmM":118,"quot":18,"quotM":19,"tag":["RIGORISTA","RISCHIO","TITOLARE"],"nota":"Rigorista inamovibile con Pinamonti vice, ma ancora fuori: ha saltato la Coppa Italia col Cesena.","fonti":["SNAI","SOS Fanta"],"rank":13,"rankTot":87},
+      {"id":39,"nome":"De Ketelaere","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":106,"fvmM":108,"quot":17,"quotM":18,"tag":["RIGORISTA","RISCHIO"],"nota":"Secondo rigorista, ma stiramento agli adduttori: rientro previsto nella seconda meta' di ottobre.","fonti":["Goal","SNAI"],"rank":14,"rankTot":87},
       {"id":38,"nome":"Krstovic","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["Pc"],"fvm":100,"fvmM":97,"quot":18,"quotM":17,"tag":[],"rank":15,"rankTot":87},
       {"id":197,"nome":"Esposito F.P.","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":93,"fvmM":90,"quot":16,"quotM":16,"tag":[],"rank":16,"rankTot":87},
-      {"id":384,"nome":"Laurientè","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["A"],"fvm":88,"fvmM":91,"quot":15,"quotM":16,"tag":[],"rank":17,"rankTot":87},
-      {"id":63,"nome":"Dovbyk","squadra":"Bologna","cod":"BOL","ruolo":"A","mantra":["Pc"],"fvm":84,"fvmM":81,"quot":16,"quotM":16,"tag":[],"rank":18,"rankTot":87},
-      {"id":364,"nome":"Castro S.","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["Pc"],"fvm":83,"fvmM":80,"quot":14,"quotM":13,"tag":[],"rank":19,"rankTot":87},
-      {"id":405,"nome":"Simeone","squadra":"Torino","cod":"TOR","ruolo":"A","mantra":["Pc"],"fvm":82,"fvmM":79,"quot":15,"quotM":15,"tag":[],"rank":20,"rankTot":87},
-      {"id":346,"nome":"Pellegrino M.","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["Pc"],"fvm":81,"fvmM":79,"quot":15,"quotM":15,"tag":[],"rank":21,"rankTot":87},
-      {"id":365,"nome":"Dybala","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["A"],"fvm":67,"fvmM":67,"quot":14,"quotM":15,"tag":[],"rank":22,"rankTot":87},
-      {"id":176,"nome":"Colombo","squadra":"Genoa","cod":"GEN","ruolo":"A","mantra":["Pc"],"fvm":63,"fvmM":60,"quot":11,"quotM":10,"tag":[],"rank":23,"rankTot":87},
+      {"id":384,"nome":"Laurientè","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["A"],"fvm":88,"fvmM":91,"quot":15,"quotM":16,"tag":["TITOLARE"],"nota":"Titolare nel reparto offensivo neroverde.","fonti":["MAM-e"],"rank":17,"rankTot":87},
+      {"id":63,"nome":"Dovbyk","squadra":"Bologna","cod":"BOL","ruolo":"A","mantra":["Pc"],"fvm":84,"fvmM":81,"quot":16,"quotM":16,"tag":["NUOVO","TITOLARE"],"nota":"Arriva in prestito dalla Roma con riscatto a 17 milioni: al Bologna trovera' la titolarita' e la continuita' che a Roma non aveva.","fonti":["Tuttosport","FantaMaster"],"rank":18,"rankTot":87},
+      {"id":364,"nome":"Castro S.","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["Pc"],"fvm":83,"fvmM":80,"quot":14,"quotM":13,"tag":["NUOVO","SCOMMESSA"],"nota":"Arriva dal Bologna per 35 milioni piu' 2 di bonus: non parte con la garanzia del posto, ma con Gasperini puo' aumentare parecchio il proprio score offensivo.","fonti":["Tuttosport","FantaMaster"],"rank":19,"rankTot":87},
+      {"id":405,"nome":"Simeone","squadra":"Torino","cod":"TOR","ruolo":"A","mantra":["Pc"],"fvm":82,"fvmM":79,"quot":15,"quotM":15,"tag":["RIGORISTA","TITOLARE"],"nota":"Punta titolare, terza opzione dal dischetto.","fonti":["SNAI","MAM-e"],"rank":20,"rankTot":87},
+      {"id":346,"nome":"Pellegrino M.","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["Pc"],"fvm":81,"fvmM":79,"quot":15,"quotM":15,"tag":["RISCHIO"],"nota":"Dato in partenza dal Parma: perde rigori e, secondo le fonti, la titolarita'.","fonti":["SNAI","SOS Fanta"],"rank":21,"rankTot":87},
+      {"id":365,"nome":"Dybala","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["A"],"fvm":67,"fvmM":67,"quot":14,"quotM":15,"tag":["RIGORISTA","TITOLARE"],"nota":"Storico rigorista giallorosso, ora insidiato da Malen: la gerarchia dal dischetto non e' piu' garantita.","fonti":["SNAI","Sky"],"rank":22,"rankTot":87},
+      {"id":176,"nome":"Colombo","squadra":"Genoa","cod":"GEN","ruolo":"A","mantra":["Pc"],"fvm":63,"fvmM":60,"quot":11,"quotM":10,"tag":["RIGORISTA","TITOLARE"],"nota":"Eredita i rigori di Malinovskyi, davanti a Messias e Vitinha: punta di riferimento di De Rossi.","fonti":["SNAI","SOS Fanta"],"rank":23,"rankTot":87},
       {"id":40,"nome":"Raspadori","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":62,"fvmM":64,"quot":13,"quotM":14,"tag":[],"rank":24,"rankTot":87},
-      {"id":323,"nome":"Santos A.","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["W","A"],"fvm":60,"fvmM":63,"quot":14,"quotM":15,"tag":[],"rank":25,"rankTot":87},
-      {"id":385,"nome":"Pinamonti","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["Pc"],"fvm":58,"fvmM":55,"quot":13,"quotM":12,"tag":[],"rank":26,"rankTot":87},
-      {"id":366,"nome":"Soulè","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["A"],"fvm":55,"fvmM":55,"quot":12,"quotM":13,"tag":[],"rank":27,"rankTot":87},
+      {"id":323,"nome":"Santos A.","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["W","A"],"fvm":60,"fvmM":63,"quot":14,"quotM":15,"tag":["TITOLARE"],"nota":"Riclassificato centrocampista, titolare nel tridente: abituato a occupare zone avanzate del campo.","fonti":["Sky","FantaMaster"],"rank":25,"rankTot":87},
+      {"id":385,"nome":"Pinamonti","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["Pc"],"fvm":58,"fvmM":55,"quot":13,"quotM":12,"tag":["RIGORISTA","TITOLARE"],"nota":"Vice rigorista confermato e punta titolare del 4-2-3-1 di Aquilani.","fonti":["SNAI","MAM-e"],"rank":26,"rankTot":87},
+      {"id":366,"nome":"Soulè","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["A"],"fvm":55,"fvmM":55,"quot":12,"quotM":13,"tag":["RIGORISTA","TITOLARE"],"nota":"Terza scelta dal dischetto, titolare sulla trequarti di Gasperini.","fonti":["SNAI"],"rank":27,"rankTot":87},
       {"id":284,"nome":"Nkunku","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["A"],"fvm":52,"fvmM":54,"quot":13,"quotM":14,"tag":[],"rank":28,"rankTot":87},
-      {"id":452,"nome":"Adams A.","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":52,"fvmM":50,"quot":12,"quotM":11,"tag":[],"rank":29,"rankTot":87},
-      {"id":81,"nome":"Esposito Se.","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["A"],"fvm":50,"fvmM":50,"quot":13,"quotM":14,"tag":[],"rank":30,"rankTot":87},
+      {"id":452,"nome":"Adams A.","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":52,"fvmM":50,"quot":12,"quotM":11,"tag":["RIGORISTA","NUOVO","TITOLARE"],"nota":"Primo rigorista con 3 su 3 al Siviglia: doppia garanzia dal dischetto insieme a Rrahmani.","fonti":["SNAI","SOS Fanta"],"rank":29,"rankTot":87},
+      {"id":81,"nome":"Esposito Se.","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["A"],"fvm":50,"fvmM":50,"quot":13,"quotM":14,"tag":["RISCHIO"],"nota":"Dato in uscita dal Cagliari: perderebbe sia il posto sia i rigori.","fonti":["SNAI"],"rank":30,"rankTot":87},
       {"id":110,"nome":"Diao","squadra":"Como","cod":"COM","ruolo":"A","mantra":["W","A"],"fvm":50,"fvmM":52,"quot":11,"quotM":12,"tag":[],"rank":31,"rankTot":87},
       {"id":324,"nome":"Lukaku","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["Pc"],"fvm":45,"fvmM":41,"quot":10,"quotM":9,"tag":[],"rank":32,"rankTot":87},
-      {"id":347,"nome":"Tourè E.","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["Pc"],"fvm":43,"fvmM":43,"quot":11,"quotM":11,"tag":[],"rank":33,"rankTot":87},
-      {"id":218,"nome":"David","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["Pc"],"fvm":40,"fvmM":37,"quot":9,"quotM":8,"tag":[],"rank":34,"rankTot":87},
+      {"id":347,"nome":"Tourè E.","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["Pc"],"fvm":43,"fvmM":43,"quot":11,"quotM":11,"tag":["RIGORISTA","TITOLARE"],"nota":"Nuovo rigorista dopo la partenza di Pellegrino: 3 su 3 dal dischetto con i club.","fonti":["SNAI","SOS Fanta"],"rank":33,"rankTot":87},
+      {"id":218,"nome":"David","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["Pc"],"fvm":40,"fvmM":37,"quot":9,"quotM":8,"tag":["RISCHIO"],"nota":"Potrebbe lasciare la Juventus negli ultimi giorni di mercato.","fonti":["FantaMaster"],"rank":34,"rankTot":87},
       {"id":386,"nome":"Bowie","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["Pc"],"fvm":39,"fvmM":36,"quot":10,"quotM":9,"tag":[],"rank":35,"rankTot":87},
-      {"id":300,"nome":"Cutrone","squadra":"Monza","cod":"MON","ruolo":"A","mantra":["Pc"],"fvm":33,"fvmM":30,"quot":9,"quotM":8,"tag":[],"rank":36,"rankTot":87},
+      {"id":300,"nome":"Cutrone","squadra":"Monza","cod":"MON","ruolo":"A","mantra":["Pc"],"fvm":33,"fvmM":30,"quot":9,"quotM":8,"tag":["RIGORISTA","SCOMMESSA","TITOLARE"],"nota":"Con Pessina fuori calcia lui i rigori: puo' tornare quello del primo anno di Como.","fonti":["SOS Fanta","CalcioD'Angolo"],"rank":36,"rankTot":87},
       {"id":241,"nome":"Ratkov","squadra":"Lazio","cod":"LAZ","ruolo":"A","mantra":["Pc"],"fvm":32,"fvmM":29,"quot":10,"quotM":9,"tag":[],"rank":37,"rankTot":87},
       {"id":406,"nome":"Adams C.","squadra":"Torino","cod":"TOR","ruolo":"A","mantra":["A"],"fvm":32,"fvmM":34,"quot":9,"quotM":10,"tag":[],"rank":38,"rankTot":87},
       {"id":240,"nome":"Dia","squadra":"Lazio","cod":"LAZ","ruolo":"A","mantra":["A"],"fvm":31,"fvmM":33,"quot":10,"quotM":11,"tag":[],"rank":39,"rankTot":87},
-      {"id":153,"nome":"Ghedjemis","squadra":"Frosinone","cod":"FRO","ruolo":"A","mantra":["W","A"],"fvm":30,"fvmM":32,"quot":9,"quotM":10,"tag":[],"rank":40,"rankTot":87},
-      {"id":454,"nome":"Yeboah J.","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["A"],"fvm":28,"fvmM":29,"quot":8,"quotM":8,"tag":[],"rank":41,"rankTot":87},
+      {"id":153,"nome":"Ghedjemis","squadra":"Frosinone","cod":"FRO","ruolo":"A","mantra":["W","A"],"fvm":30,"fvmM":32,"quot":9,"quotM":10,"tag":["SCOMMESSA","NUOVO"],"nota":"Arriva dalla Serie B con 15 gol, terzo rigorista.","fonti":["Sisal","SOS Fanta"],"rank":40,"rankTot":87},
+      {"id":454,"nome":"Yeboah J.","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["A"],"fvm":28,"fvmM":29,"quot":8,"quotM":8,"tag":["RIGORISTA","SCOMMESSA"],"nota":"Terzo rigorista, l'uomo che inventa negli ultimi venti metri.","fonti":["SOS Fanta"],"rank":41,"rankTot":87},
       {"id":219,"nome":"Boga","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["W","A"],"fvm":25,"fvmM":28,"quot":6,"quotM":7,"tag":[],"rank":42,"rankTot":87},
-      {"id":260,"nome":"Geubbels","squadra":"Lecce","cod":"LEC","ruolo":"A","mantra":["Pc"],"fvm":25,"fvmM":23,"quot":9,"quotM":8,"tag":[],"rank":43,"rankTot":87},
+      {"id":260,"nome":"Geubbels","squadra":"Lecce","cod":"LEC","ruolo":"A","mantra":["Pc"],"fvm":25,"fvmM":23,"quot":9,"quotM":8,"tag":["RIGORISTA","TITOLARE"],"nota":"Primo rigorista con 7 su 7 in carriera dal dischetto, davanti a Stulic e Pierotti.","fonti":["SOS Fanta","CalcioD'Angolo"],"rank":43,"rankTot":87},
       {"id":133,"nome":"Piccoli","squadra":"Fiorentina","cod":"FIO","ruolo":"A","mantra":["Pc"],"fvm":24,"fvmM":21,"quot":8,"quotM":7,"tag":[],"rank":44,"rankTot":87},
-      {"id":154,"nome":"Raimondo","squadra":"Frosinone","cod":"FRO","ruolo":"A","mantra":["Pc"],"fvm":24,"fvmM":21,"quot":7,"quotM":6,"tag":[],"rank":45,"rankTot":87},
+      {"id":154,"nome":"Raimondo","squadra":"Frosinone","cod":"FRO","ruolo":"A","mantra":["Pc"],"fvm":24,"fvmM":21,"quot":7,"quotM":6,"tag":["SCOMMESSA","NUOVO"],"nota":"Torna in Serie A dopo una stagione da 11 reti, seconda opzione dal dischetto.","fonti":["Sisal","SOS Fanta"],"rank":45,"rankTot":87},
       {"id":64,"nome":"Dallinga","squadra":"Bologna","cod":"BOL","ruolo":"A","mantra":["Pc"],"fvm":23,"fvmM":20,"quot":8,"quotM":7,"tag":[],"rank":46,"rankTot":87},
-      {"id":325,"nome":"Neres","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["W","A"],"fvm":22,"fvmM":25,"quot":6,"quotM":7,"tag":[],"rank":47,"rankTot":87},
+      {"id":325,"nome":"Neres","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["W","A"],"fvm":22,"fvmM":25,"quot":6,"quotM":7,"tag":["RISCHIO"],"nota":"Ritardo di condizione segnalato alla vigilia del campionato.","fonti":["IlNapoliOnline","SOS Fanta"],"rank":47,"rankTot":87},
       {"id":198,"nome":"Bonny","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":21,"fvmM":18,"quot":7,"quotM":6,"tag":[],"rank":48,"rankTot":87},
       {"id":177,"nome":"Vitinha O.","squadra":"Genoa","cod":"GEN","ruolo":"A","mantra":["A"],"fvm":20,"fvmM":21,"quot":8,"quotM":8,"tag":[],"rank":49,"rankTot":87},
-      {"id":453,"nome":"Rrahmani Al.","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":20,"fvmM":17,"quot":8,"quotM":7,"tag":[],"rank":50,"rankTot":87},
+      {"id":453,"nome":"Rrahmani Al.","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":20,"fvmM":17,"quot":8,"quotM":7,"tag":["RIGORISTA","NUOVO","SCOMMESSA"],"nota":"Secondo rigorista con 14 su 18 prima di arrivare in Italia, e 15 gol con lo Sparta Praga.","fonti":["SNAI","Sisal","SOS Fanta"],"rank":50,"rankTot":87},
       {"id":82,"nome":"Mutandwa","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":19,"fvmM":18,"quot":6,"quotM":6,"tag":[],"rank":51,"rankTot":87},
       {"id":261,"nome":"Stulic","squadra":"Lecce","cod":"LEC","ruolo":"A","mantra":["Pc"],"fvm":18,"fvmM":16,"quot":7,"quotM":6,"tag":[],"rank":52,"rankTot":87},
-      {"id":286,"nome":"Camarda","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["Pc"],"fvm":18,"fvmM":17,"quot":5,"quotM":4,"tag":[],"rank":53,"rankTot":87},
+      {"id":286,"nome":"Camarda","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["Pc"],"fvm":18,"fvmM":17,"quot":5,"quotM":4,"tag":["SCOMMESSA"],"nota":"Elogiato da Amorim nella pre-stagione.","fonti":["Sky"],"rank":53,"rankTot":87},
       {"id":301,"nome":"Mota","squadra":"Monza","cod":"MON","ruolo":"A","mantra":["A"],"fvm":18,"fvmM":18,"quot":5,"quotM":5,"tag":[],"rank":54,"rankTot":87},
       {"id":407,"nome":"Zapata D.","squadra":"Torino","cod":"TOR","ruolo":"A","mantra":["Pc"],"fvm":18,"fvmM":16,"quot":7,"quotM":6,"tag":[],"rank":55,"rankTot":87},
-      {"id":242,"nome":"Noslin","squadra":"Lazio","cod":"LAZ","ruolo":"A","mantra":["A"],"fvm":17,"fvmM":17,"quot":6,"quotM":6,"tag":[],"rank":56,"rankTot":87},
-      {"id":41,"nome":"Sulemana K.","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":16,"fvmM":17,"quot":6,"quotM":6,"tag":[],"rank":57,"rankTot":87},
+      {"id":242,"nome":"Noslin","squadra":"Lazio","cod":"LAZ","ruolo":"A","mantra":["A"],"fvm":17,"fvmM":17,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Antiscommessa: duttile ma dietro quasi tutti gli attaccanti in rosa nelle gerarchie.","fonti":["Fantacalcio.it"],"rank":56,"rankTot":87},
+      {"id":41,"nome":"Sulemana K.","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":16,"fvmM":17,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Le fonti segnalano un Sulemana dell'Atalanta fuori per lesione al collaterale fino a meta' ottobre, senza distinguere fra i due omonimi: verifica prima di puntarci.","fonti":["Goal","SOS Fanta"],"rank":57,"rankTot":87},
       {"id":155,"nome":"Kvernadze","squadra":"Frosinone","cod":"FRO","ruolo":"A","mantra":["W","A"],"fvm":15,"fvmM":16,"quot":4,"quotM":5,"tag":[],"rank":58,"rankTot":87},
       {"id":83,"nome":"Maldini","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["T","A"],"fvm":14,"fvmM":15,"quot":5,"quotM":6,"tag":[],"rank":59,"rankTot":87},
-      {"id":285,"nome":"Gimenez","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["Pc"],"fvm":14,"fvmM":13,"quot":6,"quotM":5,"tag":[],"rank":60,"rankTot":87},
+      {"id":285,"nome":"Gimenez","squadra":"Milan","cod":"MIL","ruolo":"A","mantra":["Pc"],"fvm":14,"fvmM":13,"quot":6,"quotM":5,"tag":["RISCHIO"],"nota":"Distorsione alla caviglia: rientro fra fine agosto e inizio settembre.","fonti":["IlNapoliOnline","SOS Fanta"],"rank":60,"rankTot":87},
       {"id":455,"nome":"Adorante","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":14,"fvmM":12,"quot":5,"quotM":4,"tag":[],"rank":61,"rankTot":87},
       {"id":348,"nome":"Frigan","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["A"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":[],"rank":62,"rankTot":87},
       {"id":349,"nome":"Elphege","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["Pc"],"fvm":11,"fvmM":10,"quot":3,"quotM":3,"tag":[],"rank":63,"rankTot":87},
       {"id":111,"nome":"Morata","squadra":"Como","cod":"COM","ruolo":"A","mantra":["Pc"],"fvm":10,"fvmM":8,"quot":4,"quotM":3,"tag":[],"rank":64,"rankTot":87},
-      {"id":220,"nome":"Ekhator","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":[],"rank":65,"rankTot":87},
+      {"id":220,"nome":"Ekhator","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":["SCOMMESSA","RISCHIO"],"nota":"Sei crediti per un attaccante di prospettiva, ma lesione al bicipite femorale con rientro a fine agosto.","fonti":["Sisal","FantaMaster"],"rank":65,"rankTot":87},
       {"id":302,"nome":"Robinson J.","squadra":"Monza","cod":"MON","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"rank":66,"rankTot":87},
       {"id":326,"nome":"Giovane","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"rank":67,"rankTot":87},
       {"id":327,"nome":"Lang","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":[],"rank":68,"rankTot":87},
       {"id":328,"nome":"Lucca","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["Pc"],"fvm":10,"fvmM":9,"quot":3,"quotM":3,"tag":[],"rank":69,"rankTot":87},
       {"id":84,"nome":"Borrelli","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":9,"fvmM":7,"quot":4,"quotM":3,"tag":[],"rank":70,"rankTot":87},
       {"id":85,"nome":"Mendy P.","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":9,"fvmM":7,"quot":4,"quotM":3,"tag":[],"rank":71,"rankTot":87},
-      {"id":178,"nome":"Havel","squadra":"Genoa","cod":"GEN","ruolo":"A","mantra":["Pc"],"fvm":9,"fvmM":7,"quot":4,"quotM":3,"tag":[],"rank":72,"rankTot":87},
+      {"id":178,"nome":"Havel","squadra":"Genoa","cod":"GEN","ruolo":"A","mantra":["Pc"],"fvm":9,"fvmM":7,"quot":4,"quotM":3,"tag":["SCOMMESSA"],"nota":"Tre crediti per uno che l'anno scorso ha chiuso con 13 gol e 3 assist.","fonti":["Sisal"],"rank":72,"rankTot":87},
       {"id":262,"nome":"N'Dri","squadra":"Lecce","cod":"LEC","ruolo":"A","mantra":["W","A"],"fvm":9,"fvmM":11,"quot":3,"quotM":4,"tag":[],"rank":73,"rankTot":87},
       {"id":408,"nome":"Kulenovic","squadra":"Torino","cod":"TOR","ruolo":"A","mantra":["Pc"],"fvm":9,"fvmM":7,"quot":4,"quotM":3,"tag":[],"rank":74,"rankTot":87},
       {"id":303,"nome":"Varela G.","squadra":"Monza","cod":"MON","ruolo":"A","mantra":["Pc"],"fvm":7,"fvmM":6,"quot":3,"quotM":3,"tag":[],"rank":75,"rankTot":87},
@@ -663,7 +686,7 @@
       {"id":367,"nome":"Vaz","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["Pc"],"fvm":4,"fvmM":3,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":79,"rankTot":87},
       {"id":432,"nome":"Buksa","squadra":"Udinese","cod":"UDI","ruolo":"A","mantra":["Pc"],"fvm":4,"fvmM":4,"quot":2,"quotM":2,"tag":["LOWCOST"],"rank":80,"rankTot":87},
       {"id":433,"nome":"Bayo V.","squadra":"Udinese","cod":"UDI","ruolo":"A","mantra":["Pc"],"fvm":3,"fvmM":3,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":81,"rankTot":87},
-      {"id":87,"nome":"Trepy","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":2,"fvmM":2,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":82,"rankTot":87},
+      {"id":87,"nome":"Trepy","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":2,"fvmM":2,"quot":1,"quotM":1,"tag":["SCOMMESSA","LOWCOST"],"nota":"Giovane da un credito, indicato come jolly per l'ultimo slot d'attacco.","fonti":["Sisal"],"rank":82,"rankTot":87},
       {"id":86,"nome":"Albarracin","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["A"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":83,"rankTot":87},
       {"id":113,"nome":"Azon","squadra":"Como","cod":"COM","ruolo":"A","mantra":["Pc"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":84,"rankTot":87},
       {"id":387,"nome":"Moro L.","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["Pc"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"rank":85,"rankTot":87},
@@ -848,6 +871,8 @@
     const TAG_FILTRO = [
       { k: 'ALL', et: 'Tutti', i: '', c: 'text-slate-300' },
       { k: 'TOP', et: 'Top 1° Slot', i: '<i class="fa-solid fa-crown mr-1"></i>', c: 'text-amber-300' },
+      { k: 'TITOLARE', et: 'Titolari', i: '<i class="fa-solid fa-check mr-1"></i>', c: 'text-slate-300' },
+      { k: 'NUOVO', et: 'Nuovi arrivi', i: '<i class="fa-solid fa-plane-arrival mr-1"></i>', c: 'text-violet-300' },
       { k: 'RIGORISTA', et: 'Rigoristi', i: '<i class="fa-solid fa-bullseye mr-1"></i>', c: 'text-emerald-300' },
       { k: 'MODIFICATORE', et: 'Modificatore Difesa', i: '<i class="fa-solid fa-shield-halved mr-1"></i>', c: 'text-sky-300' },
       { k: 'SCOMMESSA', et: 'Scommesse', i: '<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>', c: 'text-indigo-300' },
@@ -895,8 +920,9 @@
     const COLORE_RUOLO = { P: 'text-amber-400', D: 'text-emerald-400', C: 'text-blue-400', A: 'text-rose-400' };
 
     const ETICHETTA_TAG = {
-      TOP: 'Top 1° slot', RIGORISTA: 'Rigorista', MODIFICATORE: 'Modificatore',
-      LOWCOST: 'Low cost', RISCHIO: 'A rischio', SCOMMESSA: 'Scommessa'
+      TOP: 'Top 1° slot', TITOLARE: 'Titolare', RIGORISTA: 'Rigorista',
+      MODIFICATORE: 'Modificatore', SCOMMESSA: 'Scommessa', NUOVO: 'Nuovo arrivo',
+      LOWCOST: 'Low cost', RISCHIO: 'A rischio'
     };
 
     const NOMI_MANTRA = {
@@ -907,6 +933,8 @@
 
     const STILE_TAG = {
       TOP: 'bg-amber-950 text-amber-300 border-amber-800/60 font-bold',
+      TITOLARE: 'bg-slate-800 text-slate-300 border-slate-700/60',
+      NUOVO: 'bg-violet-950 text-violet-300 border-violet-800/60',
       RIGORISTA: 'bg-emerald-950 text-emerald-300 border-emerald-800/60 font-bold',
       MODIFICATORE: 'bg-sky-950 text-sky-300 border-sky-800/60',
       LOWCOST: 'bg-teal-950 text-teal-300 border-teal-800/60',
@@ -972,7 +1000,7 @@
         if (filtroRuolo !== 'ALL' && p.ruolo !== filtroRuolo) return false;
         if (filtroTag !== 'ALL' && !p.tag.includes(filtroTag)) return false;
         if (!q) return true;
-        return [p.nome, p.squadra, ...(p.blocco ?? []), ...p.mantra, ...p.tag].join(' ').toLowerCase().includes(q);
+        return [p.nome, p.squadra, p.nota ?? '', ...(p.blocco ?? []), ...p.mantra, ...p.tag].join(' ').toLowerCase().includes(q);
       });
 
       document.getElementById('tabella').innerHTML = righe.map(p => {
@@ -993,9 +1021,12 @@
             <td class="p-3 text-center align-top">
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800/60 text-slate-300 border border-slate-700/50 tabular-nums" title="Mantra: FVM ${p.fvmM}, quotazione ${p.quotM}">${p.fvm} / ${p.quot}</span>
             </td>
-            <td class="p-3 align-top">
-              <span class="text-[11px] text-slate-400 tabular-nums">${p.rank}° per FVM fra i ${NOMI_RUOLO[p.ruolo].toLowerCase()}</span>
-              <p class="mt-1 flex flex-wrap gap-1">${p.tag.map(t => `<span class="text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider border ${STILE_TAG[t]}">${ETICHETTA_TAG[t]}</span>`).join('')}</p>
+            <td class="p-3 align-top max-w-md">
+              <p class="flex flex-wrap gap-1">${p.tag.map(t => `<span class="text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider border ${STILE_TAG[t]}">${ETICHETTA_TAG[t]}</span>`).join('')}</p>
+              ${p.nota ? `<p class="text-[11px] text-slate-300 mt-1.5 leading-relaxed">${esc(p.nota)}</p>` : ''}
+              <p class="text-[10px] text-slate-500 mt-1 tabular-nums">
+                ${p.rank}° per FVM fra i ${NOMI_RUOLO[p.ruolo].toLowerCase()}${p.fonti ? ' • fonti: ' + esc(p.fonti.join(', ')) : ''}
+              </p>
             </td>
             <td class="p-3 text-center font-black text-amber-300 text-sm tabular-nums align-top">${preso ? '—' : prezzo + ' cr'}</td>
             <td class="p-3 text-right align-top">
@@ -1007,13 +1038,8 @@
       }).join('');
 
       if (!righe.length) {
-        const inArrivo = ['RIGORISTA', 'MODIFICATORE', 'RISCHIO'].includes(filtroTag);
-        document.getElementById('tabella').innerHTML = `
-          <tr><td colspan="7" class="p-8 text-center text-xs text-slate-500">
-            ${inArrivo
-              ? 'Questo tag arriva dalla verifica sulle cinque fonti, ancora da fare: nessun giocatore e\' marcato per ora.'
-              : 'Nessun calciatore corrisponde ai filtri.'}
-          </td></tr>`;
+        document.getElementById('tabella').innerHTML =
+          '<tr><td colspan="7" class="p-8 text-center text-xs text-slate-500">Nessun calciatore corrisponde ai filtri.</td></tr>';
       }
 
       document.getElementById('conteggio').textContent =

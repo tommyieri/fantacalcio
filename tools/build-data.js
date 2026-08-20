@@ -6,10 +6,10 @@
  * I portieri vengono raggruppati in blocchi squadra, perche' la lega
  * assegna l'intero pacchetto portieri di una squadra a un solo slot.
  *
- * I tag ricavabili dai numeri (TOP, LOWCOST) vengono calcolati qui. Quelli
- * che dipendono da valutazioni esterne (RIGORISTA, RISCHIO, MODIFICATORE)
- * restano vuoti finche' non arrivano dalla verifica sulle cinque fonti:
- * non vengono inventati.
+ * I tag ricavabili dai numeri (TOP, LOWCOST) vengono calcolati qui dal FVM.
+ * Quelli che dipendono da valutazioni esterne (RIGORISTA, RISCHIO, TITOLARE,
+ * SCOMMESSA, MODIFICATORE, NUOVO) arrivano da data/analisi.tsv, dove ogni
+ * riga porta con se' la nota e le fonti da cui e' stata ricavata.
  *
  * Uso:  node tools/build-data.js
  */
@@ -19,6 +19,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'data/listone.tsv');
+const ANALISI = path.join(ROOT, 'data/analisi.tsv');
 
 const CODICI = {
   Atalanta: 'ATA', Bologna: 'BOL', Cagliari: 'CAG', Como: 'COM', Fiorentina: 'FIO',
@@ -83,6 +84,38 @@ for (const r of dati.filter(r => r.ruolo !== 'P')) {
   });
 }
 
+/* --- Analisi dalle fonti -------------------------------------------------- */
+
+const TAG_VALIDI = new Set(['RIGORISTA', 'RISCHIO', 'TITOLARE', 'SCOMMESSA', 'MODIFICATORE', 'NUOVO']);
+
+const perNome = new Map();
+for (const g of giocatori) {
+  perNome.set(`${g.nome}||${g.squadra}`, g);
+  // Un'annotazione su un portiere si applica al blocco che lo contiene:
+  // e' il blocco a occupare lo slot in asta.
+  for (const portiere of g.blocco ?? []) perNome.set(`${portiere}||${g.squadra}`, g);
+}
+
+const analisi = fs.readFileSync(ANALISI, 'utf8').trim().split('\n').slice(1);
+let annotati = 0;
+for (const riga of analisi) {
+  const [nome, squadra, tag, nota, fonti] = riga.split('\t');
+  const g = perNome.get(`${nome}||${squadra}`);
+  // Una riga che non aggancia nessun giocatore e' quasi sempre un nome
+  // sbagliato: meglio fallire il build che perdere l'annotazione in silenzio.
+  if (!g) throw new Error(`analisi.tsv: "${nome}" (${squadra}) non esiste nel listone`);
+  for (const t of tag.split(';')) {
+    if (!TAG_VALIDI.has(t)) throw new Error(`analisi.tsv: tag sconosciuto "${t}" per ${nome}`);
+    if (!g.tag.includes(t)) g.tag.push(t);
+  }
+  if (!nota || !fonti) throw new Error(`analisi.tsv: nota o fonti mancanti per ${nome}`);
+  // Un blocco puo' ricevere l'annotazione del titolare: la prima vince, e le
+  // successive si accodano invece di sovrascriverla.
+  g.nota = g.nota ? `${g.nota} ${nota}` : nota;
+  g.fonti = [...new Set([...(g.fonti ?? []), ...fonti.split(';')])];
+  annotati++;
+}
+
 /* --- Tag ricavabili dai numeri ------------------------------------------- */
 
 const SLOT = { P: 2, D: 8, C: 8, A: 6 };
@@ -114,5 +147,7 @@ const conteggi = {};
 for (const p of giocatori) conteggi[p.ruolo] = (conteggi[p.ruolo] ?? 0) + 1;
 console.log(`righe listone:   ${dati.length}`);
 console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).map(([k, v]) => k + ':' + v).join(', ')})`);
-console.log(`con tag TOP:     ${giocatori.filter(p => p.tag.includes('TOP')).length}`);
-console.log(`con tag LOWCOST: ${giocatori.filter(p => p.tag.includes('LOWCOST')).length}`);
+console.log(`annotati:        ${annotati}`);
+for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {
+  console.log(`  ${t.padEnd(13)}${giocatori.filter(p => p.tag.includes(t)).length}`);
+}

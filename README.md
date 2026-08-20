@@ -57,9 +57,22 @@ La griglia degli incroci e' quella ufficiale della stessa fonte, trascritta e ve
 per simmetria su tutte le 400 caselle; le uniche tre coppie a indice 0 sono i derby
 cittadini, come il calendario impone.
 
-### Cosa manca
+### Analisi dalle fonti
 
-I tag che dipendono da valutazioni esterne e non dai numeri del listone:
-rigoristi, modificatore di difesa e giocatori a rischio. Vanno dalla verifica sulle
-cinque fonti (SOS Fanta, Gazzetta, Sky, Goal, Sisal). Finche' non ci sono, i relativi
-filtri restano vuoti e l'app lo dichiara invece di riempirli con stime.
+`data/analisi.tsv` contiene 135 giocatori annotati con i tag che non si ricavano dai numeri
+— rigoristi, titolari, infortunati, scommesse, nuovi arrivi, profili da modificatore — e per
+ciascuno la nota e le fonti da cui viene. Le fonti consultate: Sky Sport, SOS Fanta, Goal,
+Sisal, SNAI, FantaMaster, Fantacalcio.it, TuttoMercatoWeb, CalcioD'Angolo, DAZN, Tuttosport.
+
+Il build fallisce se una riga di `analisi.tsv` cita un giocatore che nel listone non esiste,
+oppure se usa un tag non previsto: un refuso sul nome non puo' far sparire l'annotazione in
+silenzio. Le annotazioni su un portiere vengono applicate al blocco che lo contiene.
+
+`data/ricerca/` conserva gli appunti grezzi della ricognizione (formazioni tipo, rigoristi,
+infortuni, allenatori).
+
+### Limiti noti
+
+Il listone e' una fotografia: il mercato chiude il 1° settembre e alcune operazioni sono
+successive. La piu' pesante e' Vicario alla Juventus, ufficiale il 18 agosto e nuovo titolare,
+che nel listone non compare. L'app elenca queste lacune in apertura invece di nasconderle.
