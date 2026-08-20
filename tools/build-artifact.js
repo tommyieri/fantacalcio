@@ -42,6 +42,13 @@ function icon(name) {
   return cache[name];
 }
 
+// Un'icona costruita per interpolazione non e' riscrivibile con una
+// sostituzione testuale: meglio dirlo qui che fallire poi su un file mancante.
+const interpolata = html.match(/fa-[a-z-]*\$\{|fa-solid[^"]*\$\{/);
+if (interpolata) {
+  throw new Error(`icona costruita per interpolazione vicino a "${interpolata[0]}": rendila markup letterale`);
+}
+
 let icons = 0;
 html = html.replace(/<i class="fa-solid fa-([a-z-]+)([^"]*)"><\/i>/g, (_, name, rest) => {
   const ic = icon(name);

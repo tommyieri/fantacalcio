@@ -457,3 +457,130 @@ const PLAYERS = [
   {"id":456,"nome":"Lauberbach","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":86,"rankTot":87},
   {"id":457,"nome":"Lisman","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["W","A"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":87,"rankTot":87},
 ];
+
+const SQUADRE_INFO = {
+  "ATA": {
+    "squadra": "Atalanta",
+    "allenatore": "Maurizio Sarri",
+    "modulo": "4-3-3",
+    "nota": "Nuovo: passa dalla difesa a tre alla difesa a quattro, possesso al posto della verticalita'."
+  },
+  "BOL": {
+    "squadra": "Bologna",
+    "allenatore": "Domenico Tedesco",
+    "modulo": "4-3-3",
+    "nota": "Nuovo, contratto fino al 2028 dopo l'addio di Italiano."
+  },
+  "CAG": {
+    "squadra": "Cagliari",
+    "allenatore": "Fabio Pisacane",
+    "modulo": "3-5-2",
+    "nota": "Confermato."
+  },
+  "COM": {
+    "squadra": "Como",
+    "allenatore": "Cesc Fabregas",
+    "modulo": "4-2-3-1",
+    "nota": "Confermato malgrado le offerte dall'estero."
+  },
+  "FIO": {
+    "squadra": "Fiorentina",
+    "allenatore": "Fabio Grosso",
+    "modulo": "4-3-3",
+    "nota": "Nuovo."
+  },
+  "FRO": {
+    "squadra": "Frosinone",
+    "allenatore": "Massimiliano Alvini",
+    "modulo": "3-5-2",
+    "nota": "Nuovo, neopromossa."
+  },
+  "GEN": {
+    "squadra": "Genoa",
+    "allenatore": "Daniele De Rossi",
+    "modulo": "3-4-2-1",
+    "nota": "Confermato: punta sui nuovi Bijlow, Marcandalli e Colombo."
+  },
+  "INT": {
+    "squadra": "Inter",
+    "allenatore": "Cristian Chivu",
+    "modulo": "3-5-2",
+    "nota": "Confermato fino al 2028 dopo scudetto e Coppa Italia."
+  },
+  "JUV": {
+    "squadra": "Juventus",
+    "allenatore": "Luciano Spalletti",
+    "modulo": "4-2-3-1",
+    "nota": "Confermato malgrado il sesto posto; possibile ritorno alla difesa a quattro."
+  },
+  "LAZ": {
+    "squadra": "Lazio",
+    "allenatore": "Gennaro Gattuso",
+    "modulo": "4-2-3-1",
+    "nota": "Nuovo al posto di Sarri, contratto biennale."
+  },
+  "LEC": {
+    "squadra": "Lecce",
+    "allenatore": "Eusebio Di Francesco",
+    "modulo": "4-3-3",
+    "nota": "Confermato."
+  },
+  "MIL": {
+    "squadra": "Milan",
+    "allenatore": "Ruben Amorim",
+    "modulo": "3-4-2-1",
+    "nota": "Nuovo dopo l'esonero di Allegri: due trequartisti dietro la punta unica."
+  },
+  "MON": {
+    "squadra": "Monza",
+    "allenatore": "Ivan Juric",
+    "modulo": "3-4-2-1",
+    "nota": "Nuovo, neopromossa."
+  },
+  "NAP": {
+    "squadra": "Napoli",
+    "allenatore": "Massimiliano Allegri",
+    "modulo": "4-3-3",
+    "nota": "Nuovo: piu' equilibrio fra le linee, meno pressing."
+  },
+  "PAR": {
+    "squadra": "Parma",
+    "allenatore": "Carlos Cuesta",
+    "modulo": "3-5-2",
+    "nota": "Confermato."
+  },
+  "ROM": {
+    "squadra": "Roma",
+    "allenatore": "Gian Piero Gasperini",
+    "modulo": "3-4-2-1",
+    "nota": "Confermato dopo il ritorno in Champions."
+  },
+  "SAS": {
+    "squadra": "Sassuolo",
+    "allenatore": "Alberto Aquilani",
+    "modulo": "4-2-3-1",
+    "nota": "Nuovo."
+  },
+  "TOR": {
+    "squadra": "Torino",
+    "allenatore": "Ignazio Abate",
+    "modulo": "3-4-2-1",
+    "nota": "Nuovo."
+  },
+  "UDI": {
+    "squadra": "Udinese",
+    "allenatore": "Kosta Runjaic",
+    "modulo": "3-5-2",
+    "nota": "Confermato."
+  },
+  "VEN": {
+    "squadra": "Venezia",
+    "allenatore": "Giovanni Stroppa",
+    "modulo": "3-5-2",
+    "nota": "Confermato, neopromossa con un gruppo quasi tutto nuovo."
+  }
+};
+
+const SQUADRE_LISTA = ["ATA","BOL","CAG","COM","FIO","FRO","GEN","INT","JUV","LAZ","LEC","MIL","MON","NAP","PAR","ROM","SAS","TOR","UDI","VEN"];
+
+const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8,"INT":8,"JUV":10,"LAZ":12,"LEC":13,"MIL":11,"MON":7,"NAP":11,"PAR":7,"ROM":7,"SAS":14,"TOR":9,"UDI":10,"VEN":9},"BOL":{"ATA":6,"BOL":0,"CAG":9,"COM":12,"FIO":10,"FRO":11,"GEN":7,"INT":9,"JUV":11,"LAZ":7,"LEC":6,"MIL":10,"MON":13,"NAP":6,"PAR":11,"ROM":12,"SAS":6,"TOR":8,"UDI":10,"VEN":7},"CAG":{"ATA":6,"BOL":9,"CAG":0,"COM":11,"FIO":6,"FRO":8,"GEN":10,"INT":12,"JUV":8,"LAZ":11,"LEC":10,"MIL":7,"MON":9,"NAP":12,"PAR":10,"ROM":8,"SAS":8,"TOR":11,"UDI":9,"VEN":6},"COM":{"ATA":10,"BOL":12,"CAG":11,"COM":0,"FIO":6,"FRO":6,"GEN":7,"INT":10,"JUV":8,"LAZ":10,"LEC":13,"MIL":9,"MON":9,"NAP":7,"PAR":7,"ROM":9,"SAS":11,"TOR":11,"UDI":8,"VEN":7},"FIO":{"ATA":8,"BOL":10,"CAG":6,"COM":6,"FIO":0,"FRO":10,"GEN":8,"INT":10,"JUV":11,"LAZ":6,"LEC":6,"MIL":9,"MON":12,"NAP":7,"PAR":12,"ROM":13,"SAS":7,"TOR":8,"UDI":11,"VEN":11},"FRO":{"ATA":5,"BOL":11,"CAG":8,"COM":6,"FIO":10,"FRO":0,"GEN":14,"INT":10,"JUV":9,"LAZ":7,"LEC":7,"MIL":9,"MON":7,"NAP":6,"PAR":11,"ROM":12,"SAS":6,"TOR":10,"UDI":10,"VEN":13},"GEN":{"ATA":8,"BOL":7,"CAG":10,"COM":7,"FIO":8,"FRO":14,"GEN":0,"INT":12,"JUV":5,"LAZ":9,"LEC":8,"MIL":7,"MON":7,"NAP":10,"PAR":9,"ROM":10,"SAS":7,"TOR":14,"UDI":7,"VEN":12},"INT":{"ATA":8,"BOL":9,"CAG":12,"COM":10,"FIO":10,"FRO":10,"GEN":12,"INT":0,"JUV":7,"LAZ":7,"LEC":8,"MIL":0,"MON":7,"NAP":10,"PAR":13,"ROM":12,"SAS":4,"TOR":12,"UDI":12,"VEN":8},"JUV":{"ATA":10,"BOL":11,"CAG":8,"COM":8,"FIO":11,"FRO":9,"GEN":5,"INT":7,"JUV":0,"LAZ":13,"LEC":12,"MIL":12,"MON":10,"NAP":12,"PAR":10,"ROM":6,"SAS":10,"TOR":0,"UDI":9,"VEN":8},"LAZ":{"ATA":12,"BOL":7,"CAG":11,"COM":10,"FIO":6,"FRO":7,"GEN":9,"INT":7,"JUV":13,"LAZ":0,"LEC":13,"MIL":12,"MON":7,"NAP":16,"PAR":7,"ROM":0,"SAS":12,"TOR":6,"UDI":8,"VEN":8},"LEC":{"ATA":13,"BOL":6,"CAG":10,"COM":13,"FIO":6,"FRO":7,"GEN":8,"INT":8,"JUV":12,"LAZ":13,"LEC":0,"MIL":11,"MON":6,"NAP":11,"PAR":4,"ROM":6,"SAS":14,"TOR":7,"UDI":7,"VEN":9},"MIL":{"ATA":11,"BOL":10,"CAG":7,"COM":9,"FIO":9,"FRO":9,"GEN":7,"INT":0,"JUV":12,"LAZ":12,"LEC":11,"MIL":0,"MON":12,"NAP":9,"PAR":6,"ROM":7,"SAS":15,"TOR":7,"UDI":7,"VEN":11},"MON":{"ATA":7,"BOL":13,"CAG":9,"COM":9,"FIO":12,"FRO":7,"GEN":7,"INT":7,"JUV":10,"LAZ":7,"LEC":6,"MIL":12,"MON":0,"NAP":10,"PAR":9,"ROM":12,"SAS":10,"TOR":9,"UDI":9,"VEN":6},"NAP":{"ATA":11,"BOL":6,"CAG":12,"COM":7,"FIO":7,"FRO":6,"GEN":10,"INT":10,"JUV":12,"LAZ":16,"LEC":11,"MIL":9,"MON":10,"NAP":0,"PAR":8,"ROM":3,"SAS":11,"TOR":7,"UDI":8,"VEN":7},"PAR":{"ATA":7,"BOL":11,"CAG":10,"COM":7,"FIO":12,"FRO":11,"GEN":9,"INT":13,"JUV":10,"LAZ":7,"LEC":4,"MIL":6,"MON":9,"NAP":8,"PAR":0,"ROM":12,"SAS":4,"TOR":9,"UDI":11,"VEN":11},"ROM":{"ATA":7,"BOL":12,"CAG":8,"COM":9,"FIO":13,"FRO":12,"GEN":10,"INT":12,"JUV":6,"LAZ":0,"LEC":6,"MIL":7,"MON":12,"NAP":3,"PAR":12,"ROM":0,"SAS":7,"TOR":13,"UDI":11,"VEN":11},"SAS":{"ATA":14,"BOL":6,"CAG":8,"COM":11,"FIO":7,"FRO":6,"GEN":7,"INT":4,"JUV":10,"LAZ":12,"LEC":14,"MIL":15,"MON":10,"NAP":11,"PAR":4,"ROM":7,"SAS":0,"TOR":9,"UDI":7,"VEN":9},"TOR":{"ATA":9,"BOL":8,"CAG":11,"COM":11,"FIO":8,"FRO":10,"GEN":14,"INT":12,"JUV":0,"LAZ":6,"LEC":7,"MIL":7,"MON":9,"NAP":7,"PAR":9,"ROM":13,"SAS":9,"TOR":0,"UDI":10,"VEN":11},"UDI":{"ATA":10,"BOL":10,"CAG":9,"COM":8,"FIO":11,"FRO":10,"GEN":7,"INT":12,"JUV":9,"LAZ":8,"LEC":7,"MIL":7,"MON":9,"NAP":8,"PAR":11,"ROM":11,"SAS":7,"TOR":10,"UDI":0,"VEN":7},"VEN":{"ATA":9,"BOL":7,"CAG":6,"COM":7,"FIO":11,"FRO":13,"GEN":12,"INT":8,"JUV":8,"LAZ":8,"LEC":9,"MIL":11,"MON":6,"NAP":7,"PAR":11,"ROM":11,"SAS":9,"TOR":11,"UDI":7,"VEN":0}};

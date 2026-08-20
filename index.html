@@ -7,240 +7,270 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6 font-sans">
-  <div class="max-w-7xl mx-auto space-y-5">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-5 font-sans">
+  <div class="max-w-[1600px] mx-auto space-y-4">
 
-    <!-- Intestazione e metriche live -->
-    <header class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <!-- Intestazione e metriche personali -->
+    <header class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
         <div>
-          <h1 class="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+          <h1 class="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2.5">
             <i class="fa-solid fa-trophy text-amber-400"></i> FantaStrategy Pro
           </h1>
-          <p class="text-xs text-slate-400 mt-1">
-            Serie A 2026/27 • Budget 500 cr • Rosa 2P, 8D, 8C, 6A
+          <p class="text-xs text-slate-400 mt-0.5">
+            Serie A 2026/27 • 500 crediti • 2P 8D 8C 6A • <span id="intestazione-lega"></span>
           </p>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full lg:w-auto">
           <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
-            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Crediti Residui</span>
+            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">I miei crediti</span>
             <span id="m-residuo" class="text-xl md:text-2xl font-black text-emerald-400 tabular-nums">500</span>
             <span class="text-[10px] text-slate-500">/ 500</span>
           </div>
           <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
-            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Slot Rosa</span>
+            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Slot rosa</span>
             <span id="m-slot" class="text-xl md:text-2xl font-black text-indigo-400 tabular-nums">0</span>
             <span class="text-[10px] text-slate-500">/ 24</span>
           </div>
           <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
-            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Max Bid Attacco</span>
+            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Max bid attacco</span>
             <span id="m-max-a" class="text-xl md:text-2xl font-black text-rose-400 tabular-nums">245</span>
           </div>
           <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center">
-            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Max Bid Centrocampo</span>
+            <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Max bid centrocampo</span>
             <span id="m-max-c" class="text-xl md:text-2xl font-black text-amber-400 tabular-nums">143</span>
           </div>
         </div>
       </div>
 
-      <!-- Capienza massima: il tetto invalicabile imposto dalla salvaguardia -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-3 border-t border-slate-800 text-[11px]">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2.5 border-t border-slate-800 text-[11px]">
         <p class="text-slate-400">
           <i class="fa-solid fa-lock text-slate-500 mr-1"></i>
           Capienza massima su un singolo giocatore:
           <span id="m-capienza" class="text-white font-black tabular-nums">477</span> cr
-          <span class="text-slate-500">— tenendo 1 credito per ciascuno degli altri <span id="m-slot-vuoti" class="tabular-nums">23</span> slot vuoti</span>
+          <span class="text-slate-500">— tenendo 1 credito per ciascuno degli altri <span id="m-slot-vuoti" class="tabular-nums">23</span> slot</span>
         </p>
-        <button onclick="apriPiano()" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">
-          <i class="fa-solid fa-sliders mr-1"></i>Impostazioni asta
-        </button>
-      </div>
-
-      <!-- Piano di spesa: e' la base su cui il motore rialloca il delta -->
-      <div id="pannello-piano" class="hidden pt-3 border-t border-slate-800">
-        <div class="flex flex-wrap items-end gap-4">
-          <p class="text-[11px] text-slate-400 basis-full">
-            Percentuale del budget destinata a ciascun reparto. Ogni credito speso sopra o sotto il piano
-            viene ridistribuito automaticamente sui reparti ancora da completare.
-          </p>
-          <label class="text-[10px] uppercase font-semibold text-amber-400">Portieri
-            <input type="number" id="piano-P" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
-          </label>
-          <label class="text-[10px] uppercase font-semibold text-emerald-400">Difensori
-            <input type="number" id="piano-D" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
-          </label>
-          <label class="text-[10px] uppercase font-semibold text-blue-400">Centrocampisti
-            <input type="number" id="piano-C" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
-          </label>
-          <label class="text-[10px] uppercase font-semibold text-rose-400">Attaccanti
-            <input type="number" id="piano-A" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
-          </label>
-          <span id="piano-totale" class="text-[11px] text-slate-400"></span>
-          <button type="button" onclick="usaPianoMisurato()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold transition" title="7% portieri, 19% difesa, 32% centrocampo, 42% attacco">Usa le medie delle aste reali</button>
-          <button type="button" onclick="resetPiano()" class="text-[11px] text-slate-400 hover:text-slate-200 font-semibold transition">Ripristina</button>
-
-          <label class="text-[10px] uppercase font-semibold text-slate-400 basis-full pt-2 border-t border-slate-800">
-            Partecipanti alla lega
-            <input type="number" id="partecipanti" min="2" max="20" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
-            <span class="block mt-1 normal-case font-normal text-slate-500">Non tocca il tuo budget: serve a stimare quanto costeranno i giocatori sul mercato.</span>
-          </label>
+        <div class="flex gap-4">
+          <button type="button" onclick="mostraPannello('pannello-impostazioni')" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">
+            <i class="fa-solid fa-sliders mr-1"></i>Impostazioni
+          </button>
+          <button type="button" onclick="mostraPannello('pannello-fonti')" class="text-slate-400 hover:text-slate-200 font-semibold transition">
+            <i class="fa-solid fa-circle-info mr-1"></i>Fonti e avvertenze
+          </button>
         </div>
       </div>
-    </header>
 
-    <!-- Avviso sulla provenienza dei dati: nessuno deve fidarsi al buio in asta -->
-    <details id="avviso-dati" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] text-slate-400">
-      <summary class="cursor-pointer font-semibold text-slate-300 flex items-center gap-2">
-        <i class="fa-solid fa-circle-info text-indigo-400"></i>
-        Da dove vengono i dati, e le tre cose da controllare il giorno dell'asta
-      </summary>
-      <div class="mt-3 space-y-3 leading-relaxed">
+      <!-- Impostazioni della lega e piano di spesa -->
+      <div id="pannello-impostazioni" class="hidden pt-3 border-t border-slate-800 space-y-4">
+        <div>
+          <p class="text-[11px] text-slate-400 mb-2">
+            Percentuale del tuo budget per reparto. Ogni credito speso sopra o sotto il piano si
+            ridistribuisce da solo sui reparti ancora da completare.
+          </p>
+          <div class="flex flex-wrap items-end gap-3">
+            <label class="text-[10px] uppercase font-semibold text-amber-400">Portieri
+              <input type="number" id="piano-P" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
+            </label>
+            <label class="text-[10px] uppercase font-semibold text-emerald-400">Difensori
+              <input type="number" id="piano-D" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
+            </label>
+            <label class="text-[10px] uppercase font-semibold text-blue-400">Centrocampisti
+              <input type="number" id="piano-C" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
+            </label>
+            <label class="text-[10px] uppercase font-semibold text-rose-400">Attaccanti
+              <input type="number" id="piano-A" min="0" max="100" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
+            </label>
+            <span id="piano-totale" class="text-[11px] text-slate-400"></span>
+            <button type="button" onclick="usaPianoMisurato()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold transition" title="7% portieri, 19% difesa, 32% centrocampo, 42% attacco">Usa le medie delle aste reali</button>
+            <button type="button" onclick="resetPiano()" class="text-[11px] text-slate-400 hover:text-slate-200 font-semibold transition">Ripristina</button>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800">
+          <p class="text-[11px] text-slate-400 mb-2">
+            Partecipanti alla lega. Il primo sei tu: i nomi servono a registrare chi si prende cosa.
+          </p>
+          <div class="flex items-end gap-3 mb-3">
+            <label class="text-[10px] uppercase font-semibold text-slate-400">Quanti siete
+              <input type="number" id="n-squadre" min="2" max="20" class="mt-1 block w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-sm text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
+            </label>
+            <button type="button" onclick="azzeraAsta()" class="text-[11px] text-rose-400 hover:text-rose-300 font-semibold transition pb-1.5">Azzera tutta l'asta</button>
+          </div>
+          <div id="nomi-squadre" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Provenienza dei dati -->
+      <div id="pannello-fonti" class="hidden pt-3 border-t border-slate-800 text-[11px] text-slate-400 space-y-3 leading-relaxed">
         <p>
           Ruoli Classic e Mantra, FVM e quotazioni vengono dal <strong class="text-slate-200">listone ufficiale
           Fantacalcio.it 2026/27</strong>; la griglia portieri e' quella ufficiale della stessa fonte, verificata
           per simmetria su tutte le 400 caselle. Rigoristi, titolari, infortuni, scommesse e nuovi arrivi vengono
-          da una ricognizione su Sky Sport, SOS Fanta, Gazzetta, Goal, Sisal, SNAI, FantaMaster, Fantacalcio.it,
-          TuttoMercatoWeb e CalcioD'Angolo: ogni riga della tabella porta le proprie fonti.
+          da Sky Sport, SOS Fanta, Goal, Sisal, SNAI, FantaMaster, Fantacalcio.it, TuttoMercatoWeb, DAZN,
+          Tuttosport e CalcioD'Angolo: ogni riga porta le proprie fonti.
         </p>
         <p class="text-amber-300 font-semibold">Tre cose che il listone non sa (mercato aperto fino al 1° settembre):</p>
         <ul class="list-disc pl-5 space-y-1">
-          <li>
-            <strong class="text-slate-200">Vicario alla Juventus.</strong> Ufficiale dal 18 agosto, prestito dal
-            Tottenham con riscatto a 8 milioni, ed e' il nuovo titolare al posto di Di Gregorio. Non compare nel
-            listone: il blocco Juventus vale piu' di quanto dica il suo FVM.
-          </li>
-          <li>
-            <strong class="text-slate-200">Frattesi alla Lazio.</strong> Due fonti lo danno titolare nel 4-2-3-1
-            di Gattuso, il listone lo ha ancora all'Inter.
-          </li>
-          <li>
-            <strong class="text-slate-200">Nomi non nel listone</strong> visti nelle formazioni tipo: Spence
-            (Inter), Molina (Roma), Moreira (Milan), Kristensen all'Atalanta invece che all'Udinese.
-            Verifica sulla piattaforma della tua lega prima di puntarci.
-          </li>
+          <li><strong class="text-slate-200">Vicario alla Juventus.</strong> Ufficiale dal 18 agosto, prestito dal Tottenham con riscatto a 8 milioni, nuovo titolare al posto di Di Gregorio. Non compare nel listone: il blocco Juventus vale piu' del suo FVM.</li>
+          <li><strong class="text-slate-200">Frattesi alla Lazio.</strong> Due fonti lo danno titolare nel 4-2-3-1 di Gattuso, il listone lo ha ancora all'Inter.</li>
+          <li><strong class="text-slate-200">Nomi fuori listone</strong> visti nelle formazioni tipo: Spence (Inter), Molina (Roma), Moreira (Milan), Kristensen all'Atalanta invece che all'Udinese.</li>
         </ul>
+        <p>
+          Il prezzo di mercato non e' un prezzo rilevato: e' una stima che divide i crediti ancora in gioco
+          nella lega per reparto, secondo la ripartizione mediana misurata sulle aste reali, e li distribuisce
+          sui giocatori ancora liberi in proporzione al FVM. Si ricalcola a ogni assegnazione.
+        </p>
       </div>
-    </details>
+    </header>
 
-    <!-- Griglia incroci portieri -->
-    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-        <h2 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-shield-halved text-amber-400"></i> Calcolatore Coppia Portieri (Incroci Casa/Trasferta)
-        </h2>
-        <span class="text-[11px] text-slate-400">Indice = giornate in cui entrambe giocano fuori casa</span>
+    <!-- Navigazione fra le viste -->
+    <nav class="flex flex-wrap gap-2" id="navigazione"></nav>
+
+    <!-- ============ VISTA ASTA ============ -->
+    <section id="vista-asta" class="space-y-4">
+
+      <!-- Tabellone dei partecipanti -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-users-line text-indigo-400"></i> Tabellone partecipanti
+          </h2>
+          <span class="text-[11px] text-slate-500">Clicca una squadra per vederne la rosa</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="text-slate-400 uppercase tracking-wider border-b border-slate-800">
+              <tr>
+                <th scope="col" class="py-2 pr-3">Squadra</th>
+                <th scope="col" class="py-2 px-2 text-right">Crediti</th>
+                <th scope="col" class="py-2 px-2 text-right">Spesi</th>
+                <th scope="col" class="py-2 px-2 text-center">P</th>
+                <th scope="col" class="py-2 px-2 text-center">D</th>
+                <th scope="col" class="py-2 px-2 text-center">C</th>
+                <th scope="col" class="py-2 px-2 text-center">A</th>
+                <th scope="col" class="py-2 px-2 text-right">Max bid</th>
+                <th scope="col" class="py-2 pl-2">Reparti ancora aperti</th>
+              </tr>
+            </thead>
+            <tbody id="tabellone" class="divide-y divide-slate-800/60"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-        <div>
-          <label for="griglia-a" class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Squadra 1</label>
-          <select id="griglia-a" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
-        </div>
-        <div>
-          <label for="griglia-b" class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Squadra 2</label>
-          <select id="griglia-b" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
-        </div>
-        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 uppercase font-bold block">Incrocio Trasferte</span>
-            <span id="griglia-testo" class="text-xs text-slate-300">Seleziona 2 squadre</span>
+
+      <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <!-- Listone -->
+        <div class="xl:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="relative w-full sm:w-80">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500 text-xs"></i>
+              <label for="ricerca" class="sr-only">Cerca calciatore</label>
+              <input type="text" id="ricerca" placeholder="Cerca calciatore, squadra o tag..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-200">
+            </div>
+            <div id="filtri-ruolo" class="flex flex-wrap gap-1.5 w-full sm:w-auto"></div>
           </div>
-          <span id="griglia-valore" class="text-lg font-black text-amber-400 tabular-nums">-</span>
+
+          <div id="filtri-tag" class="flex flex-wrap gap-2 pt-1 border-t border-slate-800/80 text-[11px]"></div>
+
+          <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="solo-liberi" checked class="accent-indigo-500">
+              Nascondi i giocatori gia' assegnati
+            </label>
+            <span id="conteggio" class="text-slate-500"></span>
+          </div>
+
+          <div class="overflow-x-auto max-h-[65vh] rounded-xl border border-slate-800/80">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 z-10">
+                <tr>
+                  <th scope="col" class="p-2.5">R</th>
+                  <th scope="col" class="p-2.5">Calciatore</th>
+                  <th scope="col" class="p-2.5">Team</th>
+                  <th scope="col" class="p-2.5 text-center">FVM / Q.</th>
+                  <th scope="col" class="p-2.5">Consiglio</th>
+                  <th scope="col" class="p-2.5 text-center">Prezzi</th>
+                  <th scope="col" class="p-2.5 text-right">Assegna</th>
+                </tr>
+              </thead>
+              <tbody id="tabella" class="divide-y divide-slate-800/60"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- La mia rosa -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-users-viewfinder text-indigo-400"></i> La mia rosa
+            </h2>
+            <span id="badge-ruoli" class="text-[10px] font-semibold text-slate-400 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 tabular-nums"></span>
+          </div>
+          <div id="riepilogo-reparti" class="grid grid-cols-4 gap-1.5 mb-3"></div>
+          <div id="rosa" class="space-y-1.5 max-h-[55vh] overflow-y-auto pr-1"></div>
+          <p class="mt-3 pt-2.5 border-t border-slate-800 text-[11px] text-slate-500">
+            Spesa totale: <span id="m-speso" class="text-slate-300 font-bold tabular-nums">0</span> cr
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- Listone e rosa -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-      <section class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div class="relative w-full sm:w-80">
+    <!-- ============ VISTA FORMAZIONI ============ -->
+    <section id="vista-formazioni" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-list text-emerald-400"></i> Formazioni tipo e disponibilita'
+          </h2>
+          <div class="relative w-full sm:w-72">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500 text-xs"></i>
-            <label for="ricerca" class="sr-only">Cerca</label>
-            <input type="text" id="ricerca" placeholder="Cerca calciatore, squadra o tag..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-200">
+            <label for="ricerca-formazioni" class="sr-only">Filtra squadra o calciatore</label>
+            <input type="text" id="ricerca-formazioni" placeholder="Filtra per squadra o calciatore..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-200">
           </div>
-          <div id="filtri-ruolo" class="flex flex-wrap gap-1.5 w-full sm:w-auto"></div>
         </div>
+        <p class="text-[11px] text-slate-500 mt-2">
+          I titolari indicati dalle formazioni tipo delle fonti, con lo stato in asta: chi e' ancora
+          libero e chi se l'e' gia' preso.
+        </p>
+      </div>
+      <div id="formazioni" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </section>
 
-        <div id="filtri-tag" class="flex flex-wrap gap-2 pt-1 border-t border-slate-800/80 text-[11px]"></div>
-
-        <div class="overflow-x-auto max-h-[600px] rounded-xl border border-slate-800/80">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 z-10">
-              <tr>
-                <th scope="col" class="p-3">R</th>
-                <th scope="col" class="p-3">Calciatore / Blocco</th>
-                <th scope="col" class="p-3">Team</th>
-                <th scope="col" class="p-3 text-center">FVM / Q.</th>
-                <th scope="col" class="p-3">Consiglio</th>
-                <th scope="col" class="p-3 text-center">Il tuo max<span class="block font-normal normal-case text-[10px] text-slate-500">e prezzo di mercato</span></th>
-                <th scope="col" class="p-3 text-right">Azione</th>
-              </tr>
-            </thead>
-            <tbody id="tabella" class="divide-y divide-slate-800/60"></tbody>
-          </table>
+    <!-- ============ VISTA GRIGLIA ============ -->
+    <section id="vista-griglia" class="hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-amber-400"></i> Calcolatore coppia portieri
+          </h2>
+          <span class="text-[11px] text-slate-400">Indice = giornate in cui entrambe giocano fuori casa</span>
         </div>
-        <p id="conteggio" class="text-[11px] text-slate-500"></p>
-      </section>
-
-      <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
-        <div>
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-users-viewfinder text-indigo-400"></i> La Mia Rosa
-            </h2>
-            <span id="badge-ruoli" class="text-[11px] font-semibold text-slate-400 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 tabular-nums">0/2 P • 0/8 D • 0/8 C • 0/6 A</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div>
+            <label for="griglia-a" class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Squadra 1</label>
+            <select id="griglia-a" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
           </div>
-
-          <!-- Spesa per reparto: mostra dove il piano e' stato rispettato o sforato -->
-          <div id="riepilogo-reparti" class="grid grid-cols-4 gap-1.5 mb-3"></div>
-
-          <div id="rosa" class="space-y-1.5 max-h-[420px] overflow-y-auto pr-1"></div>
+          <div>
+            <label for="griglia-b" class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Squadra 2</label>
+            <select id="griglia-b" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold block">Incrocio trasferte</span>
+              <span id="griglia-testo" class="text-xs text-slate-300">Seleziona 2 squadre</span>
+            </div>
+            <span id="griglia-valore" class="text-lg font-black text-amber-400 tabular-nums">-</span>
+          </div>
         </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500 flex justify-between items-center">
-          <span>Spesa totale: <span id="m-speso" class="text-slate-300 font-bold tabular-nums">0</span> cr</span>
-          <button onclick="azzeraAsta()" class="text-rose-400 hover:text-rose-300 font-semibold transition">Azzera Asta</button>
+        <div class="mt-4 pt-3 border-t border-slate-800">
+          <p class="text-[11px] text-slate-400 mb-2">Le coppie migliori fra i blocchi ancora liberi:</p>
+          <div id="coppie-consigliate" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"></div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   </div>
 
   <script>
-    /* ====================== DATI ====================== */
-
-    const SQUADRE = ['ATA','BOL','CAG','COM','FIO','FRO','GEN','INT','JUV','LAZ','LEC','MIL','MON','NAP','PAR','ROM','SAS','TOR','UDI','VEN'];
-
-    // Griglia ufficiale degli incroci portieri 2026/27 (fantacalcio.it).
-    // L'indice e' il numero di giornate in cui le due squadre giocano
-    // entrambe in trasferta: piu' e' basso, piu' e' probabile che almeno
-    // uno dei due portieri giochi in casa. Trascritta e verificata per
-    // simmetria su tutte le 400 caselle.
-    const GRIGLIA_VERIFICATA = true;
-    const GRIGLIA = {
-      ATA: { ATA:0, BOL:6, CAG:6, COM:10, FIO:8, FRO:5, GEN:8, INT:8, JUV:10, LAZ:12, LEC:13, MIL:11, MON:7, NAP:11, PAR:7, ROM:7, SAS:14, TOR:9, UDI:10, VEN:9 },
-      BOL: { ATA:6, BOL:0, CAG:9, COM:12, FIO:10, FRO:11, GEN:7, INT:9, JUV:11, LAZ:7, LEC:6, MIL:10, MON:13, NAP:6, PAR:11, ROM:12, SAS:6, TOR:8, UDI:10, VEN:7 },
-      CAG: { ATA:6, BOL:9, CAG:0, COM:11, FIO:6, FRO:8, GEN:10, INT:12, JUV:8, LAZ:11, LEC:10, MIL:7, MON:9, NAP:12, PAR:10, ROM:8, SAS:8, TOR:11, UDI:9, VEN:6 },
-      COM: { ATA:10, BOL:12, CAG:11, COM:0, FIO:6, FRO:6, GEN:7, INT:10, JUV:8, LAZ:10, LEC:13, MIL:9, MON:9, NAP:7, PAR:7, ROM:9, SAS:11, TOR:11, UDI:8, VEN:7 },
-      FIO: { ATA:8, BOL:10, CAG:6, COM:6, FIO:0, FRO:10, GEN:8, INT:10, JUV:11, LAZ:6, LEC:6, MIL:9, MON:12, NAP:7, PAR:12, ROM:13, SAS:7, TOR:8, UDI:11, VEN:11 },
-      FRO: { ATA:5, BOL:11, CAG:8, COM:6, FIO:10, FRO:0, GEN:14, INT:10, JUV:9, LAZ:7, LEC:7, MIL:9, MON:7, NAP:6, PAR:11, ROM:12, SAS:6, TOR:10, UDI:10, VEN:13 },
-      GEN: { ATA:8, BOL:7, CAG:10, COM:7, FIO:8, FRO:14, GEN:0, INT:12, JUV:5, LAZ:9, LEC:8, MIL:7, MON:7, NAP:10, PAR:9, ROM:10, SAS:7, TOR:14, UDI:7, VEN:12 },
-      INT: { ATA:8, BOL:9, CAG:12, COM:10, FIO:10, FRO:10, GEN:12, INT:0, JUV:7, LAZ:7, LEC:8, MIL:0, MON:7, NAP:10, PAR:13, ROM:12, SAS:4, TOR:12, UDI:12, VEN:8 },
-      JUV: { ATA:10, BOL:11, CAG:8, COM:8, FIO:11, FRO:9, GEN:5, INT:7, JUV:0, LAZ:13, LEC:12, MIL:12, MON:10, NAP:12, PAR:10, ROM:6, SAS:10, TOR:0, UDI:9, VEN:8 },
-      LAZ: { ATA:12, BOL:7, CAG:11, COM:10, FIO:6, FRO:7, GEN:9, INT:7, JUV:13, LAZ:0, LEC:13, MIL:12, MON:7, NAP:16, PAR:7, ROM:0, SAS:12, TOR:6, UDI:8, VEN:8 },
-      LEC: { ATA:13, BOL:6, CAG:10, COM:13, FIO:6, FRO:7, GEN:8, INT:8, JUV:12, LAZ:13, LEC:0, MIL:11, MON:6, NAP:11, PAR:4, ROM:6, SAS:14, TOR:7, UDI:7, VEN:9 },
-      MIL: { ATA:11, BOL:10, CAG:7, COM:9, FIO:9, FRO:9, GEN:7, INT:0, JUV:12, LAZ:12, LEC:11, MIL:0, MON:12, NAP:9, PAR:6, ROM:7, SAS:15, TOR:7, UDI:7, VEN:11 },
-      MON: { ATA:7, BOL:13, CAG:9, COM:9, FIO:12, FRO:7, GEN:7, INT:7, JUV:10, LAZ:7, LEC:6, MIL:12, MON:0, NAP:10, PAR:9, ROM:12, SAS:10, TOR:9, UDI:9, VEN:6 },
-      NAP: { ATA:11, BOL:6, CAG:12, COM:7, FIO:7, FRO:6, GEN:10, INT:10, JUV:12, LAZ:16, LEC:11, MIL:9, MON:10, NAP:0, PAR:8, ROM:3, SAS:11, TOR:7, UDI:8, VEN:7 },
-      PAR: { ATA:7, BOL:11, CAG:10, COM:7, FIO:12, FRO:11, GEN:9, INT:13, JUV:10, LAZ:7, LEC:4, MIL:6, MON:9, NAP:8, PAR:0, ROM:12, SAS:4, TOR:9, UDI:11, VEN:11 },
-      ROM: { ATA:7, BOL:12, CAG:8, COM:9, FIO:13, FRO:12, GEN:10, INT:12, JUV:6, LAZ:0, LEC:6, MIL:7, MON:12, NAP:3, PAR:12, ROM:0, SAS:7, TOR:13, UDI:11, VEN:11 },
-      SAS: { ATA:14, BOL:6, CAG:8, COM:11, FIO:7, FRO:6, GEN:7, INT:4, JUV:10, LAZ:12, LEC:14, MIL:15, MON:10, NAP:11, PAR:4, ROM:7, SAS:0, TOR:9, UDI:7, VEN:9 },
-      TOR: { ATA:9, BOL:8, CAG:11, COM:11, FIO:8, FRO:10, GEN:14, INT:12, JUV:0, LAZ:6, LEC:7, MIL:7, MON:9, NAP:7, PAR:9, ROM:13, SAS:9, TOR:0, UDI:10, VEN:11 },
-      UDI: { ATA:10, BOL:10, CAG:9, COM:8, FIO:11, FRO:10, GEN:7, INT:12, JUV:9, LAZ:8, LEC:7, MIL:7, MON:9, NAP:8, PAR:11, ROM:11, SAS:7, TOR:10, UDI:0, VEN:7 },
-      VEN: { ATA:9, BOL:7, CAG:6, COM:7, FIO:11, FRO:13, GEN:12, INT:8, JUV:8, LAZ:8, LEC:9, MIL:11, MON:6, NAP:7, PAR:11, ROM:11, SAS:9, TOR:11, UDI:7, VEN:0 }
-    };
-
     const PLAYERS = [
       {"id":16,"nome":"Blocco Roma","squadra":"Roma","cod":"ROM","ruolo":"P","mantra":["Por"],"fvm":65,"fvmM":65,"quot":20,"quotM":20,"blocco":["Svilar","De Marzi","Gollini"],"tag":["TITOLARE","TOP"],"nota":"Portiere titolare, fra i piu' quotati del ruolo.","fonti":["Sky","MAM-e"],"fascia":2,"rank":1,"rankTot":20},
       {"id":8,"nome":"Blocco Inter","squadra":"Inter","cod":"INT","ruolo":"P","mantra":["Por"],"fvm":63,"fvmM":63,"quot":20,"quotM":20,"blocco":["Martinez Jo.","Provedel","Di Gennaro"],"tag":["TITOLARE","TOP"],"nota":"Portiere titolare dell'Inter campione d'Italia.","fonti":["DAZN"],"fascia":2,"rank":2,"rankTot":20},
@@ -700,8 +730,135 @@
       {"id":456,"nome":"Lauberbach","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":86,"rankTot":87},
       {"id":457,"nome":"Lisman","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["W","A"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":87,"rankTot":87},
     ];
+    
+    const SQUADRE_INFO = {
+      "ATA": {
+        "squadra": "Atalanta",
+        "allenatore": "Maurizio Sarri",
+        "modulo": "4-3-3",
+        "nota": "Nuovo: passa dalla difesa a tre alla difesa a quattro, possesso al posto della verticalita'."
+      },
+      "BOL": {
+        "squadra": "Bologna",
+        "allenatore": "Domenico Tedesco",
+        "modulo": "4-3-3",
+        "nota": "Nuovo, contratto fino al 2028 dopo l'addio di Italiano."
+      },
+      "CAG": {
+        "squadra": "Cagliari",
+        "allenatore": "Fabio Pisacane",
+        "modulo": "3-5-2",
+        "nota": "Confermato."
+      },
+      "COM": {
+        "squadra": "Como",
+        "allenatore": "Cesc Fabregas",
+        "modulo": "4-2-3-1",
+        "nota": "Confermato malgrado le offerte dall'estero."
+      },
+      "FIO": {
+        "squadra": "Fiorentina",
+        "allenatore": "Fabio Grosso",
+        "modulo": "4-3-3",
+        "nota": "Nuovo."
+      },
+      "FRO": {
+        "squadra": "Frosinone",
+        "allenatore": "Massimiliano Alvini",
+        "modulo": "3-5-2",
+        "nota": "Nuovo, neopromossa."
+      },
+      "GEN": {
+        "squadra": "Genoa",
+        "allenatore": "Daniele De Rossi",
+        "modulo": "3-4-2-1",
+        "nota": "Confermato: punta sui nuovi Bijlow, Marcandalli e Colombo."
+      },
+      "INT": {
+        "squadra": "Inter",
+        "allenatore": "Cristian Chivu",
+        "modulo": "3-5-2",
+        "nota": "Confermato fino al 2028 dopo scudetto e Coppa Italia."
+      },
+      "JUV": {
+        "squadra": "Juventus",
+        "allenatore": "Luciano Spalletti",
+        "modulo": "4-2-3-1",
+        "nota": "Confermato malgrado il sesto posto; possibile ritorno alla difesa a quattro."
+      },
+      "LAZ": {
+        "squadra": "Lazio",
+        "allenatore": "Gennaro Gattuso",
+        "modulo": "4-2-3-1",
+        "nota": "Nuovo al posto di Sarri, contratto biennale."
+      },
+      "LEC": {
+        "squadra": "Lecce",
+        "allenatore": "Eusebio Di Francesco",
+        "modulo": "4-3-3",
+        "nota": "Confermato."
+      },
+      "MIL": {
+        "squadra": "Milan",
+        "allenatore": "Ruben Amorim",
+        "modulo": "3-4-2-1",
+        "nota": "Nuovo dopo l'esonero di Allegri: due trequartisti dietro la punta unica."
+      },
+      "MON": {
+        "squadra": "Monza",
+        "allenatore": "Ivan Juric",
+        "modulo": "3-4-2-1",
+        "nota": "Nuovo, neopromossa."
+      },
+      "NAP": {
+        "squadra": "Napoli",
+        "allenatore": "Massimiliano Allegri",
+        "modulo": "4-3-3",
+        "nota": "Nuovo: piu' equilibrio fra le linee, meno pressing."
+      },
+      "PAR": {
+        "squadra": "Parma",
+        "allenatore": "Carlos Cuesta",
+        "modulo": "3-5-2",
+        "nota": "Confermato."
+      },
+      "ROM": {
+        "squadra": "Roma",
+        "allenatore": "Gian Piero Gasperini",
+        "modulo": "3-4-2-1",
+        "nota": "Confermato dopo il ritorno in Champions."
+      },
+      "SAS": {
+        "squadra": "Sassuolo",
+        "allenatore": "Alberto Aquilani",
+        "modulo": "4-2-3-1",
+        "nota": "Nuovo."
+      },
+      "TOR": {
+        "squadra": "Torino",
+        "allenatore": "Ignazio Abate",
+        "modulo": "3-4-2-1",
+        "nota": "Nuovo."
+      },
+      "UDI": {
+        "squadra": "Udinese",
+        "allenatore": "Kosta Runjaic",
+        "modulo": "3-5-2",
+        "nota": "Confermato."
+      },
+      "VEN": {
+        "squadra": "Venezia",
+        "allenatore": "Giovanni Stroppa",
+        "modulo": "3-5-2",
+        "nota": "Confermato, neopromossa con un gruppo quasi tutto nuovo."
+      }
+    };
+    
+    const SQUADRE_LISTA = ["ATA","BOL","CAG","COM","FIO","FRO","GEN","INT","JUV","LAZ","LEC","MIL","MON","NAP","PAR","ROM","SAS","TOR","UDI","VEN"];
+    
+    const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8,"INT":8,"JUV":10,"LAZ":12,"LEC":13,"MIL":11,"MON":7,"NAP":11,"PAR":7,"ROM":7,"SAS":14,"TOR":9,"UDI":10,"VEN":9},"BOL":{"ATA":6,"BOL":0,"CAG":9,"COM":12,"FIO":10,"FRO":11,"GEN":7,"INT":9,"JUV":11,"LAZ":7,"LEC":6,"MIL":10,"MON":13,"NAP":6,"PAR":11,"ROM":12,"SAS":6,"TOR":8,"UDI":10,"VEN":7},"CAG":{"ATA":6,"BOL":9,"CAG":0,"COM":11,"FIO":6,"FRO":8,"GEN":10,"INT":12,"JUV":8,"LAZ":11,"LEC":10,"MIL":7,"MON":9,"NAP":12,"PAR":10,"ROM":8,"SAS":8,"TOR":11,"UDI":9,"VEN":6},"COM":{"ATA":10,"BOL":12,"CAG":11,"COM":0,"FIO":6,"FRO":6,"GEN":7,"INT":10,"JUV":8,"LAZ":10,"LEC":13,"MIL":9,"MON":9,"NAP":7,"PAR":7,"ROM":9,"SAS":11,"TOR":11,"UDI":8,"VEN":7},"FIO":{"ATA":8,"BOL":10,"CAG":6,"COM":6,"FIO":0,"FRO":10,"GEN":8,"INT":10,"JUV":11,"LAZ":6,"LEC":6,"MIL":9,"MON":12,"NAP":7,"PAR":12,"ROM":13,"SAS":7,"TOR":8,"UDI":11,"VEN":11},"FRO":{"ATA":5,"BOL":11,"CAG":8,"COM":6,"FIO":10,"FRO":0,"GEN":14,"INT":10,"JUV":9,"LAZ":7,"LEC":7,"MIL":9,"MON":7,"NAP":6,"PAR":11,"ROM":12,"SAS":6,"TOR":10,"UDI":10,"VEN":13},"GEN":{"ATA":8,"BOL":7,"CAG":10,"COM":7,"FIO":8,"FRO":14,"GEN":0,"INT":12,"JUV":5,"LAZ":9,"LEC":8,"MIL":7,"MON":7,"NAP":10,"PAR":9,"ROM":10,"SAS":7,"TOR":14,"UDI":7,"VEN":12},"INT":{"ATA":8,"BOL":9,"CAG":12,"COM":10,"FIO":10,"FRO":10,"GEN":12,"INT":0,"JUV":7,"LAZ":7,"LEC":8,"MIL":0,"MON":7,"NAP":10,"PAR":13,"ROM":12,"SAS":4,"TOR":12,"UDI":12,"VEN":8},"JUV":{"ATA":10,"BOL":11,"CAG":8,"COM":8,"FIO":11,"FRO":9,"GEN":5,"INT":7,"JUV":0,"LAZ":13,"LEC":12,"MIL":12,"MON":10,"NAP":12,"PAR":10,"ROM":6,"SAS":10,"TOR":0,"UDI":9,"VEN":8},"LAZ":{"ATA":12,"BOL":7,"CAG":11,"COM":10,"FIO":6,"FRO":7,"GEN":9,"INT":7,"JUV":13,"LAZ":0,"LEC":13,"MIL":12,"MON":7,"NAP":16,"PAR":7,"ROM":0,"SAS":12,"TOR":6,"UDI":8,"VEN":8},"LEC":{"ATA":13,"BOL":6,"CAG":10,"COM":13,"FIO":6,"FRO":7,"GEN":8,"INT":8,"JUV":12,"LAZ":13,"LEC":0,"MIL":11,"MON":6,"NAP":11,"PAR":4,"ROM":6,"SAS":14,"TOR":7,"UDI":7,"VEN":9},"MIL":{"ATA":11,"BOL":10,"CAG":7,"COM":9,"FIO":9,"FRO":9,"GEN":7,"INT":0,"JUV":12,"LAZ":12,"LEC":11,"MIL":0,"MON":12,"NAP":9,"PAR":6,"ROM":7,"SAS":15,"TOR":7,"UDI":7,"VEN":11},"MON":{"ATA":7,"BOL":13,"CAG":9,"COM":9,"FIO":12,"FRO":7,"GEN":7,"INT":7,"JUV":10,"LAZ":7,"LEC":6,"MIL":12,"MON":0,"NAP":10,"PAR":9,"ROM":12,"SAS":10,"TOR":9,"UDI":9,"VEN":6},"NAP":{"ATA":11,"BOL":6,"CAG":12,"COM":7,"FIO":7,"FRO":6,"GEN":10,"INT":10,"JUV":12,"LAZ":16,"LEC":11,"MIL":9,"MON":10,"NAP":0,"PAR":8,"ROM":3,"SAS":11,"TOR":7,"UDI":8,"VEN":7},"PAR":{"ATA":7,"BOL":11,"CAG":10,"COM":7,"FIO":12,"FRO":11,"GEN":9,"INT":13,"JUV":10,"LAZ":7,"LEC":4,"MIL":6,"MON":9,"NAP":8,"PAR":0,"ROM":12,"SAS":4,"TOR":9,"UDI":11,"VEN":11},"ROM":{"ATA":7,"BOL":12,"CAG":8,"COM":9,"FIO":13,"FRO":12,"GEN":10,"INT":12,"JUV":6,"LAZ":0,"LEC":6,"MIL":7,"MON":12,"NAP":3,"PAR":12,"ROM":0,"SAS":7,"TOR":13,"UDI":11,"VEN":11},"SAS":{"ATA":14,"BOL":6,"CAG":8,"COM":11,"FIO":7,"FRO":6,"GEN":7,"INT":4,"JUV":10,"LAZ":12,"LEC":14,"MIL":15,"MON":10,"NAP":11,"PAR":4,"ROM":7,"SAS":0,"TOR":9,"UDI":7,"VEN":9},"TOR":{"ATA":9,"BOL":8,"CAG":11,"COM":11,"FIO":8,"FRO":10,"GEN":14,"INT":12,"JUV":0,"LAZ":6,"LEC":7,"MIL":7,"MON":9,"NAP":7,"PAR":9,"ROM":13,"SAS":9,"TOR":0,"UDI":10,"VEN":11},"UDI":{"ATA":10,"BOL":10,"CAG":9,"COM":8,"FIO":11,"FRO":10,"GEN":7,"INT":12,"JUV":9,"LAZ":8,"LEC":7,"MIL":7,"MON":9,"NAP":8,"PAR":11,"ROM":11,"SAS":7,"TOR":10,"UDI":0,"VEN":7},"VEN":{"ATA":9,"BOL":7,"CAG":6,"COM":7,"FIO":11,"FRO":13,"GEN":12,"INT":8,"JUV":8,"LAZ":8,"LEC":9,"MIL":11,"MON":6,"NAP":7,"PAR":11,"ROM":11,"SAS":9,"TOR":11,"UDI":7,"VEN":0}};
 
-    /* ====================== MOTORE BUDGET ====================== */
+    /* ====================== COSTANTI ====================== */
 
     const BUDGET = 500;
     const RUOLI = ['P', 'D', 'C', 'A'];
@@ -709,12 +866,12 @@
     const NOMI_RUOLO = { P: 'Portieri', D: 'Difensori', C: 'Centrocampisti', A: 'Attaccanti' };
     const PIANO_DEFAULT = { P: 5, D: 15, C: 30, A: 50 };
 
-    // Ripartizione mediana misurata sulle aste reali 2026/27: e' un'alternativa
-    // al piano di partenza, non un obbligo.
+    // Ripartizione mediana misurata sulle aste reali 2026/27.
     const PIANO_MISURATO = { P: 7, D: 19, C: 32, A: 42 };
 
-    const PARTECIPANTI_DEFAULT = 10;
+    const N_SQUADRE_DEFAULT = 8;
 
+    const COLORE_RUOLO = { P: 'text-amber-400', D: 'text-emerald-400', C: 'text-blue-400', A: 'text-rose-400' };
     const NOMI_FASCIA = { 1: '1ª fascia', 2: '2ª fascia', 3: '3ª fascia', 4: '4ª fascia' };
     const STILE_FASCIA = {
       1: 'bg-amber-950 text-amber-300 border-amber-800/60',
@@ -722,6 +879,30 @@
       3: 'bg-slate-800 text-slate-400 border-slate-700/60',
       4: 'bg-slate-900 text-slate-500 border-slate-800'
     };
+    const ETICHETTA_TAG = {
+      TOP: 'Top 1° slot', TITOLARE: 'Titolare', RIGORISTA: 'Rigorista',
+      MODIFICATORE: 'Modificatore', SCOMMESSA: 'Scommessa', NUOVO: 'Nuovo arrivo',
+      LOWCOST: 'Low cost', RISCHIO: 'A rischio'
+    };
+    const STILE_TAG = {
+      TOP: 'bg-amber-950 text-amber-300 border-amber-800/60 font-bold',
+      TITOLARE: 'bg-slate-800 text-slate-300 border-slate-700/60',
+      RIGORISTA: 'bg-emerald-950 text-emerald-300 border-emerald-800/60 font-bold',
+      MODIFICATORE: 'bg-sky-950 text-sky-300 border-sky-800/60',
+      SCOMMESSA: 'bg-indigo-950 text-indigo-300 border-indigo-800/60',
+      NUOVO: 'bg-violet-950 text-violet-300 border-violet-800/60',
+      LOWCOST: 'bg-teal-950 text-teal-300 border-teal-800/60',
+      RISCHIO: 'bg-rose-950 text-rose-300 border-rose-800/60'
+    };
+    const NOMI_MANTRA = {
+      Por: 'Portiere', Dd: 'Difensore destro', Ds: 'Difensore sinistro', Dc: 'Difensore centrale',
+      B: 'Braccetto', E: 'Esterno', M: 'Mediano', C: 'Centrale', W: 'Ala',
+      T: 'Trequartista', A: 'Attaccante', Pc: 'Punta centrale'
+    };
+
+    const PER_ID = new Map(PLAYERS.map(p => [p.id, p]));
+
+    /* ====================== STATO ====================== */
 
     // localStorage puo' essere negato (iframe sandboxed, navigazione privata):
     // in quel caso l'asta resta utilizzabile per la sessione corrente.
@@ -740,47 +921,70 @@
       }
     })();
 
-    const CHIAVE_ROSA = 'fantastrategy.rosa.2026';
-    const CHIAVE_PIANO = 'fantastrategy.piano.2026';
-    const CHIAVE_LEGA = 'fantastrategy.lega.2026';
+    const CHIAVE = 'fantastrategy.asta.2026';
 
-    function caricaJSON(chiave, fallback) {
-      try {
-        const v = JSON.parse(store.getItem(chiave));
-        return v === null || typeof v !== 'object' ? fallback : v;
-      } catch (e) {
-        return fallback;
-      }
+    function nuoveSquadre(n) {
+      return Array.from({ length: n }, (_, i) => ({
+        nome: i === 0 ? 'Io' : `Squadra ${i + 1}`,
+        rosa: []
+      }));
     }
 
-    let rosa = Array.isArray(caricaJSON(CHIAVE_ROSA, [])) ? caricaJSON(CHIAVE_ROSA, []) : [];
-    let piano = { ...PIANO_DEFAULT, ...caricaJSON(CHIAVE_PIANO, {}) };
-    let partecipanti = Number(caricaJSON(CHIAVE_LEGA, {}).partecipanti) || PARTECIPANTI_DEFAULT;
+    function caricaStato() {
+      const vuoto = { squadre: nuoveSquadre(N_SQUADRE_DEFAULT), piano: { ...PIANO_DEFAULT } };
+      let s;
+      try { s = JSON.parse(store.getItem(CHIAVE)); } catch (e) { return vuoto; }
+      if (!s || !Array.isArray(s.squadre) || !s.squadre.length) return vuoto;
+      // Un giocatore uscito dal listone non deve lasciare dietro un acquisto orfano.
+      for (const sq of s.squadre) {
+        sq.rosa = (sq.rosa ?? []).filter(a => PER_ID.has(a.id));
+      }
+      return { squadre: s.squadre, piano: { ...PIANO_DEFAULT, ...(s.piano ?? {}) } };
+    }
+
+    const caricato = caricaStato();
+    let squadre = caricato.squadre;
+    let piano = caricato.piano;
     let filtroRuolo = 'ALL';
     let filtroTag = 'ALL';
+    let soloLiberi = true;
+    let vista = 'asta';
+    let apertaSquadra = null;   // indice della squadra di cui si mostra la rosa
+    let apertaRiga = null;      // id del giocatore con il pannello di assegnazione aperto
 
     function salva() {
-      store.setItem(CHIAVE_ROSA, JSON.stringify(rosa));
-      store.setItem(CHIAVE_PIANO, JSON.stringify(piano));
-      store.setItem(CHIAVE_LEGA, JSON.stringify({ partecipanti }));
+      store.setItem(CHIAVE, JSON.stringify({ squadre, piano }));
+    }
+
+    /* ====================== MOTORE ====================== */
+
+    /** Chi ha preso quale giocatore, e a quanto. */
+    function assegnazioni() {
+      const m = new Map();
+      squadre.forEach((sq, i) => {
+        for (const a of sq.rosa) m.set(a.id, { squadra: i, pagato: a.pagato });
+      });
+      return m;
     }
 
     /**
-     * Fotografia del budget dopo ogni acquisto.
+     * Fotografia di una singola squadra.
      *
-     * Il piano fissa quanto vale ogni reparto in partenza. La quota ancora
-     * disponibile per reparto e' il piano meno quanto quel reparto ha gia'
-     * speso, rinormalizzato sui crediti effettivamente rimasti: cosi' ogni
-     * scostamento dal preventivo si riversa da solo sugli altri reparti,
-     * in entrambe le direzioni.
+     * `capienza` e' quanto puo' mettere su un solo giocatore lasciando 1 credito
+     * per ogni altro slot ancora vuoto: e' il tetto invalicabile, per me come
+     * per gli avversari.
      */
-    function stato() {
-      const speso = rosa.reduce((s, p) => s + p.pagato, 0);
+    function statoSquadra(sq) {
+      const speso = sq.rosa.reduce((s, a) => s + a.pagato, 0);
       const residuo = BUDGET - speso;
 
       const presi = { P: 0, D: 0, C: 0, A: 0 };
       const spesoRuolo = { P: 0, D: 0, C: 0, A: 0 };
-      for (const p of rosa) { presi[p.ruolo]++; spesoRuolo[p.ruolo] += p.pagato; }
+      for (const a of sq.rosa) {
+        const p = PER_ID.get(a.id);
+        presi[p.ruolo]++;
+        spesoRuolo[p.ruolo] += a.pagato;
+      }
 
       const mancanti = {};
       let mancantiTot = 0;
@@ -789,85 +993,99 @@
         mancantiTot += mancanti[r];
       }
 
-      // Salvaguardia: qualunque offerta deve lasciare 1 credito per ogni
-      // altro slot ancora vuoto, altrimenti la rosa non si completa.
-      const capienzaMax = mancantiTot > 0 ? Math.max(1, residuo - (mancantiTot - 1)) : 0;
+      const capienza = mancantiTot > 0 ? Math.max(1, residuo - (mancantiTot - 1)) : 0;
+      return { speso, residuo, presi, spesoRuolo, mancanti, mancantiTot, capienza };
+    }
+
+    /** Quanto una squadra puo' ancora offrire per un giocatore di quel ruolo. */
+    function capienzaRuolo(st, ruolo) {
+      return st.mancanti[ruolo] > 0 ? st.capienza : 0;
+    }
+
+    /**
+     * Il mio stato, con in piu' la quota di budget per reparto.
+     *
+     * Il piano fissa quanto vale ogni reparto in partenza; la quota ancora
+     * disponibile e' il piano meno quanto quel reparto ha gia' speso,
+     * rinormalizzata sui crediti rimasti. Cosi' ogni scostamento dal preventivo
+     * si riversa da solo sugli altri reparti, in entrambe le direzioni.
+     */
+    function mioStato() {
+      const st = statoSquadra(squadre[0]);
 
       const pesi = {};
       let pesoTot = 0;
       for (const r of RUOLI) {
-        pesi[r] = mancanti[r] > 0 ? Math.max(0, BUDGET * piano[r] / 100 - spesoRuolo[r]) : 0;
+        pesi[r] = st.mancanti[r] > 0 ? Math.max(0, BUDGET * piano[r] / 100 - st.spesoRuolo[r]) : 0;
         pesoTot += pesi[r];
       }
 
-      const quota = {};
+      st.quota = {};
       for (const r of RUOLI) {
-        if (pesoTot > 0) quota[r] = residuo * pesi[r] / pesoTot;
-        else quota[r] = mancantiTot > 0 ? residuo * mancanti[r] / mancantiTot : 0;
+        if (pesoTot > 0) st.quota[r] = st.residuo * pesi[r] / pesoTot;
+        else st.quota[r] = st.mancantiTot > 0 ? st.residuo * st.mancanti[r] / st.mancantiTot : 0;
       }
-
-      return { speso, residuo, presi, spesoRuolo, mancanti, mancantiTot, capienzaMax, quota };
+      return st;
     }
 
-    /** Quanto puo' finire su un singolo giocatore di quel reparto. */
+    /** Quanto il piano concede oggi a un singolo giocatore di quel reparto. */
     function maxPerRuolo(st, r) {
       if (st.mancanti[r] <= 0) return 0;
-      return Math.max(1, Math.min(st.capienzaMax, Math.round(st.quota[r] - (st.mancanti[r] - 1))));
+      return Math.max(1, Math.min(st.capienza, Math.round(st.quota[r] - (st.mancanti[r] - 1))));
     }
 
     /**
-     * Quanto conviene offrire per ogni giocatore ancora disponibile.
-     *
-     * Il punto di partenza e' il prezzo di mercato, non una divisione della
-     * quota di reparto fra i migliori: nessuno compra i sei attaccanti piu'
-     * cari, quindi spalmare il budget su di loro produceva cifre irreali e
-     * faceva risultare fuori portata chiunque.
-     *
-     * Sopra al prezzo di mercato agiscono due tetti: quanto il piano concede
-     * oggi a un singolo giocatore di quel reparto, e la capienza massima. Man
-     * mano che il reparto si riempie il primo tetto scende, e i big rimasti
-     * diventano progressivamente inavvicinabili: e' il comportamento giusto.
+     * Il piu' alto rilancio che un avversario puo' ancora permettersi su quel
+     * ruolo. E' il numero che decide davvero un'asta: se nessuno puo' superare
+     * una certa cifra, quella cifra basta a vincere.
      */
-    function prezziConsigliati(st, mercato) {
-      const prezzi = new Map();
-      const presiId = new Set(rosa.map(p => p.id));
-
-      for (const r of RUOLI) {
-        const tetto = maxPerRuolo(st, r);
-        for (const p of PLAYERS.filter(p => p.ruolo === r && !presiId.has(p.id))) {
-          if (st.mancanti[r] <= 0) { prezzi.set(p.id, 0); continue; }
-          prezzi.set(p.id, Math.max(1, Math.min(mercato.get(p.id).atteso, tetto, st.capienzaMax)));
-        }
+    function tettoAvversari(ruolo) {
+      const migliore = { cr: 0, nome: null, quanti: 0 };
+      for (let i = 1; i < squadre.length; i++) {
+        const c = capienzaRuolo(statoSquadra(squadre[i]), ruolo);
+        if (c <= 0) continue;
+        migliore.quanti++;
+        if (c > migliore.cr) { migliore.cr = c; migliore.nome = squadre[i].nome; }
       }
-      return prezzi;
+      return migliore;
     }
 
     /**
-     * Prezzo che il mercato chiedera' per ogni giocatore, indipendente dal
-     * budget di chi sta comprando.
+     * Prezzo che il mercato chiedera' per ogni giocatore ancora libero.
      *
-     * I crediti in gioco in tutta la lega si dividono per reparto secondo la
-     * ripartizione mediana misurata sulle aste reali, e dentro ogni reparto si
-     * distribuiscono sui giocatori che verranno effettivamente comprati (gli
-     * slot per il numero di partecipanti) in proporzione al FVM ufficiale.
+     * Si parte dai crediti ancora in mano a tutti, si dividono per reparto
+     * secondo la ripartizione mediana misurata sulle aste reali, ripesata sugli
+     * slot che restano davvero da riempire, e si distribuiscono sui giocatori
+     * ancora liberi in proporzione al FVM ufficiale.
      *
-     * E' una stima costruita su due dati pubblici, non un prezzo rilevato:
-     * l'intervallo mostrato tiene conto di quanto le aste vere si discostano.
+     * Ricalcolandosi a ogni assegnazione riflette l'asta vera: se gli altri
+     * hanno finito i crediti, i big rimasti costano meno.
      */
-    function prezziMercato() {
-      const budgetLega = partecipanti * BUDGET;
-      const mercato = new Map();
+    function prezziMercato(asseg) {
+      const stati = squadre.map(statoSquadra);
+      const residuoLega = stati.reduce((s, st) => s + st.residuo, 0);
 
+      const slotRimasti = {};
+      for (const r of RUOLI) slotRimasti[r] = stati.reduce((s, st) => s + st.mancanti[r], 0);
+
+      const pesi = {};
+      let pesoTot = 0;
       for (const r of RUOLI) {
-        const n = TARGET[r] * partecipanti;
-        const disponibili = PLAYERS.filter(p => p.ruolo === r).sort((a, b) => b.fvm - a.fvm);
-        const contesi = disponibili.slice(0, n);
-        const somma = contesi.reduce((s, p) => s + p.fvm, 0) || 1;
-        const monte = Math.max(0, budgetLega * (PIANO_MISURATO[r] / 100) - n);
+        pesi[r] = PIANO_MISURATO[r] * (slotRimasti[r] / (TARGET[r] * squadre.length));
+        pesoTot += pesi[r];
+      }
 
-        for (const p of disponibili) {
-          // Chi resta fuori dai posti disponibili non ha mercato: parte da 1.
-          const atteso = contesi.includes(p) ? 1 + (p.fvm / somma) * monte : 1;
+      const mercato = new Map();
+      for (const r of RUOLI) {
+        const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id)).sort((a, b) => b.fvm - a.fvm);
+        const n = slotRimasti[r];
+        const contesi = new Set(liberi.slice(0, n).map(p => p.id));
+        const somma = liberi.slice(0, n).reduce((s, p) => s + p.fvm, 0) || 1;
+        const monte = pesoTot > 0 ? Math.max(0, residuoLega * (pesi[r] / pesoTot) - n) : 0;
+
+        for (const p of liberi) {
+          // Chi resta fuori dai posti ancora disponibili non ha mercato.
+          const atteso = contesi.has(p.id) ? 1 + (p.fvm / somma) * monte : 1;
           mercato.set(p.id, {
             atteso: Math.max(1, Math.round(atteso)),
             min: Math.max(1, Math.round(atteso * 0.8)),
@@ -878,45 +1096,165 @@
       return mercato;
     }
 
-    /* ====================== GRIGLIA PORTIERI ====================== */
-
-    function initGriglia() {
-      const opzioni = SQUADRE.map(s => `<option value="${s}">${s}</option>`).join('');
-      for (const id of ['griglia-a', 'griglia-b']) {
-        const sel = document.getElementById(id);
-        sel.innerHTML = opzioni;
-        sel.addEventListener('change', calcolaGriglia);
+    /**
+     * Quanto conviene offrire: il prezzo di mercato, limitato da quanto il
+     * piano concede oggi a un giocatore di quel reparto e dalla capienza.
+     */
+    function prezziConsigliati(st, mercato, asseg) {
+      const prezzi = new Map();
+      for (const r of RUOLI) {
+        const tetto = maxPerRuolo(st, r);
+        for (const p of PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id))) {
+          if (st.mancanti[r] <= 0) { prezzi.set(p.id, 0); continue; }
+          prezzi.set(p.id, Math.max(1, Math.min(mercato.get(p.id).atteso, tetto, st.capienza)));
+        }
       }
-      document.getElementById('griglia-a').value = 'INT';
-      document.getElementById('griglia-b').value = 'MIL';
-      calcolaGriglia();
+      return prezzi;
     }
 
-    function calcolaGriglia() {
-      const a = document.getElementById('griglia-a').value;
-      const b = document.getElementById('griglia-b').value;
-      const valore = document.getElementById('griglia-valore');
-      const testo = document.getElementById('griglia-testo');
+    /* ====================== UTILITA' ====================== */
 
-      if (a === b) {
-        valore.textContent = '—';
-        testo.textContent = 'Seleziona due squadre diverse';
-        return;
-      }
-
-      const v = GRIGLIA[a]?.[b];
-      valore.textContent = v ?? '—';
-
-      let giudizio;
-      if (v === 0) giudizio = 'Alternanza perfetta: mai entrambe fuori casa';
-      else if (v <= 5) giudizio = 'Incrocio eccellente';
-      else if (v <= 7) giudizio = 'Incrocio buono';
-      else giudizio = 'Incrocio sconsigliato';
-
-      testo.textContent = GRIGLIA_VERIFICATA ? giudizio : giudizio + ' (dato provvisorio)';
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
-    /* ====================== FILTRI ====================== */
+    /* ====================== RENDER ====================== */
+
+    function render() {
+      const asseg = assegnazioni();
+      const st = mioStato();
+      const mercato = prezziMercato(asseg);
+      const prezzi = prezziConsigliati(st, mercato, asseg);
+
+      renderMetriche(st);
+      renderImpostazioni();
+      renderTabellone();
+      renderTabella(st, mercato, prezzi, asseg);
+      renderRosa();
+      renderFormazioni(asseg);
+      renderCoppie(asseg);
+      aggiornaFiltriAttivi();
+      salva();
+    }
+
+    function renderMetriche(st) {
+      document.getElementById('m-residuo').textContent = st.residuo;
+      document.getElementById('m-slot').textContent = squadre[0].rosa.length;
+      document.getElementById('m-speso').textContent = st.speso;
+      document.getElementById('m-max-a').textContent = maxPerRuolo(st, 'A');
+      document.getElementById('m-max-c').textContent = maxPerRuolo(st, 'C');
+      document.getElementById('m-capienza').textContent = st.capienza;
+      document.getElementById('m-slot-vuoti').textContent = Math.max(0, st.mancantiTot - 1);
+      document.getElementById('badge-ruoli').textContent =
+        RUOLI.map(r => `${st.presi[r]}/${TARGET[r]} ${r}`).join(' • ');
+      document.getElementById('intestazione-lega').textContent =
+        `${squadre.length} partecipanti • ${squadre[0].nome}`;
+
+      document.getElementById('riepilogo-reparti').innerHTML = RUOLI.map(r => {
+        const previsto = Math.round(BUDGET * piano[r] / 100);
+        const sforato = st.spesoRuolo[r] > previsto;
+        return `
+          <div class="bg-slate-950/80 border ${sforato ? 'border-rose-800/60' : 'border-slate-800'} rounded-lg p-1.5 text-center" title="${NOMI_RUOLO[r]}: previsti ${previsto} cr dal piano">
+            <span class="text-[9px] uppercase font-bold ${COLORE_RUOLO[r]} block">${r}</span>
+            <span class="text-[11px] font-black tabular-nums ${sforato ? 'text-rose-300' : 'text-slate-200'}">${st.spesoRuolo[r]}</span>
+            <span class="text-[9px] text-slate-500 block tabular-nums">/ ${previsto}</span>
+          </div>`;
+      }).join('');
+    }
+
+    function renderImpostazioni() {
+      for (const r of RUOLI) {
+        const input = document.getElementById('piano-' + r);
+        if (document.activeElement !== input) input.value = piano[r];
+      }
+      const nSq = document.getElementById('n-squadre');
+      if (document.activeElement !== nSq) nSq.value = squadre.length;
+
+      const totale = RUOLI.reduce((s, r) => s + Number(piano[r]), 0);
+      const el = document.getElementById('piano-totale');
+      el.textContent = `Totale ${totale}%` + (totale === 100 ? '' : ' — le quote vengono riproporzionate');
+      el.className = totale === 100 ? 'text-[11px] text-slate-400' : 'text-[11px] text-amber-400';
+
+      const nomi = document.getElementById('nomi-squadre');
+      if (Number(nomi.dataset.n) !== squadre.length) {
+        nomi.dataset.n = squadre.length;
+        nomi.innerHTML = squadre.map((sq, i) => `
+          <input type="text" data-nome="${i}" value="${esc(sq.nome)}" maxlength="24"
+            class="bg-slate-950 border ${i === 0 ? 'border-indigo-700' : 'border-slate-800'} rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">`).join('');
+        for (const input of nomi.querySelectorAll('[data-nome]')) {
+          input.addEventListener('input', () => {
+            const i = Number(input.dataset.nome);
+            squadre[i].nome = input.value.trim() || (i === 0 ? 'Io' : `Squadra ${i + 1}`);
+            render();
+          });
+        }
+      }
+    }
+
+    function renderTabellone() {
+      document.getElementById('tabellone').innerHTML = squadre.map((sq, i) => {
+        const st = statoSquadra(sq);
+        const aperti = RUOLI.filter(r => st.mancanti[r] > 0);
+        const io = i === 0;
+        const completa = st.mancantiTot === 0;
+
+        const cella = r => `<td class="py-2 px-2 text-center tabular-nums ${st.mancanti[r] === 0 ? 'text-slate-600' : COLORE_RUOLO[r]}">${st.presi[r]}/${TARGET[r]}</td>`;
+
+        const dettaglio = apertaSquadra === i ? `
+          <tr class="bg-slate-950/60">
+            <td colspan="9" class="p-3">
+              ${sq.rosa.length ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">${
+                sq.rosa.map((a, j) => {
+                  const p = PER_ID.get(a.id);
+                  return `<div class="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 gap-2">
+                    <span class="truncate"><span class="font-black ${COLORE_RUOLO[p.ruolo]}">${p.ruolo}</span> ${esc(p.nome)}</span>
+                    <span class="flex items-center gap-2 shrink-0">
+                      <button type="button" data-correggi="${i}:${j}" class="text-emerald-400 font-black tabular-nums hover:text-emerald-300" title="Correggi il prezzo">${a.pagato}</button>
+                      <button type="button" data-rimuovi="${i}:${j}" class="text-slate-500 hover:text-rose-400" title="Rimuovi" aria-label="Rimuovi ${esc(p.nome)}"><i class="fa-solid fa-trash-can"></i></button>
+                    </span>
+                  </div>`;
+                }).join('')}</div>`
+                : '<p class="text-slate-500 italic text-[11px]">Nessun giocatore assegnato.</p>'}
+            </td>
+          </tr>` : '';
+
+        return `
+          <tr data-squadra="${i}" class="cursor-pointer transition ${io ? 'bg-indigo-950/30' : ''} ${apertaSquadra === i ? 'bg-slate-800/40' : 'hover:bg-slate-800/30'}">
+            <td class="py-2 pr-3 font-semibold ${io ? 'text-indigo-300' : 'text-slate-200'}">
+              ${apertaSquadra === i
+                ? '<i class="fa-solid fa-chevron-down text-[9px] text-slate-600 mr-1.5"></i>'
+                : '<i class="fa-solid fa-chevron-right text-[9px] text-slate-600 mr-1.5"></i>'}${esc(sq.nome)}
+            </td>
+            <td class="py-2 px-2 text-right font-black tabular-nums ${st.residuo <= 20 ? 'text-rose-400' : 'text-emerald-400'}">${st.residuo}</td>
+            <td class="py-2 px-2 text-right tabular-nums text-slate-500">${st.speso}</td>
+            ${RUOLI.map(cella).join('')}
+            <td class="py-2 px-2 text-right font-black tabular-nums text-white">${completa ? '—' : st.capienza}</td>
+            <td class="py-2 pl-2 text-[11px] ${completa ? 'text-slate-600' : 'text-slate-400'}">${completa ? 'rosa completa' : aperti.join(' ')}</td>
+          </tr>${dettaglio}`;
+      }).join('');
+
+      for (const tr of document.querySelectorAll('#tabellone [data-squadra]')) {
+        tr.addEventListener('click', e => {
+          if (e.target.closest('button')) return;
+          const i = Number(tr.dataset.squadra);
+          apertaSquadra = apertaSquadra === i ? null : i;
+          render();
+        });
+      }
+      for (const b of document.querySelectorAll('#tabellone [data-rimuovi]')) {
+        b.addEventListener('click', () => {
+          const [i, j] = b.dataset.rimuovi.split(':').map(Number);
+          squadre[i].rosa.splice(j, 1);
+          render();
+        });
+      }
+      for (const b of document.querySelectorAll('#tabellone [data-correggi]')) {
+        b.addEventListener('click', () => {
+          const [i, j] = b.dataset.correggi.split(':').map(Number);
+          correggi(i, j);
+        });
+      }
+    }
 
     const RUOLI_FILTRO = [
       { k: 'ALL', et: 'TUTTI', c: '' },
@@ -944,7 +1282,7 @@
       ).join('');
 
       document.getElementById('filtri-tag').innerHTML =
-        '<span class="text-slate-500 self-center font-semibold">Filtri Guida:</span>' +
+        '<span class="text-slate-500 self-center font-semibold">Filtri:</span>' +
         TAG_FILTRO.map(t =>
           `<button type="button" data-tag="${t.k}" class="btn-tag px-2.5 py-1 rounded font-semibold ${t.c}">${t.i}${t.et}</button>`
         ).join('');
@@ -973,270 +1311,379 @@
       }
     }
 
-    /* ====================== RENDER ====================== */
-
-    const COLORE_RUOLO = { P: 'text-amber-400', D: 'text-emerald-400', C: 'text-blue-400', A: 'text-rose-400' };
-
-    const ETICHETTA_TAG = {
-      TOP: 'Top 1° slot', TITOLARE: 'Titolare', RIGORISTA: 'Rigorista',
-      MODIFICATORE: 'Modificatore', SCOMMESSA: 'Scommessa', NUOVO: 'Nuovo arrivo',
-      LOWCOST: 'Low cost', RISCHIO: 'A rischio'
-    };
-
-    const NOMI_MANTRA = {
-      Por: 'Portiere', Dd: 'Difensore destro', Ds: 'Difensore sinistro', Dc: 'Difensore centrale',
-      B: 'Braccetto', E: 'Esterno', M: 'Mediano', C: 'Centrale', W: 'Ala',
-      T: 'Trequartista', A: 'Attaccante', Pc: 'Punta centrale'
-    };
-
-    const STILE_TAG = {
-      TOP: 'bg-amber-950 text-amber-300 border-amber-800/60 font-bold',
-      TITOLARE: 'bg-slate-800 text-slate-300 border-slate-700/60',
-      NUOVO: 'bg-violet-950 text-violet-300 border-violet-800/60',
-      RIGORISTA: 'bg-emerald-950 text-emerald-300 border-emerald-800/60 font-bold',
-      MODIFICATORE: 'bg-sky-950 text-sky-300 border-sky-800/60',
-      LOWCOST: 'bg-teal-950 text-teal-300 border-teal-800/60',
-      RISCHIO: 'bg-rose-950 text-rose-300 border-rose-800/60',
-      SCOMMESSA: 'bg-indigo-950 text-indigo-300 border-indigo-800/60'
-    };
-
-    function esc(s) {
-      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    }
-
-    function render() {
-      const st = stato();
-      const mercato = prezziMercato();
-      const prezzi = prezziConsigliati(st, mercato);
-
-      renderMetriche(st);
-      renderPiano(st);
-      renderTabella(st, prezzi, mercato);
-      renderRosa(st);
-      aggiornaFiltriAttivi();
-      salva();
-    }
-
-    function renderMetriche(st) {
-      document.getElementById('m-residuo').textContent = st.residuo;
-      document.getElementById('m-slot').textContent = rosa.length;
-      document.getElementById('m-speso').textContent = st.speso;
-      document.getElementById('m-max-a').textContent = maxPerRuolo(st, 'A');
-      document.getElementById('m-max-c').textContent = maxPerRuolo(st, 'C');
-      document.getElementById('m-capienza').textContent = st.capienzaMax;
-      document.getElementById('m-slot-vuoti').textContent = Math.max(0, st.mancantiTot - 1);
-      document.getElementById('badge-ruoli').textContent =
-        RUOLI.map(r => `${st.presi[r]}/${TARGET[r]} ${r}`).join(' • ');
-
-      document.getElementById('riepilogo-reparti').innerHTML = RUOLI.map(r => {
-        const previsto = Math.round(BUDGET * piano[r] / 100);
-        const sforato = st.spesoRuolo[r] > previsto;
-        return `
-          <div class="bg-slate-950/80 border ${sforato ? 'border-rose-800/60' : 'border-slate-800'} rounded-lg p-1.5 text-center" title="${NOMI_RUOLO[r]}: previsti ${previsto} cr dal piano">
-            <span class="text-[9px] uppercase font-bold ${COLORE_RUOLO[r]} block">${r}</span>
-            <span class="text-[11px] font-black tabular-nums ${sforato ? 'text-rose-300' : 'text-slate-200'}">${st.spesoRuolo[r]}</span>
-            <span class="text-[9px] text-slate-500 block tabular-nums">/ ${previsto}</span>
-          </div>`;
-      }).join('');
-    }
-
-    function renderPiano(st) {
-      for (const r of RUOLI) {
-        const input = document.getElementById('piano-' + r);
-        if (document.activeElement !== input) input.value = piano[r];
-      }
-      const inputPart = document.getElementById('partecipanti');
-      if (document.activeElement !== inputPart) inputPart.value = partecipanti;
-
-      const totale = RUOLI.reduce((s, r) => s + Number(piano[r]), 0);
-      const el = document.getElementById('piano-totale');
-      el.textContent = `Totale ${totale}%` + (totale === 100 ? '' : ' — le quote vengono riproporzionate');
-      el.className = totale === 100 ? 'text-[11px] text-slate-400' : 'text-[11px] text-amber-400';
-    }
-
-    function renderTabella(st, prezzi, mercato) {
+    function renderTabella(st, mercato, prezzi, asseg) {
       const q = document.getElementById('ricerca').value.trim().toLowerCase();
-      const presiId = new Set(rosa.map(p => p.id));
+      const tetti = Object.fromEntries(RUOLI.map(r => [r, tettoAvversari(r)]));
 
       const righe = PLAYERS.filter(p => {
+        if (soloLiberi && asseg.has(p.id)) return false;
         if (filtroRuolo !== 'ALL' && p.ruolo !== filtroRuolo) return false;
         if (filtroTag !== 'ALL' && !p.tag.includes(filtroTag)) return false;
         if (!q) return true;
-        return [p.nome, p.squadra, p.nota ?? '', ...(p.blocco ?? []), ...p.mantra, ...p.tag].join(' ').toLowerCase().includes(q);
+        return [p.nome, p.squadra, p.nota ?? '', ...(p.blocco ?? []), ...p.mantra, ...p.tag]
+          .join(' ').toLowerCase().includes(q);
       });
 
       document.getElementById('tabella').innerHTML = righe.map(p => {
-        const preso = presiId.has(p.id);
+        const preso = asseg.get(p.id);
+        const mio = maxPerRuolo(st, p.ruolo);
+        const avv = tetti[p.ruolo];
+        const mkt = mercato.get(p.id);
         const prezzo = prezzi.get(p.id) ?? 0;
-        const mantra = p.mantra.map(m => `<span class="text-[10px] px-1.5 py-px rounded bg-slate-800/80 text-slate-400 border border-slate-700/50" title="${NOMI_MANTRA[m] ?? m}">${m}</span>`).join(' ');
-        const dettaglio = p.blocco ? p.blocco.join(' / ') : '';
+
+        const mantra = p.mantra.map(m =>
+          `<span class="text-[10px] px-1 py-px rounded bg-slate-800/80 text-slate-400 border border-slate-700/50" title="${NOMI_MANTRA[m] ?? m}">${m}</span>`).join(' ');
+
+        const celle = preso
+          ? `<td class="p-2.5 text-center text-[11px] text-slate-500">—</td>
+             <td class="p-2.5 text-right">
+               <span class="text-[11px] font-bold text-slate-400">${esc(squadre[preso.squadra].nome)}</span>
+               <span class="block text-[11px] text-emerald-500 tabular-nums">${preso.pagato} cr</span>
+             </td>`
+          : `<td class="p-2.5 text-center align-top">
+               <span class="font-black text-amber-300 text-sm tabular-nums" title="Quanto ti conviene offrire">${prezzo} cr</span>
+               <span class="block text-[10px] text-slate-500 mt-0.5 tabular-nums">mercato ${mkt.min}–${mkt.max}</span>
+               ${mkt.min > mio
+                 ? '<span class="block text-[10px] text-rose-400 mt-0.5">oltre il tuo budget</span>'
+                 : ''}
+               <span class="block text-[9px] text-slate-600 mt-0.5 tabular-nums">${
+                 avv.cr > 0
+                   ? `${avv.quanti} in corsa, fino a ${avv.cr} (${esc(avv.nome)})`
+                   : 'nessun rivale puo\' piu\' prenderlo'}</span>
+             </td>
+             <td class="p-2.5 text-right align-top">
+               <button type="button" data-apri="${p.id}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">Assegna</button>
+             </td>`;
+
+        const pannello = apertaRiga === p.id && !preso ? `
+          <tr class="bg-slate-950">
+            <td colspan="7" class="p-3">
+              <div class="flex flex-wrap items-end gap-3">
+                <label class="text-[10px] uppercase font-semibold text-slate-400">Prezzo pagato
+                  <input type="number" id="prezzo-input" min="1" value="${prezzo}" class="mt-1 block w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-100 tabular-nums focus:outline-none focus:border-indigo-500">
+                </label>
+                <div class="flex flex-wrap gap-1.5">
+                  ${squadre.map((sq, i) => {
+                    const s = statoSquadra(sq);
+                    const puo = s.mancanti[p.ruolo] > 0;
+                    return `<button type="button" data-assegna="${p.id}:${i}" ${puo ? '' : 'disabled'}
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                        !puo ? 'bg-slate-900 text-slate-700 cursor-not-allowed'
+                        : i === 0 ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-200'}"
+                      title="${puo ? `capienza ${s.capienza} cr` : `ha gia' tutti gli slot ${p.ruolo}`}">${esc(sq.nome)}</button>`;
+                  }).join('')}
+                </div>
+                <button type="button" data-chiudi="1" class="text-[11px] text-slate-500 hover:text-slate-300 pb-2">Annulla</button>
+              </div>
+            </td>
+          </tr>` : '';
 
         return `
-          <tr class="${preso ? 'opacity-35 bg-slate-950/60' : 'hover:bg-slate-800/40 transition duration-150'}">
-            <td class="p-3 font-black ${COLORE_RUOLO[p.ruolo]} align-top">${p.ruolo}</td>
-            <td class="p-3 align-top">
+          <tr class="${preso ? 'opacity-40 bg-slate-950/60' : 'hover:bg-slate-800/40 transition'}">
+            <td class="p-2.5 font-black ${COLORE_RUOLO[p.ruolo]} align-top">${p.ruolo}</td>
+            <td class="p-2.5 align-top">
               <span class="font-semibold text-white">${esc(p.nome)}</span>
-              ${dettaglio ? `<p class="text-[10px] text-slate-500 mt-0.5">${esc(dettaglio)}</p>` : ''}
+              ${p.blocco ? `<p class="text-[10px] text-slate-500 mt-0.5">${esc(p.blocco.join(' / '))}</p>` : ''}
               <p class="mt-1 flex flex-wrap gap-1">${mantra}</p>
             </td>
-            <td class="p-3 text-slate-400 align-top">${esc(p.squadra)}</td>
-            <td class="p-3 text-center align-top">
+            <td class="p-2.5 text-slate-400 align-top">${esc(p.squadra)}</td>
+            <td class="p-2.5 text-center align-top">
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800/60 text-slate-300 border border-slate-700/50 tabular-nums" title="Mantra: FVM ${p.fvmM}, quotazione ${p.quotM}">${p.fvm} / ${p.quot}</span>
               <span class="block mt-1 text-[10px] px-1.5 py-px rounded border ${STILE_FASCIA[p.fascia]}" title="Fascia dalla quotazione ufficiale: 1ª da 30 crediti in su, 2ª 15-29, 3ª 6-14, 4ª 1-5">${NOMI_FASCIA[p.fascia]}</span>
             </td>
-            <td class="p-3 align-top max-w-md">
-              <p class="flex flex-wrap gap-1">${p.tag.map(t => `<span class="text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider border ${STILE_TAG[t]}">${ETICHETTA_TAG[t]}</span>`).join('')}</p>
+            <td class="p-2.5 align-top max-w-sm">
+              <p class="flex flex-wrap gap-1">${p.tag.map(t => `<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border ${STILE_TAG[t]}">${ETICHETTA_TAG[t]}</span>`).join('')}</p>
               ${p.nota ? `<p class="text-[11px] text-slate-300 mt-1.5 leading-relaxed">${esc(p.nota)}</p>` : ''}
-              <p class="text-[10px] text-slate-500 mt-1 tabular-nums">
-                ${p.rank}° per FVM fra i ${NOMI_RUOLO[p.ruolo].toLowerCase()}${p.fonti ? ' • fonti: ' + esc(p.fonti.join(', ')) : ''}
-              </p>
+              <p class="text-[10px] text-slate-500 mt-1 tabular-nums">${p.rank}° per FVM fra i ${NOMI_RUOLO[p.ruolo].toLowerCase()}${p.fonti ? ' • fonti: ' + esc(p.fonti.join(', ')) : ''}</p>
             </td>
-            <td class="p-3 text-center align-top">
-              ${preso ? '<span class="text-slate-500">—</span>' : `
-                <span class="font-black text-amber-300 text-sm tabular-nums">${prezzo} cr</span>
-                <span class="block text-[10px] text-slate-500 mt-0.5 tabular-nums" title="Stima di quanto costera' in un'asta da ${partecipanti} partecipanti">mercato ${mercato.get(p.id).min}–${mercato.get(p.id).max}</span>
-                ${mercato.get(p.id).min > Math.min(maxPerRuolo(st, p.ruolo), st.capienzaMax)
-                  ? '<span class="block text-[10px] text-rose-400 mt-0.5">fuori portata</span>' : ''}
-              `}
-            </td>
-            <td class="p-3 text-right align-top">
-              ${preso
-                ? '<span class="text-[11px] text-slate-500 font-bold tracking-wider">PRESO</span>'
-                : `<button type="button" data-compra="${p.id}" data-prezzo="${prezzo}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">Acquista</button>`}
-            </td>
-          </tr>`;
-      }).join('');
-
-      if (!righe.length) {
-        document.getElementById('tabella').innerHTML =
-          '<tr><td colspan="7" class="p-8 text-center text-xs text-slate-500">Nessun calciatore corrisponde ai filtri.</td></tr>';
-      }
+            ${celle}
+          </tr>${pannello}`;
+      }).join('') || '<tr><td colspan="7" class="p-8 text-center text-xs text-slate-500">Nessun calciatore corrisponde ai filtri.</td></tr>';
 
       document.getElementById('conteggio').textContent =
-        `${righe.length} di ${PLAYERS.length} calciatori` + (st.mancantiTot === 0 ? ' — rosa completa' : '');
+        `${righe.length} mostrati • ${PLAYERS.length - asseg.size} ancora liberi su ${PLAYERS.length}`;
 
-      for (const b of document.querySelectorAll('[data-compra]')) {
-        b.addEventListener('click', () => compra(Number(b.dataset.compra), Number(b.dataset.prezzo)));
+      for (const b of document.querySelectorAll('[data-apri]')) {
+        b.addEventListener('click', () => { apertaRiga = Number(b.dataset.apri); render(); focalizzaPrezzo(); });
+      }
+      for (const b of document.querySelectorAll('[data-chiudi]')) {
+        b.addEventListener('click', () => { apertaRiga = null; render(); });
+      }
+      for (const b of document.querySelectorAll('[data-assegna]')) {
+        b.addEventListener('click', () => {
+          const [id, i] = b.dataset.assegna.split(':').map(Number);
+          assegna(id, i);
+        });
+      }
+      const input = document.getElementById('prezzo-input');
+      if (input) {
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); assegna(apertaRiga, 0); }
+          if (e.key === 'Escape') { apertaRiga = null; render(); }
+        });
       }
     }
 
-    function renderRosa(st) {
+    function focalizzaPrezzo() {
+      const input = document.getElementById('prezzo-input');
+      if (input) { input.focus(); input.select(); }
+    }
+
+    function renderRosa() {
       const el = document.getElementById('rosa');
+      const rosa = squadre[0].rosa;
       if (!rosa.length) {
-        el.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs italic">Nessun calciatore registrato in rosa.</div>';
+        el.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs italic">Nessun calciatore in rosa.</div>';
         return;
       }
+      const ordine = { P: 0, D: 1, C: 2, A: 3 };
+      const indicizzata = rosa.map((a, j) => ({ ...a, j, p: PER_ID.get(a.id) }))
+        .sort((x, y) => ordine[x.p.ruolo] - ordine[y.p.ruolo] || y.pagato - x.pagato);
 
-      el.innerHTML = rosa.map((p, i) => `
+      el.innerHTML = indicizzata.map(({ p, pagato, j }) => `
         <div class="flex justify-between items-center bg-slate-950/80 p-2 rounded-xl border border-slate-800 text-xs gap-2">
           <div class="flex items-center gap-2 truncate">
             <span class="font-black ${COLORE_RUOLO[p.ruolo]}">${p.ruolo}</span>
             <span class="font-semibold text-slate-200 truncate">${esc(p.nome)}</span>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button type="button" data-correggi="${i}" class="text-emerald-400 font-black tabular-nums hover:text-emerald-300 transition" title="Correggi il prezzo pagato">${p.pagato} cr</button>
-            <button type="button" data-rimuovi="${i}" class="text-slate-500 hover:text-rose-400 transition" title="Rimuovi dalla rosa" aria-label="Rimuovi ${esc(p.nome)}"><i class="fa-solid fa-trash-can"></i></button>
+            <button type="button" data-mia-correggi="${j}" class="text-emerald-400 font-black tabular-nums hover:text-emerald-300" title="Correggi il prezzo">${pagato} cr</button>
+            <button type="button" data-mia-rimuovi="${j}" class="text-slate-500 hover:text-rose-400" title="Rimuovi" aria-label="Rimuovi ${esc(p.nome)}"><i class="fa-solid fa-trash-can"></i></button>
           </div>
         </div>`).join('');
 
-      for (const b of document.querySelectorAll('[data-rimuovi]')) {
-        b.addEventListener('click', () => { rosa.splice(Number(b.dataset.rimuovi), 1); render(); });
+      for (const b of document.querySelectorAll('[data-mia-rimuovi]')) {
+        b.addEventListener('click', () => { squadre[0].rosa.splice(Number(b.dataset.miaRimuovi), 1); render(); });
       }
-      for (const b of document.querySelectorAll('[data-correggi]')) {
-        b.addEventListener('click', () => correggi(Number(b.dataset.correggi)));
+      for (const b of document.querySelectorAll('[data-mia-correggi]')) {
+        b.addEventListener('click', () => correggi(0, Number(b.dataset.miaCorreggi)));
       }
+    }
+
+    function renderFormazioni(asseg) {
+      const q = document.getElementById('ricerca-formazioni').value.trim().toLowerCase();
+      const ordine = { P: 0, D: 1, C: 2, A: 3 };
+
+      const carte = Object.entries(SQUADRE_INFO).map(([cod, info]) => {
+        const titolari = PLAYERS
+          .filter(p => p.cod === cod && p.tag.includes('TITOLARE'))
+          .sort((a, b) => ordine[a.ruolo] - ordine[b.ruolo] || b.fvm - a.fvm);
+
+        if (q && !info.squadra.toLowerCase().includes(q) && !titolari.some(p => p.nome.toLowerCase().includes(q))) return '';
+
+        const liberi = titolari.filter(p => !asseg.has(p.id)).length;
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <h3 class="font-bold text-white">${esc(info.squadra)}</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400 shrink-0">${esc(info.modulo)}</span>
+            </div>
+            <p class="text-[11px] text-slate-400">${esc(info.allenatore)}</p>
+            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">${esc(info.nota)}</p>
+            <p class="text-[10px] mt-2 ${liberi ? 'text-emerald-400' : 'text-slate-600'}">${liberi} titolari ancora liberi su ${titolari.length}</p>
+            <div class="mt-2 space-y-1">
+              ${titolari.length ? titolari.map(p => {
+                const preso = asseg.get(p.id);
+                return `<div class="flex justify-between items-center gap-2 text-[11px] ${preso ? 'opacity-50' : ''}">
+                  <span class="truncate"><span class="font-black ${COLORE_RUOLO[p.ruolo]}">${p.ruolo}</span> ${esc(p.nome)}</span>
+                  <span class="shrink-0 ${preso ? 'text-slate-500' : 'text-emerald-400'}">${preso ? esc(squadre[preso.squadra].nome) + ' · ' + preso.pagato : 'libero'}</span>
+                </div>`;
+              }).join('')
+                : '<p class="text-[11px] text-slate-600 italic">Formazione tipo non ancora raccolta per questa squadra.</p>'}
+            </div>
+          </div>`;
+      }).join('');
+
+      document.getElementById('formazioni').innerHTML =
+        carte || '<p class="text-xs text-slate-500 col-span-full">Nessuna squadra corrisponde alla ricerca.</p>';
+    }
+
+    /* ====================== GRIGLIA PORTIERI ====================== */
+
+    function initGriglia() {
+      const opzioni = SQUADRE_LISTA.map(s => `<option value="${s}">${s}</option>`).join('');
+      for (const id of ['griglia-a', 'griglia-b']) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = opzioni;
+        sel.addEventListener('change', calcolaGriglia);
+      }
+      document.getElementById('griglia-a').value = 'INT';
+      document.getElementById('griglia-b').value = 'MIL';
+      calcolaGriglia();
+    }
+
+    function giudizioIncrocio(v) {
+      if (v === 0) return 'Alternanza perfetta: mai entrambe fuori casa';
+      if (v <= 5) return 'Incrocio eccellente';
+      if (v <= 7) return 'Incrocio buono';
+      return 'Incrocio sconsigliato';
+    }
+
+    function calcolaGriglia() {
+      const a = document.getElementById('griglia-a').value;
+      const b = document.getElementById('griglia-b').value;
+      const valore = document.getElementById('griglia-valore');
+      const testo = document.getElementById('griglia-testo');
+
+      if (a === b) {
+        valore.textContent = '—';
+        testo.textContent = 'Seleziona due squadre diverse';
+        return;
+      }
+      const v = GRIGLIA[a]?.[b];
+      valore.textContent = v ?? '—';
+      testo.textContent = giudizioIncrocio(v);
+    }
+
+    /** Le coppie di blocchi ancora liberi con l'incrocio migliore. */
+    function renderCoppie(asseg) {
+      const blocchi = PLAYERS.filter(p => p.ruolo === 'P' && !asseg.has(p.id));
+      const coppie = [];
+      for (let i = 0; i < blocchi.length; i++) {
+        for (let j = i + 1; j < blocchi.length; j++) {
+          const v = GRIGLIA[blocchi[i].cod]?.[blocchi[j].cod];
+          if (v === undefined) continue;
+          coppie.push({ a: blocchi[i], b: blocchi[j], v, valore: blocchi[i].fvm + blocchi[j].fvm });
+        }
+      }
+      // A parita' di incrocio vince la coppia che costa meno: e' quella che
+      // libera piu' crediti per gli altri reparti.
+      coppie.sort((x, y) => x.v - y.v || x.valore - y.valore);
+
+      document.getElementById('coppie-consigliate').innerHTML = coppie.slice(0, 6).map(c => `
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex justify-between items-center gap-2">
+          <span class="text-[11px] text-slate-300 truncate">${c.a.cod} + ${c.b.cod}
+            <span class="block text-[10px] text-slate-500">${giudizioIncrocio(c.v)}</span>
+          </span>
+          <span class="text-lg font-black tabular-nums ${c.v === 0 ? 'text-emerald-400' : c.v <= 5 ? 'text-amber-400' : 'text-slate-400'}">${c.v}</span>
+        </div>`).join('') || '<p class="text-[11px] text-slate-500">Nessun blocco ancora libero.</p>';
     }
 
     /* ====================== AZIONI ====================== */
 
-    function chiediPrezzo(messaggio, predefinito) {
-      const risposta = prompt(messaggio, predefinito);
-      if (risposta === null) return null;
-      const n = Number.parseInt(risposta, 10);
-      if (!Number.isFinite(n) || n < 1) {
-        alert('Inserisci un importo valido: minimo 1 credito.');
-        return null;
-      }
-      return n;
-    }
+    function assegna(id, iSquadra) {
+      const p = PER_ID.get(id);
+      const sq = squadre[iSquadra];
+      if (!p || !sq) return;
 
-    function compra(id, consigliato) {
-      const p = PLAYERS.find(x => x.id === id);
-      if (!p) return;
-
-      const st = stato();
+      const st = statoSquadra(sq);
       if (st.mancanti[p.ruolo] <= 0) {
-        alert(`Reparto gia' completo: hai tutti e ${TARGET[p.ruolo]} gli slot di ${NOMI_RUOLO[p.ruolo].toLowerCase()}.`);
+        alert(`${sq.nome} ha gia' tutti e ${TARGET[p.ruolo]} gli slot di ${NOMI_RUOLO[p.ruolo].toLowerCase()}.`);
         return;
       }
 
-      const pagato = chiediPrezzo(
-        `A quanto hai preso ${p.nome}?\n\nConsigliato: ${consigliato} cr\nCapienza massima: ${st.capienzaMax} cr`,
-        consigliato
-      );
-      if (pagato === null) return;
-
-      if (pagato > st.capienzaMax) {
-        alert(`${pagato} cr sforano la capienza massima di ${st.capienzaMax} cr:\nnon resterebbe 1 credito per ciascuno degli altri ${st.mancantiTot - 1} slot da riempire.`);
+      const input = document.getElementById('prezzo-input');
+      const pagato = Number.parseInt(input ? input.value : '', 10);
+      if (!Number.isFinite(pagato) || pagato < 1) {
+        alert('Inserisci un prezzo valido: minimo 1 credito.');
+        return;
+      }
+      if (pagato > st.capienza) {
+        alert(`${pagato} cr sforano la capienza di ${sq.nome}: ${st.capienza} cr.\nNon resterebbe 1 credito per ciascuno degli altri ${st.mancantiTot - 1} slot.`);
         return;
       }
 
-      rosa.push({ id: p.id, nome: p.nome, ruolo: p.ruolo, squadra: p.squadra, pagato });
+      sq.rosa.push({ id, pagato });
+      apertaRiga = null;
       render();
     }
 
-    function correggi(indice) {
-      const p = rosa[indice];
-      if (!p) return;
+    function correggi(iSquadra, iRosa) {
+      const sq = squadre[iSquadra];
+      const a = sq?.rosa[iRosa];
+      if (!a) return;
 
-      const nuovo = chiediPrezzo(`Prezzo corretto per ${p.nome}:`, p.pagato);
-      if (nuovo === null) return;
-
-      // La capienza va ricalcolata senza il prezzo attuale, altrimenti il
-      // giocatore verrebbe confrontato con un budget che lo include gia'.
-      const precedente = p.pagato;
-      p.pagato = 0;
-      const capienza = stato().capienzaMax;
-      if (nuovo > capienza) {
-        p.pagato = precedente;
-        alert(`${nuovo} cr sforano la capienza massima di ${capienza} cr.`);
+      const p = PER_ID.get(a.id);
+      const risposta = prompt(`Prezzo corretto per ${p.nome} (${sq.nome}):`, a.pagato);
+      if (risposta === null) return;
+      const nuovo = Number.parseInt(risposta, 10);
+      if (!Number.isFinite(nuovo) || nuovo < 1) {
+        alert('Inserisci un prezzo valido: minimo 1 credito.');
         return;
       }
-      p.pagato = nuovo;
+
+      // La capienza va misurata senza il prezzo attuale, altrimenti il
+      // giocatore verrebbe confrontato con un budget che lo comprende gia'.
+      const precedente = a.pagato;
+      a.pagato = 0;
+      const capienza = statoSquadra(sq).capienza;
+      if (nuovo > capienza) {
+        a.pagato = precedente;
+        alert(`${nuovo} cr sforano la capienza di ${sq.nome}: ${capienza} cr.`);
+        return;
+      }
+      a.pagato = nuovo;
       render();
     }
 
     function azzeraAsta() {
-      if (!confirm('Vuoi davvero azzerare l\'asta? La rosa e i crediti tornano al punto di partenza.')) return;
-      rosa = [];
+      if (!confirm("Vuoi azzerare tutta l'asta? Le rose di tutti i partecipanti tornano vuote.")) return;
+      squadre = nuoveSquadre(squadre.length);
+      apertaSquadra = null;
+      apertaRiga = null;
+      document.getElementById('nomi-squadre').dataset.n = '';
       render();
     }
 
-    function apriPiano() {
-      document.getElementById('pannello-piano').classList.toggle('hidden');
+    function mostraPannello(id) {
+      document.getElementById(id).classList.toggle('hidden');
     }
 
-    function resetPiano() {
-      piano = { ...PIANO_DEFAULT };
-      render();
+    function resetPiano() { piano = { ...PIANO_DEFAULT }; render(); }
+    function usaPianoMisurato() { piano = { ...PIANO_MISURATO }; render(); }
+
+    /* ====================== NAVIGAZIONE ====================== */
+
+    // Le icone restano markup letterale: il build dell'Artifact le converte in
+    // SVG con una sostituzione testuale, che non vede dentro a un'interpolazione.
+    const VISTE = [
+      { k: 'asta', et: 'Asta', i: '<i class="fa-solid fa-gavel mr-1.5"></i>' },
+      { k: 'formazioni', et: 'Formazioni tipo', i: '<i class="fa-solid fa-clipboard-list mr-1.5"></i>' },
+      { k: 'griglia', et: 'Griglia portieri', i: '<i class="fa-solid fa-shield-halved mr-1.5"></i>' }
+    ];
+
+    function initNavigazione() {
+      document.getElementById('navigazione').innerHTML = VISTE.map(v =>
+        `<button type="button" data-vista="${v.k}" class="btn-vista px-4 py-2 rounded-xl text-xs font-bold border transition">
+          ${v.i}${v.et}
+        </button>`).join('');
+
+      for (const b of document.querySelectorAll('.btn-vista')) {
+        b.addEventListener('click', () => { vista = b.dataset.vista; aggiornaVista(); });
+      }
+      aggiornaVista();
     }
 
-    function usaPianoMisurato() {
-      piano = { ...PIANO_MISURATO };
-      render();
+    function aggiornaVista() {
+      for (const v of VISTE) {
+        document.getElementById('vista-' + v.k).classList.toggle('hidden', v.k !== vista);
+      }
+      for (const b of document.querySelectorAll('.btn-vista')) {
+        const attivo = b.dataset.vista === vista;
+        b.classList.toggle('bg-indigo-600', attivo);
+        b.classList.toggle('text-white', attivo);
+        b.classList.toggle('border-indigo-500', attivo);
+        b.classList.toggle('bg-slate-900', !attivo);
+        b.classList.toggle('text-slate-400', !attivo);
+        b.classList.toggle('border-slate-800', !attivo);
+      }
     }
 
     /* ====================== AVVIO ====================== */
 
+    initNavigazione();
     initGriglia();
     initFiltri();
 
     document.getElementById('ricerca').addEventListener('input', render);
-    document.getElementById('partecipanti').addEventListener('input', e => {
-      const v = Number(e.target.value);
-      partecipanti = Number.isFinite(v) && v >= 2 && v <= 20 ? Math.round(v) : PARTECIPANTI_DEFAULT;
+    document.getElementById('ricerca-formazioni').addEventListener('input', render);
+    document.getElementById('solo-liberi').addEventListener('change', e => {
+      soloLiberi = e.target.checked;
       render();
     });
+
     for (const r of RUOLI) {
       document.getElementById('piano-' + r).addEventListener('input', e => {
         const v = Number(e.target.value);
@@ -1244,6 +1691,24 @@
         render();
       });
     }
+
+    document.getElementById('n-squadre').addEventListener('input', e => {
+      const v = Math.round(Number(e.target.value));
+      if (!Number.isFinite(v) || v < 2 || v > 20) return;
+      if (v < squadre.length) {
+        const perse = squadre.slice(v).reduce((s, sq) => s + sq.rosa.length, 0);
+        if (perse && !confirm(`Riducendo a ${v} partecipanti perdi ${perse} assegnazioni. Procedo?`)) {
+          e.target.value = squadre.length;
+          return;
+        }
+        squadre = squadre.slice(0, v);
+      } else {
+        while (squadre.length < v) squadre.push({ nome: `Squadra ${squadre.length + 1}`, rosa: [] });
+      }
+      apertaSquadra = null;
+      document.getElementById('nomi-squadre').dataset.n = '';
+      render();
+    });
 
     render();
   </script>

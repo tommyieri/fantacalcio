@@ -20,6 +20,8 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'data/listone.tsv');
 const ANALISI = path.join(ROOT, 'data/analisi.tsv');
+const SQUADRE = path.join(ROOT, 'data/squadre.tsv');
+const GRIGLIA = path.join(ROOT, 'data/griglia.json');
 
 const CODICI = {
   Atalanta: 'ATA', Bologna: 'BOL', Cagliari: 'CAG', Como: 'COM', Fiorentina: 'FIO',
@@ -140,13 +142,37 @@ for (const ruolo of ['P', 'D', 'C', 'A']) {
   delRuolo.forEach((p, i) => { p.rank = i + 1; p.rankTot = delRuolo.length; });
 }
 
+/* --- Squadre: allenatore e modulo ----------------------------------------- */
+
+const squadre = {};
+for (const riga of fs.readFileSync(SQUADRE, 'utf8').trim().split('\n').slice(1)) {
+  const [squadra, allenatore, modulo, nota] = riga.split('\t');
+  if (!CODICI[squadra]) throw new Error(`squadre.tsv: squadra sconosciuta "${squadra}"`);
+  squadre[CODICI[squadra]] = { squadra, allenatore, modulo, nota };
+}
+if (Object.keys(squadre).length !== 20) throw new Error('squadre.tsv: servono tutte e 20 le squadre');
+
 /* --- Scrittura ------------------------------------------------------------ */
 
 const ordine = { P: 0, D: 1, C: 2, A: 3 };
 giocatori.sort((a, b) => ordine[a.ruolo] - ordine[b.ruolo] || b.fvm - a.fvm);
 
 const righeJs = giocatori.map(p => '  ' + JSON.stringify(p) + ',').join('\n');
-const out = `const PLAYERS = [\n${righeJs}\n];\n`;
+// La griglia ufficiale degli incroci portieri: l'indice fra due squadre e' il
+// numero di giornate in cui giocano entrambe in trasferta.
+const griglia = JSON.parse(fs.readFileSync(GRIGLIA, 'utf8'));
+const codici = Object.values(CODICI);
+for (const a of codici) {
+  for (const b of codici) {
+    if (griglia[a]?.[b] === undefined) throw new Error(`griglia.json: manca ${a}/${b}`);
+    if (griglia[a][b] !== griglia[b][a]) throw new Error(`griglia.json: asimmetria ${a}/${b}`);
+  }
+}
+
+const out = `const PLAYERS = [\n${righeJs}\n];\n\n`
+  + `const SQUADRE_INFO = ${JSON.stringify(squadre, null, 2)};\n\n`
+  + `const SQUADRE_LISTA = ${JSON.stringify(codici)};\n\n`
+  + `const GRIGLIA = ${JSON.stringify(griglia)};\n`;
 fs.writeFileSync(path.join(ROOT, 'data/players.generated.js'), out);
 
 const conteggi = {};

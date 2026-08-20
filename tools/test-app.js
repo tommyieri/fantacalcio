@@ -1,7 +1,8 @@
 /*
  * Verifiche funzionali su dist/artifact.html (la versione autonoma, quindi
- * senza dipendenze di rete). Copre il motore del budget caso per caso, la
- * salvaguardia del credito per slot, filtri, persistenza e griglia.
+ * senza dipendenze di rete). Copre il tabellone a piu' partecipanti, il motore
+ * del budget, la salvaguardia del credito per slot, i prezzi di mercato,
+ * filtri, viste e persistenza.
  *
  * Uso:  npm run build && npm test
  *       CHROMIUM_PATH=/percorso/chrome npm test   (se serve un binario preciso)
@@ -9,7 +10,6 @@
 
 const { chromium } = require('playwright');
 const fs = require('fs');
-
 const path = require('path');
 const os = require('os');
 
@@ -17,30 +17,34 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = fs.mkdtempSync(path.join(os.tmpdir(), 'fantastrategy-'));
 const content = fs.readFileSync(path.join(ROOT, 'dist/artifact.html'), 'utf8');
 fs.writeFileSync(`${OUT}/app.html`,
-  `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">`
-  + `<style>:root{color-scheme:light}body{margin:0;background:#faf9f5;color:#141413}</style></head><body>${content}</body></html>`);
+  '<!doctype html><html><head><meta charset="utf-8">'
+  + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+  + '<style>:root{color-scheme:light}body{margin:0;background:#faf9f5;color:#141413}</style>'
+  + `</head><body>${content}</body></html>`);
 
 let fallite = 0;
 function check(nome, atteso, ottenuto) {
   const ok = JSON.stringify(atteso) === JSON.stringify(ottenuto);
   if (!ok) fallite++;
-  console.log(`${ok ? '  ok  ' : ' FAIL '} ${nome}${ok ? '' : `\n         atteso ${JSON.stringify(atteso)}, ottenuto ${JSON.stringify(ottenuto)}`}`);
+  console.log(`${ok ? '  ok  ' : ' FAIL '} ${nome}`
+    + (ok ? '' : `\n         atteso ${JSON.stringify(atteso)}, ottenuto ${JSON.stringify(ottenuto)}`));
 }
 
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const page = await browser.newPage({ viewport: { width: 1600, height: 1100 } });
   const errori = [];
   page.on('pageerror', e => errori.push('PAGEERROR: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errori.push('CONSOLE: ' + m.text()); });
   const rete = [];
   page.on('request', r => { if (!r.url().startsWith('file:')) rete.push(r.url()); });
+  page.on('dialog', d => d.accept());
 
   await page.goto('file://' + OUT + '/app.html', { waitUntil: 'networkidle' });
-  await page.evaluate(() => { localStorage.clear(); });
+  await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
 
-  const m = () => page.evaluate(() => ({
+  const mie = () => page.evaluate(() => ({
     residuo: +document.getElementById('m-residuo').textContent,
     slot: +document.getElementById('m-slot').textContent,
     maxA: +document.getElementById('m-max-a').textContent,
@@ -50,151 +54,181 @@ function check(nome, atteso, ottenuto) {
     badge: document.getElementById('badge-ruoli').textContent
   }));
 
-  console.log('\n— stato iniziale —');
-  const s0 = await m();
-  check('crediti residui', 500, s0.residuo);
-  check('capienza massima (500 - 23 slot vuoti)', 477, s0.capienza);
-  check('max attacco (quota A 250 - 5 altri slot A)', 245, s0.maxA);
-  check('max centrocampo (quota C 150 - 7 altri slot C)', 143, s0.maxC);
-  check('righe in tabella (listone ufficiale)', 457, await page.evaluate(() => document.querySelectorAll('#tabella tr').length));
+  // Riga del tabellone di una squadra: crediti, slot per ruolo, max bid.
+  const squadra = i => page.evaluate(n => {
+    const tr = document.querySelector(`#tabellone [data-squadra="${n}"]`);
+    const c = [...tr.querySelectorAll('td')].map(td => td.textContent.trim());
+    return { nome: c[0], residuo: +c[1], speso: +c[2], P: c[3], D: c[4], C: c[5], A: c[6], maxBid: c[7], aperti: c[8] };
+  }, i);
 
-  // Prezzo consigliato del miglior attaccante: deve stare dentro il max di reparto
-  const prezzoTop = await page.evaluate(() => {
-    const r = [...document.querySelectorAll('#tabella tr')].find(tr => tr.textContent.includes('Martinez L.'));
-    return +r.querySelector('[data-prezzo]').dataset.prezzo;
+  // Assegna un giocatore per nome a una squadra, al prezzo indicato.
+  // Confronto esatto sul nome: "Thuram" non deve pescare "Thuram K.", e il
+  // nome non deve essere cercato nelle note dove i giocatori sono solo citati.
+  const trovaRiga = n => [...document.querySelectorAll('#tabella tr')].find(t => {
+    const nome = t.querySelector('td:nth-child(2) span.font-semibold');
+    return nome && nome.textContent.trim() === n;
   });
-  check('prezzo consigliato Lautaro <= max attacco', true, prezzoTop > 0 && prezzoTop <= s0.maxA);
 
-  console.log('\n— acquisto portiere a 4 cr (sotto il piano di 25) —');
-  page.on('dialog', d => d.accept(String(globalThis.__prezzo ?? 1)));
-  await page.evaluate(() => { window.prompt = () => '4'; });
-  await page.click('#tabella tr:first-child [data-compra]');
-  const s1 = await m();
-  check('residuo', 496, s1.residuo);
+  const assegna = async (nome, iSquadra, prezzo) => {
+    await page.evaluate(([n, src]) => {
+      const trovaRiga = new Function('n', 'return (' + src + ')(n)');
+      trovaRiga(n).querySelector('[data-apri]').click();
+    }, [nome, trovaRiga.toString()]);
+    await page.fill('#prezzo-input', String(prezzo));
+    await page.click(`[data-assegna$=":${iSquadra}"]`);
+  };
+
+  const rigaGiocatore = nome => page.evaluate(([n, src]) => {
+    const trovaRiga = new Function('n', 'return (' + src + ')(n)');
+    const tr = trovaRiga(n);
+    if (!tr) return null;
+    const t = tr.textContent;
+    return {
+      prezzo: +(t.match(/(\d+) cr/) || [])[1],
+      mercato: (t.match(/mercato (\d+)–(\d+)/) || []).slice(1, 3).map(Number),
+      avversari: +(t.match(/fino a (\d+)/) || [])[1] || 0,
+      inCorsa: +(t.match(/(\d+) in corsa/) || [])[1] || 0,
+      oltreBudget: t.includes('oltre il tuo budget'),
+      fascia: (t.match(/(\dª fascia)/) || [])[1]
+    };
+  }, [nome, trovaRiga.toString()]);
+
+  console.log('\n— partenza: 8 partecipanti —');
+  check('squadre nel tabellone', 8, await page.evaluate(() => document.querySelectorAll('#tabellone [data-squadra]').length));
+  check('la prima sono io', 'Io', (await squadra(0)).nome);
+  const s0 = await mie();
+  check('i miei crediti', 500, s0.residuo);
+  check('capienza (500 - 23 slot vuoti)', 477, s0.capienza);
+  check('max attacco dal piano', 245, s0.maxA);
+  check('avversario col budget pieno', 477, (await squadra(1)).residuo === 500 ? 477 : -1);
+
+  const lautaro0 = await rigaGiocatore('Martinez L.');
+  check('Lautaro in 1ª fascia', '1ª fascia', lautaro0.fascia);
+  check('mercato di Lautaro e\' un intervallo', true, lautaro0.mercato[0] < lautaro0.mercato[1]);
+  check('tetto avversari pari alla loro capienza', 477, lautaro0.avversari);
+
+  console.log('\n— un avversario prende Lautaro —');
+  await assegna('Martinez L.', 1, 120);
+  const sq1 = await squadra(1);
+  check('crediti dell\'avversario', 380, sq1.residuo);
+  check('slot attacco dell\'avversario', '1/6', sq1.A);
+  check('Lautaro sparisce dai liberi', null, await rigaGiocatore('Martinez L.'));
+
+  console.log('\n— i prezzi si adattano a chi resta —');
+  const malen1 = await rigaGiocatore('Malen');
+  check('Malen resta il piu\' caro fra i liberi', true, malen1.mercato[0] > 50);
+  check('il tetto resta alto: gli altri sei non hanno speso', 477, malen1.avversari);
+
+  console.log('\n— un avversario riempie l\'attacco —');
+  for (const [nome, prezzo] of [['Thuram', 80], ['Hojlund', 70], ['Ramos G.', 60], ['Kolo Muani', 50], ['Kean', 20]]) {
+    await assegna(nome, 1, prezzo);
+  }
+  const sq1pieno = await squadra(1);
+  check('sei attaccanti presi', '6/6', sq1pieno.A);
+  check('attacco non compare fra i reparti aperti', false, sq1pieno.aperti.includes('A'));
+  // Il tetto e' il massimo fra tutti: resta alto finche' qualcuno ha budget.
+  // Cio' che cambia e' quanti avversari possono ancora contendere il ruolo.
+  const dopo = await rigaGiocatore('Yildiz');
+  check('un avversario in meno in corsa per l\'attacco', 6, dopo.inCorsa);
+  check('in centrocampo restano tutti e sette', 7, (await rigaGiocatore('Paz N.')).inCorsa);
+
+  console.log('\n— la salvaguardia vale anche per gli avversari —');
+  const prima = (await squadra(2)).residuo;
+  await assegna('Yildiz', 2, 9999);
+  check('offerta oltre la capienza rifiutata', prima, (await squadra(2)).residuo);
+
+  console.log('\n— i miei acquisti —');
+  await assegna('Dimarco', 0, 90);
+  const s1 = await mie();
+  check('i miei crediti', 410, s1.residuo);
   check('slot occupati', 1, s1.slot);
-  check('capienza (496 - 22)', 474, s1.capienza);
-  check('max attacco invariato: il piano P non e\' stato sforato', 245, s1.maxA);
+  check('badge ruoli', '0/2 P • 1/8 D • 0/8 C • 0/6 A', s1.badge);
+  check('difesa oltre il piano (90 su 75) segnalata', true, await page.evaluate(() =>
+    document.querySelector('#riepilogo-reparti div:nth-child(2)').className.includes('rose')));
 
-  console.log('\n— correzione dello stesso acquisto a 30 cr (sopra il piano) —');
-  await page.evaluate(() => { window.prompt = () => '30'; });
-  await page.click('[data-correggi="0"]');
-  const s2 = await m();
-  check('residuo', 470, s2.residuo);
-  check('capienza (470 - 22)', 448, s2.capienza);
-  check('max attacco ridotto dal delta', true, s2.maxA < 245);
-  const quotaPesaurita = await page.evaluate(() => {
-    const r = [...document.querySelectorAll('#tabella tr')].find(tr => tr.textContent.includes('Blocco Bologna'));
-    return +r.querySelector('[data-prezzo]').dataset.prezzo;
+  console.log('\n— reparto pieno: bottone disabilitato —');
+  await page.evaluate(() => {
+    const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
+      const nome = t.querySelector('td:nth-child(2) span.font-semibold');
+      return nome && nome.textContent.trim() === 'Soulè';
+    });
+    tr.querySelector('[data-apri]').click();
   });
-  check('secondo portiere scende a 1 cr: budget P esaurito', 1, quotaPesaurita);
+  check('la squadra con l\'attacco pieno non e\' assegnabile', true,
+    await page.evaluate(() => document.querySelector('[data-assegna$=":1"]').disabled));
+  await page.click('[data-chiudi]');
 
-  console.log('\n— salvaguardia: offerta oltre la capienza —');
-  await page.evaluate(() => { window.prompt = () => '9999'; });
-  await page.click('#tabella tr:nth-child(2) [data-compra]');
-  const s3 = await m();
-  check('acquisto rifiutato, slot invariati', 1, s3.slot);
-  check('residuo invariato', 470, s3.residuo);
+  console.log('\n— rosa di un avversario e rimozione —');
+  await page.click('#tabellone [data-squadra="1"]');
+  check('rosa avversario mostrata', 6, await page.evaluate(() => document.querySelectorAll('#tabellone [data-rimuovi]').length));
+  await page.click('#tabellone [data-rimuovi="1:5"]');
+  check('un acquisto rimosso', '5/6', (await squadra(1)).A);
+  await page.click('#tabellone [data-squadra="1"]');
 
-  console.log('\n— reparto completo —');
-  await page.evaluate(() => { window.prompt = () => '1'; });
-  await page.click('#tabella tr:nth-child(2) [data-compra]');
-  check('due portieri presi', 2, (await m()).slot);
-  await page.click('#tabella tr:nth-child(3) [data-compra]');
-  check('terzo portiere rifiutato', 2, (await m()).slot);
-  check('badge ruoli', '2/2 P • 0/8 D • 0/8 C • 0/6 A', (await m()).badge);
+  console.log('\n— viste —');
+  await page.click('[data-vista="formazioni"]');
+  check('vista formazioni visibile', false, await page.evaluate(() => document.getElementById('vista-formazioni').classList.contains('hidden')));
+  check('venti schede squadra', 20, await page.evaluate(() => document.querySelectorAll('#formazioni > div').length));
+  check('lo stato in asta compare fra i titolari', true, await page.evaluate(() =>
+    document.getElementById('formazioni').textContent.includes('libero')));
+  await page.fill('#ricerca-formazioni', 'napoli');
+  check('filtro formazioni', 1, await page.evaluate(() => document.querySelectorAll('#formazioni > div').length));
+  await page.fill('#ricerca-formazioni', '');
 
-  console.log('— reparto chiuso: la quota P era gia\' esaurita, nulla da liberare —');
-  const s4 = await m();
-  check('max attacco invariato dopo il 2o portiere a 1 cr', s2.maxA, s4.maxA);
-
-  console.log('\n— riallocazione vera: due portieri sotto il piano —');
-  await page.evaluate(() => { localStorage.clear(); });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.evaluate(() => { window.prompt = () => '1'; });
-  await page.click('#tabella tr:first-child [data-compra]');
-  await page.click('#tabella tr:nth-child(2) [data-compra]');
-  const s4b = await m();
-  check('2 portieri a 1 cr: speso', 2, s4b.speso);
-  check('i 23 cr non spesi sui portieri alzano il max attacco', 257, s4b.maxA);
-  check('capienza (498 - 21 slot vuoti)', 477, s4b.capienza);
+  await page.click('[data-vista="griglia"]');
+  await page.selectOption('#griglia-a', 'JUV');
+  await page.selectOption('#griglia-b', 'TOR');
+  check('JUV/TOR alternanza perfetta', '0', await page.evaluate(() => document.getElementById('griglia-valore').textContent));
+  await page.selectOption('#griglia-a', 'NAP');
+  await page.selectOption('#griglia-b', 'ROM');
+  check('NAP/ROM indice 3', '3', await page.evaluate(() => document.getElementById('griglia-valore').textContent));
+  check('coppie consigliate fra i blocchi liberi', true, await page.evaluate(() =>
+    document.querySelectorAll('#coppie-consigliate > div').length > 0));
+  await page.click('[data-vista="asta"]');
 
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
-  check('solo difensori', 176, await page.evaluate(() => document.querySelectorAll('#tabella tr').length));
+  const nD = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
+  check('solo difensori, senza i gia\' assegnati', 175, nD);
   await page.click('[data-ruolo="ALL"]');
-  await page.click('[data-tag="TOP"]');
+  await page.click('[data-tag="RIGORISTA"]');
   const nRig = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('filtro top non vuoto', true, nRig > 0 && nRig < 457);
+  check('filtro rigoristi non vuoto', true, nRig > 0 && nRig < 100);
   await page.click('[data-tag="ALL"]');
   await page.fill('#ricerca', 'napoli');
   const nNap = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('ricerca "napoli" non vuota', true, nNap > 0 && nNap < 457);
+  check('ricerca "napoli"', true, nNap > 0 && nNap < 100);
   await page.fill('#ricerca', '');
 
-  console.log('\n— fasce e prezzo di mercato —');
-  const mercato = await page.evaluate(() => {
-    const riga = n => [...document.querySelectorAll('#tabella tr')].find(tr => tr.textContent.includes(n));
-    const leggi = n => {
-      const t = riga(n).textContent;
-      return { fascia: (t.match(/(\dª fascia)/) || [])[1], mercato: (t.match(/mercato (\d+)–(\d+)/) || []).slice(1, 3).map(Number) };
-    };
-    return { lautaro: leggi('Martinez L.'), dimarco: leggi('Dimarco'), gallo: leggi('Gallo') };
-  });
-  check('Lautaro in 1ª fascia (quotazione 35)', '1ª fascia', mercato.lautaro.fascia);
-  check('Dimarco in 1ª fascia (quotazione 32)', '1ª fascia', mercato.dimarco.fascia);
-  check('Gallo in 4ª fascia (quotazione 6 -> 3ª)', '3ª fascia', mercato.gallo.fascia);
-  check('mercato Lautaro coerente col reparto attacco', true,
-    mercato.lautaro.mercato[0] > 50 && mercato.lautaro.mercato[1] < 300);
-  check('mercato e\' un intervallo crescente', true, mercato.lautaro.mercato[0] < mercato.lautaro.mercato[1]);
+  await page.uncheck('#solo-liberi');
+  check('mostrando anche gli assegnati la lista cresce', true,
+    await page.evaluate(() => document.querySelectorAll('#tabella tr').length) > 450);
+  await page.check('#solo-liberi');
 
-  console.log('\n— il mercato dipende dai partecipanti —');
-  await page.click('text=Impostazioni asta');
-  await page.fill('#partecipanti', '14');
-  const con14 = await page.evaluate(() =>
-    Number(([...document.querySelectorAll('#tabella tr')].find(tr => tr.textContent.includes('Martinez L.')).textContent.match(/mercato (\d+)–/) || [])[1]));
-  check('con 14 partecipanti il prezzo di mercato sale', true, con14 > mercato.lautaro.mercato[0]);
-  await page.fill('#partecipanti', '10');
-
-  console.log('\n— piano di spesa modificabile —');
-  await page.fill('#piano-A', '70');
-  const s5 = await m();
-  check('alzando A al 70% il max attacco cresce', true, s5.maxA > s4.maxA);
-  await page.fill('#piano-A', '50');
-
-  console.log('\n— persistenza —');
+  console.log('\n— rinomina e persistenza —');
+  await page.click('text=Impostazioni');
+  await page.fill('[data-nome="1"]', 'Marco');
+  check('nome avversario aggiornato', 'Marco', (await squadra(1)).nome);
   await page.reload({ waitUntil: 'networkidle' });
-  const s6 = await m();
-  check('rosa ricaricata dopo il refresh', 2, s6.slot);
-
-  console.log('\n— rimozione —');
-  await page.click('[data-rimuovi="0"]');
-  check('slot dopo rimozione', 1, (await m()).slot);
-
-  console.log('\n— griglia portieri —');
-  await page.selectOption('#griglia-a', 'JUV');
-  await page.selectOption('#griglia-b', 'TOR');
-  const g = await page.evaluate(() => document.getElementById('griglia-valore').textContent + ' | ' + document.getElementById('griglia-testo').textContent);
-  check('JUV/TOR: alternanza perfetta, dato ufficiale', true, g.startsWith('0') && !g.includes('provvisorio'));
-  await page.selectOption('#griglia-a', 'NAP');
-  await page.selectOption('#griglia-b', 'ROM');
-  check('NAP/ROM indice 3 (era 12 nella griglia sbagliata)', '3', await page.evaluate(() => document.getElementById('griglia-valore').textContent));
-  await page.selectOption('#griglia-b', 'NAP');
-  check('stessa squadra gestita', true, (await page.evaluate(() => document.getElementById('griglia-testo').textContent)).includes('diverse'));
+  check('nome sopravvive al refresh', 'Marco', (await squadra(1)).nome);
+  check('i miei crediti sopravvivono', 410, (await mie()).residuo);
+  check('rosa avversario sopravvive', '5/6', (await squadra(1)).A);
 
   console.log('\n— igiene della pagina —');
   check('nessuna richiesta di rete esterna', [], rete);
   check('nessun errore in console', [], errori);
-  check('nessuno scroll orizzontale', false,
-    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1));
+  check('nessuno scroll orizzontale', false, await page.evaluate(() =>
+    document.documentElement.scrollWidth > document.documentElement.clientWidth + 1));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(200);
-  check('nessuno scroll orizzontale su mobile', false,
-    await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1));
+  check('nessuno scroll orizzontale su mobile', false, await page.evaluate(() =>
+    document.documentElement.scrollWidth > document.documentElement.clientWidth + 1));
 
-  await page.setViewportSize({ width: 1440, height: 1100 });
-  await page.evaluate(() => { localStorage.clear(); });
+  await page.setViewportSize({ width: 1600, height: 1250 });
+  await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
-  await page.screenshot({ path: `${OUT}/nuova.png` });
+  await page.screenshot({ path: `${OUT}/asta.png` });
+  console.log(`\nschermata: ${OUT}/asta.png`);
 
   console.log(fallite ? `\n${fallite} verifiche fallite` : '\nTutte le verifiche superate');
   await browser.close();
