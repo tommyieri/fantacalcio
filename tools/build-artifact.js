@@ -9,8 +9,6 @@
  *   2. Font Awesome da CDN -> icone SVG inline
  *   3. <html>/<head>/<body> -> rimossi (li fornisce l'host dell'Artifact);
  *      le classi del <body> passano su un wrapper <div>
- *   4. localStorage -> wrapper con fallback in memoria (l'iframe sandboxed
- *      dell'Artifact puo' negare l'accesso allo storage)
  *
  * Uso:  npm install && npm run build
  */
@@ -20,7 +18,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const SRC = path.join(ROOT, 'index');
+const SRC = path.join(ROOT, 'index.html');
 const DIST = path.join(ROOT, 'dist');
 const OUT = path.join(DIST, 'artifact.html');
 const TMP = path.join(DIST, '.build');
@@ -62,32 +60,14 @@ const bodyClasses = bodyTag[1];
 let body = html.slice(html.indexOf(bodyTag[0]) + bodyTag[0].length);
 body = body.slice(0, body.lastIndexOf('</body>')).trim();
 
-/* --- 3. localStorage con fallback in memoria ------------------------------ */
+/* --- 3. Verifica che l'app gestisca da sola lo storage negato ------------- */
 
-const storageShim = `
-    // L'iframe dell'Artifact puo' negare l'accesso a localStorage: in quel caso
-    // la rosa resta valida per la sessione corrente, senza rompere la pagina.
-    const store = (() => {
-      try {
-        const k = '__fs_probe__';
-        localStorage.setItem(k, '1');
-        localStorage.removeItem(k);
-        return localStorage;
-      } catch (e) {
-        const mem = {};
-        return {
-          getItem: k => (k in mem ? mem[k] : null),
-          setItem: (k, v) => { mem[k] = String(v); },
-          removeItem: k => { delete mem[k]; }
-        };
-      }
-    })();
-`;
-
-body = body.replace('<script>', `<script>${storageShim}`);
-const storageCalls = (body.match(/\blocalStorage\.(getItem|setItem|removeItem)\(/g) || []).length;
-body = body.replace(/\blocalStorage\.(getItem|setItem|removeItem)\(/g, 'store.$1(');
-if (!storageCalls) throw new Error('nessuna chiamata a localStorage trovata: shim inutile');
+// L'iframe dell'Artifact puo' negare localStorage: index.html incapsula gia'
+// l'accesso in `store` con fallback in memoria. Qui si controlla soltanto che
+// quella protezione non sia stata rimossa per sbaglio.
+if (!/const store = \(\(\) => \{/.test(body) || /\blocalStorage\.(getItem|setItem)\('fantastrategy/.test(body)) {
+  throw new Error('index.html deve accedere allo storage tramite lo shim `store`');
+}
 
 const wrapped = `<div class="${bodyClasses}">\n${body}\n</div>\n`;
 const scanFile = path.join(TMP, 'scan.html');
@@ -139,6 +119,5 @@ fs.writeFileSync(OUT, page);
 fs.rmSync(TMP, { recursive: true, force: true });
 
 console.log(`icone inline:      ${icons}`);
-console.log(`chiamate storage:  ${storageCalls}`);
 console.log(`tailwind css:      ${(tailwindCss.length / 1024).toFixed(1)} KB`);
 console.log(`scritto:           ${path.relative(ROOT, OUT)} (${(page.length / 1024).toFixed(1)} KB)`);
