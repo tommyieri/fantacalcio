@@ -26,6 +26,7 @@ const TRASFERIMENTI = path.join(ROOT, 'data/trasferimenti.tsv');
 const GRIGLIA = path.join(ROOT, 'data/griglia.json');
 const SOS_TITOLARI = path.join(ROOT, 'data/sosfanta/titolari.csv');
 const SOS_PIAZZATI = path.join(ROOT, 'data/sosfanta/piazzati.csv');
+const FORMAZIONI_FANTACALCIO = path.join(ROOT, 'data/fonti/formazioni-fantacalcio.json');
 
 const CODICI = {
   Atalanta: 'ATA', Bologna: 'BOL', Cagliari: 'CAG', Como: 'COM', Fiorentina: 'FIO',
@@ -183,6 +184,45 @@ for (const riga of parseCsv(fs.readFileSync(SOS_PIAZZATI, 'utf8'))) {
   sosPiazzatiAgganciati++;
 }
 
+/* --- Probabili formazioni aggiornate ------------------------------------- */
+
+if (!fs.existsSync(FORMAZIONI_FANTACALCIO)) {
+  throw new Error('manca data/fonti/formazioni-fantacalcio.json: esegui prima "npm run fonti"');
+}
+const fonteFormazioni = JSON.parse(fs.readFileSync(FORMAZIONI_FANTACALCIO, 'utf8'));
+if (!Array.isArray(fonteFormazioni.squadre) || fonteFormazioni.squadre.length !== 20) {
+  throw new Error('formazioni-fantacalcio.json non contiene 20 squadre');
+}
+const formazioniProbabili = {};
+let formazioneXIagganciati = 0;
+let formazioneAlternativeAgganciate = 0;
+for (const squadraFonte of fonteFormazioni.squadre) {
+  const cod = CODICI[squadraFonte.squadra];
+  if (!cod) throw new Error(`formazioni-fantacalcio.json: squadra sconosciuta ${squadraFonte.squadra}`);
+  const abbina = giocatore => perIdentita.get(chiaveIdentita(giocatore.nome, squadraFonte.squadra));
+  const titolari = [];
+  const alternative = [];
+  for (const giocatore of squadraFonte.titolari) {
+    const g = abbina(giocatore);
+    if (!g) continue;
+    g.formazione = { probabilita: giocatore.probabilita, gruppo: 'XI' };
+    titolari.push({ id: g.id, probabilita: giocatore.probabilita });
+    formazioneXIagganciati++;
+  }
+  for (const giocatore of squadraFonte.panchina) {
+    const g = abbina(giocatore);
+    if (!g || giocatore.probabilita < 30 || titolari.some(t => t.id === g.id)) continue;
+    g.formazione = g.formazione ?? { probabilita: giocatore.probabilita, gruppo: 'ALTERNATIVA' };
+    alternative.push({ id: g.id, probabilita: giocatore.probabilita });
+    formazioneAlternativeAgganciate++;
+  }
+  formazioniProbabili[cod] = {
+    modulo: squadraFonte.modulo,
+    titolari,
+    alternative: alternative.slice(0, 8)
+  };
+}
+
 /* --- Tag ricavabili dai numeri ------------------------------------------- */
 
 const SLOT = { P: 3, D: 8, C: 8, A: 6 };
@@ -237,6 +277,12 @@ for (const a of codici) {
 const out = `const PLAYERS = [\n${righeJs}\n];\n\n`
   + `const SQUADRE_INFO = ${JSON.stringify(squadre, null, 2)};\n\n`
   + `const SQUADRE_LISTA = ${JSON.stringify(codici)};\n\n`
+  + `const FORMAZIONI_PROBABILI = ${JSON.stringify({
+    fonte: fonteFormazioni.fonte,
+    url: fonteFormazioni.url,
+    aggiornatoIl: fonteFormazioni.aggiornatoIl,
+    squadre: formazioniProbabili
+  })};\n\n`
   + `const GRIGLIA = ${JSON.stringify(griglia)};\n`;
 fs.writeFileSync(path.join(ROOT, 'data/players.generated.js'), out);
 
@@ -246,6 +292,7 @@ console.log(`righe listone:   ${dati.length}`);
 console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).map(([k, v]) => k + ':' + v).join(', ')})`);
 console.log(`annotati:        ${annotati}`);
 console.log(`SOS Fanta:       ${sosTitolariAgganciati} titolarita', ${sosPiazzatiAgganciati} piazzati agganciati al listone ufficiale`);
+console.log(`Formazioni:      ${formazioneXIagganciati}/220 XI e ${formazioneAlternativeAgganciate} alternative agganciate (Fantacalcio.it)`);
 console.log(`fuori listone:   ${aggiunti} aggiunti, ${spostati} spostati di squadra`);
 for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {
   console.log(`  ${t.padEnd(13)}${giocatori.filter(p => p.tag.includes(t)).length}`);

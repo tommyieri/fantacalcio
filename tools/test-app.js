@@ -84,8 +84,8 @@ function check(nome, atteso, ottenuto) {
     if (!tr) return null;
     const t = tr.textContent;
     return {
-      prezzo: +(t.match(/(\d+) cr/) || [])[1],
-      mercato: (t.match(/mercato (\d+)–(\d+)/) || []).slice(1, 3).map(Number),
+      prezzo: +(t.match(/Stima\s+(\d+) cr/) || [])[1],
+      mercato: (t.match(/forchetta\s+(\d+)–(\d+)/) || []).slice(1, 3).map(Number),
       avversari: +(t.match(/~(\d+) \(/) || [])[1] || 0,
       inCorsa: +(t.match(/(\d+) in corsa/) || [])[1] || 0,
       risparmiareAltrove: t.includes('dovrai risparmiare altrove'),
@@ -256,6 +256,11 @@ function check(nome, atteso, ottenuto) {
   await page.click('[data-vista="formazioni"]');
   check('vista formazioni visibile', false, await page.evaluate(() => document.getElementById('vista-formazioni').classList.contains('hidden')));
   check('venti schede squadra', 20, await page.evaluate(() => document.querySelectorAll('#formazioni > div').length));
+  check('Atalanta mostra undici probabile completo', 11, await page.evaluate(() => {
+    const carta = [...document.querySelectorAll('#formazioni > div')].find(el => el.querySelector('h3')?.textContent.trim() === 'Atalanta');
+    return [...carta.querySelectorAll('.space-y-1 > div')].length;
+  }));
+  check('formazioni mostra ballottaggi aggiornati', true, await page.evaluate(() => document.getElementById('formazioni').textContent.includes('Ballottaggi / alternative')));
   check('lo stato in asta compare fra i titolari', true, await page.evaluate(() =>
     document.getElementById('formazioni').textContent.includes('libero')));
   await page.fill('#ricerca-formazioni', 'napoli');

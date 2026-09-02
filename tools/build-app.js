@@ -68,10 +68,6 @@ const htmlContent = `<!DOCTYPE html>
             Capienza massima: <span id="m-capienza" class="text-white font-black tabular-nums">477</span> cr
             <span class="text-slate-500">(1 cr riservato per gli altri <span id="m-slot-vuoti" class="tabular-nums">23</span> slot)</span>
           </p>
-          <div id="m-top-nomination" class="hidden sm:inline-flex items-center gap-1.5 bg-indigo-950/70 border border-indigo-800/60 px-2 py-0.5 rounded-md text-indigo-300">
-            <i class="fa-solid fa-bolt text-amber-400"></i>
-            <span>Chiamata consigliata: <strong class="text-white font-bold" id="m-top-nom-nome">-</strong> (<span id="m-top-nom-dettaglio" class="text-emerald-400 font-semibold">+0 cr</span>)</span>
-          </div>
         </div>
         <div class="flex gap-4 shrink-0">
           <button type="button" onclick="mostraPannello('pannello-impostazioni')" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">
@@ -191,7 +187,7 @@ const htmlContent = `<!DOCTYPE html>
               </label>
               <label class="flex items-center gap-1.5 cursor-pointer text-emerald-400 font-semibold">
                 <input type="checkbox" id="solo-affari" class="accent-emerald-500">
-                Solo raccomandati (🟢 COMPRA)
+                Solo entro stima
               </label>
             </div>
             <span id="conteggio" class="text-slate-500"></span>
@@ -205,9 +201,9 @@ const htmlContent = `<!DOCTYPE html>
                   <th scope="col" class="p-2.5">Calciatore & Profilo</th>
                   <th scope="col" class="p-2.5">Team</th>
                   <th scope="col" class="p-2.5 text-center">FVM / Q.</th>
-                  <th scope="col" class="p-2.5 text-center">Valutazione & Consiglio</th>
-                  <th scope="col" class="p-2.5 text-center">Prezzi & Margine</th>
-                  <th scope="col" class="p-2.5 text-right">Assegna</th>
+                  <th scope="col" class="p-2.5 text-center">Profilo d'asta</th>
+                  <th scope="col" class="p-2.5 text-center">Mercato live</th>
+                  <th scope="col" class="p-2.5 text-right">Piano</th>
                 </tr>
               </thead>
               <tbody id="tabella" class="divide-y divide-slate-800/60"></tbody>
@@ -617,6 +613,11 @@ ${playersData}
         else if (p.tag.includes('TITOLARE')) tit = 0.90;
         else if (p.tag.includes('SCOMMESSA')) tit = 0.65;
         else if (p.tag.includes('LOWCOST')) tit = 0.30;
+        if (p.formazione?.gruppo === 'XI') {
+          tit = 0.25 + 0.75 * (p.formazione.probabilita / 100);
+        } else if (p.formazione?.gruppo === 'ALTERNATIVA') {
+          tit = Math.min(tit, 0.25 + 0.55 * (p.formazione.probabilita / 100));
+        }
         if (r === 'P' && p.sos?.gerarchiaPortiere === 'PRIMO') tit = Math.max(tit, 0.95);
         if (p.tag.includes('RISCHIO')) tit *= 0.70;
 
@@ -1359,17 +1360,6 @@ ${playersData}
       document.getElementById('m-best-xi-modulo').textContent = bestXI.modulo;
       document.getElementById('m-mod-expected').textContent = (modRes.bonusAtteso > 0 ? '+' : '') + modRes.bonusAtteso.toFixed(2);
 
-      const nomChip = document.getElementById('m-top-nomination');
-      if (nomine.targetFurtivo) {
-        nomChip.classList.remove('hidden');
-        document.getElementById('m-top-nom-nome').textContent = nomine.targetFurtivo.nome;
-        const val = VALUTAZIONI_CACHE.get(nomine.targetFurtivo.id);
-        const marg = val ? val.valorePuro - (nomine.targetFurtivo.fvm) : 0;
-        document.getElementById('m-top-nom-dettaglio').textContent = (marg >= 0 ? '+' : '') + marg + ' cr';
-      } else {
-        nomChip.classList.add('hidden');
-      }
-
       document.getElementById('riepilogo-reparti').innerHTML = RUOLI.map(r => \`
           <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-1.5 text-center" title="\${NOMI_RUOLO[r]}: \${st.presi[r]} presi su \${TARGET[r]}">
             <span class="text-[9px] uppercase font-bold \${COLORE_RUOLO[r]} block">\${r}</span>
@@ -1503,15 +1493,26 @@ ${playersData}
 
     const TAG_FILTRO = [
       { k: 'ALL', et: 'Tutti', i: '', c: 'text-slate-300' },
-      { k: 'TOP', et: 'Top 1° Slot', i: '<i class="fa-solid fa-crown mr-1"></i>', c: 'text-amber-300' },
-      { k: 'TITOLARE', et: 'Titolari', i: '<i class="fa-solid fa-check mr-1"></i>', c: 'text-slate-300' },
-      { k: 'NUOVO', et: 'Nuovi arrivi', i: '<i class="fa-solid fa-plane-arrival mr-1"></i>', c: 'text-violet-300' },
-      { k: 'RIGORISTA', et: 'Rigoristi', i: '<i class="fa-solid fa-bullseye mr-1"></i>', c: 'text-emerald-300' },
-      { k: 'MODIFICATORE', et: 'Modificatore Difesa', i: '<i class="fa-solid fa-shield-halved mr-1"></i>', c: 'text-sky-300' },
-      { k: 'SCOMMESSA', et: 'Scommesse', i: '<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>', c: 'text-indigo-300' },
-      { k: 'LOWCOST', et: 'Low Cost 1 cr', i: '<i class="fa-solid fa-coins mr-1"></i>', c: 'text-teal-300' },
-      { k: 'RISCHIO', et: 'A Rischio', i: '<i class="fa-solid fa-triangle-exclamation mr-1"></i>', c: 'text-rose-300' }
+      { k: 'FASCIA_ALTA', et: 'Fascia alta', i: '<i class="fa-solid fa-crown mr-1"></i>', c: 'text-amber-300' },
+      { k: 'XI', et: 'Probabili titolari', i: '<i class="fa-solid fa-check mr-1"></i>', c: 'text-emerald-300' },
+      { k: 'BALLOTTAGGIO', et: 'Ballottaggi', i: '<i class="fa-solid fa-code-compare mr-1"></i>', c: 'text-amber-300' },
+      { k: 'RIGORISTA', et: 'Primi rigoristi', i: '<i class="fa-solid fa-bullseye mr-1"></i>', c: 'text-emerald-300' },
+      { k: 'PIAZZATI', et: 'Piazzati', i: '<i class="fa-solid fa-crosshairs mr-1"></i>', c: 'text-sky-300' },
+      { k: 'LOWCOST', et: 'Low cost (Q. ≤5)', i: '<i class="fa-solid fa-coins mr-1"></i>', c: 'text-teal-300' },
+      { k: 'RISCHIO', et: 'A rischio', i: '<i class="fa-solid fa-triangle-exclamation mr-1"></i>', c: 'text-rose-300' }
     ];
+
+    function corrispondeFiltro(p, filtro) {
+      if (filtro === 'ALL') return true;
+      if (filtro === 'FASCIA_ALTA') return p.fascia <= 2;
+      if (filtro === 'XI') return p.formazione?.gruppo === 'XI' && p.formazione.probabilita >= 70;
+      if (filtro === 'BALLOTTAGGIO') return (p.formazione?.gruppo === 'XI' && p.formazione.probabilita < 70) || p.formazione?.gruppo === 'ALTERNATIVA';
+      if (filtro === 'RIGORISTA') return p.sos?.piazzati?.RIGORI === 1 || p.tag.includes('RIGORISTA');
+      if (filtro === 'PIAZZATI') return Boolean(p.sos?.piazzati && Object.keys(p.sos.piazzati).length);
+      if (filtro === 'LOWCOST') return p.quot <= 5;
+      if (filtro === 'RISCHIO') return p.tag.includes('RISCHIO');
+      return false;
+    }
 
     function initFiltri() {
       document.getElementById('filtri-ruolo').innerHTML = RUOLI_FILTRO.map(r =>
@@ -1556,7 +1557,7 @@ ${playersData}
         if (soloLiberi && asseg.has(p.id)) return false;
         if (soloAffari && semaforiMap.get(p.id) !== 'COMPRA') return false;
         if (filtroRuolo !== 'ALL' && p.ruolo !== filtroRuolo) return false;
-        if (filtroTag !== 'ALL' && !p.tag.includes(filtroTag)) return false;
+        if (!corrispondeFiltro(p, filtroTag)) return false;
         if (!q) return true;
         return [p.nome, p.squadra, p.nota ?? '', ...(p.blocco ?? []), ...p.mantra, ...p.tag]
           .join(' ').toLowerCase().includes(q);
@@ -1564,7 +1565,6 @@ ${playersData}
 
       document.getElementById('tabella').innerHTML = righe.map(p => {
         const preso = asseg.get(p.id);
-        const qCap = quantoPosso(st, p.ruolo, and);
         const avv = tetti[p.ruolo];
         const mkt = mercato.get(p.id) ?? { atteso: 1, min: 1, max: 1 };
         const prezzo = prezzi.get(p.id) ?? 0;
@@ -1576,6 +1576,8 @@ ${playersData}
         const scInfo = scarsita[p.ruolo] ?? { score: 50 };
         const tierInfo = tierMap.get(p.id) ?? { score: 50, disponibili: 0, domanda: 0, saltoPunti: 0 };
         const segnaliSos = [];
+        if (p.formazione?.gruppo === 'XI') segnaliSos.push('XI ' + p.formazione.probabilita + '%');
+        else if (p.formazione?.gruppo === 'ALTERNATIVA') segnaliSos.push('ballottaggio ' + p.formazione.probabilita + '%');
         if (p.sos?.status) segnaliSos.push(p.sos.status.toLowerCase());
         if (p.sos?.gerarchiaPortiere) segnaliSos.push('portiere ' + p.sos.gerarchiaPortiere.toLowerCase());
         if (p.sos?.piazzati?.RIGORI) segnaliSos.push('rigori #' + p.sos.piazzati.RIGORI);
@@ -1584,6 +1586,13 @@ ${playersData}
 
         const mantra = p.mantra.map(m =>
           \`<span class="text-[10px] px-1 py-px rounded bg-slate-800/80 text-slate-400 border border-slate-700/50" title="\${NOMI_MANTRA[m] ?? m}">\${m}</span>\`).join(' ');
+        const etichetteProfilo = [
+          p.formazione?.gruppo === 'XI' ? '<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border bg-emerald-950 text-emerald-300 border-emerald-800/60 font-bold">Probabile XI</span>' : '',
+          p.formazione?.gruppo === 'ALTERNATIVA' ? '<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border bg-amber-950 text-amber-300 border-amber-800/60">Ballottaggio</span>' : '',
+          p.sos?.piazzati?.RIGORI === 1 ? '<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border bg-emerald-950 text-emerald-300 border-emerald-800/60 font-bold">1° rigorista</span>' : '',
+          p.tag.includes('RISCHIO') ? '<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border bg-rose-950 text-rose-300 border-rose-800/60">Rischio</span>' : '',
+          p.quot <= 5 ? '<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border bg-teal-950 text-teal-300 border-teal-800/60">Low cost</span>' : ''
+        ].filter(Boolean).join('');
 
         const semaforoBadge = semaforo === 'COMPRA'
           ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-emerald-950 text-emerald-300 border border-emerald-700"><i class="fa-solid fa-circle-check text-emerald-400"></i> COMPRA</span>'
@@ -1599,36 +1608,23 @@ ${playersData}
              </td>\`
           : \`<td class="p-2.5 text-center align-top space-y-1">
                \${semaforoBadge}
-               <div class="text-[10px] text-slate-400 tabular-nums">
-                 <span>Valore: <strong class="text-white font-bold">\${val.valorePuro}</strong></span> •
-                 <span>Mio max: <strong class="\${mioMax >= mkt.atteso ? 'text-emerald-400' : 'text-rose-400'} font-bold">\${mioMax}</strong></span>
-               </div>
+               <div class="text-[10px] text-slate-400 tabular-nums">Tetto rapido <strong class="\${mioMax >= mkt.atteso ? 'text-emerald-400' : 'text-rose-400'} font-bold">\${mioMax} cr</strong></div>
                <div class="flex items-center justify-center gap-2 text-[9px] text-slate-500 tabular-nums">
-                 <span title="Marginal Value Above Replacement: fantapunti stagionali rispetto al rimpiazzo">MVAR +\${mvar.diffSeason}pt</span>
-                 <span>•</span>
-                 <span class="\${scInfo.score >= 75 ? 'text-rose-400 font-bold' : ''}" title="Scarsita del ruolo">Scarsita \${scInfo.score}%</span>
+                 <span title="Fantapunti stagionali sopra il rimpiazzo del ruolo">+\${mvar.diffSeason} pt vs rimpiazzo</span>
                  <span>•</span>
                  <span class="\${tierInfo.score >= 75 ? 'text-rose-400 font-bold' : 'text-indigo-400'}" title="Scarsita della fascia: \${tierInfo.domanda} slot qualitativi ancora richiesti contro \${tierInfo.disponibili} profili di questa fascia o migliore; salto verso il rimpiazzo: \${tierInfo.saltoPunti} pt stagionali">Tier \${tierInfo.score}%</span>
                </div>
              </td>
              <td class="p-2.5 text-center align-top">
-               <span class="font-black text-amber-300 text-sm tabular-nums" title="Quanto ti conviene offrire">\${prezzo} cr</span>
-               <span class="block text-[10px] text-slate-500 mt-0.5 tabular-nums">mercato \${mkt.min}–\${mkt.max} • conf. \${Math.round((mkt.confidenza ?? 0.35) * 100)}%</span>
-               <span class="block text-[10px] font-bold tabular-nums mt-0.5 \${margine >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
-                 Margine \${margine >= 0 ? '+' : ''}\${margine} cr
-               </span>
-               \${mkt.min > qCap.tetto
-                 ? '<span class="block text-[10px] text-rose-400 mt-0.5">fuori portata</span>'
-                 : mkt.min > qCap.medio
-                   ? '<span class="block text-[10px] text-amber-400 mt-0.5">dovrai risparmiare altrove</span>'
-                   : ''}
-                <span class="block text-[9px] text-slate-600 mt-0.5 tabular-nums">\${
+               <span class="font-black text-amber-300 text-sm tabular-nums" title="Stima di chiusura live">Stima \${prezzo} cr</span>
+               <span class="block text-[10px] text-slate-500 mt-0.5 tabular-nums">forchetta \${mkt.min}–\${mkt.max} • conf. \${Math.round((mkt.confidenza ?? 0.35) * 100)}%</span>
+                <span class="block text-[9px] text-slate-600 mt-1 tabular-nums">\${
                   avv.cr > 0
                     ? \`\${avv.quanti} in corsa, ~\${avv.realistico} (\${esc(avv.nome)})\`
                     : "nessun rivale puo' piu' prenderlo"}</span>
               </td>
               <td class="p-2.5 text-right align-top">
-                <button type="button" data-apri="\${p.id}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">Assegna</button>
+                <button type="button" data-apri="\${p.id}" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">Valuta</button>
               </td>\`;
 
         let radarHtml = '';
@@ -1717,7 +1713,7 @@ ${playersData}
               <span class="block mt-1 text-[10px] px-1.5 py-px rounded border \${STILE_FASCIA[p.fascia]}" title="Fascia dalla quotazione ufficiale: 1ª da 30 crediti in su, 2ª 15-29, 3ª 6-14, 4ª 1-5">\${NOMI_FASCIA[p.fascia]}</span>
             </td>
             <td class="p-2.5 align-top max-w-xs">
-              <p class="flex flex-wrap gap-1">\${p.tag.map(t => \`<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border \${STILE_TAG[t]}">\${ETICHETTA_TAG[t]}</span>\`).join('')}</p>
+              <p class="flex flex-wrap gap-1">\${etichetteProfilo}</p>
               \${p.nota ? \`<p class="text-[11px] text-slate-300 mt-1.5 leading-relaxed">\${esc(p.nota)}</p>\` : ''}
               \${segnaliSos.length ? \`<p class="text-[10px] text-violet-300 mt-1 leading-relaxed" title="Segnale SOS Fanta/FisherTiger del 31/08/2026, abbinato per nome e squadra al listone ufficiale">SOS: \${esc(segnaliSos.join(' • '))}</p>\` : ''}
               <p class="text-[10px] text-slate-500 mt-1 tabular-nums">\${p.rank}° per FVM fra i \${NOMI_RUOLO[p.ruolo].toLowerCase()}\${p.fonti ? ' • fonti: ' + esc(p.fonti.join(', ')) : ''}</p>
@@ -2014,36 +2010,37 @@ ${playersData}
 
     function renderFormazioni(asseg) {
       const q = document.getElementById('ricerca-formazioni').value.trim().toLowerCase();
-      const ordine = { P: 0, D: 1, C: 2, A: 3 };
 
       const carte = Object.entries(SQUADRE_INFO).map(([cod, info]) => {
-        const titolari = PLAYERS
-          .filter(p => p.cod === cod && p.tag.includes('TITOLARE'))
-          .sort((a, b) => ordine[a.ruolo] - ordine[b.ruolo] || b.fvm - a.fvm);
+        const fonte = FORMAZIONI_PROBABILI.squadre[cod];
+        const titolari = (fonte?.titolari ?? []).map(voce => ({ p: PER_ID.get(voce.id), probabilita: voce.probabilita })).filter(voce => voce.p);
+        const alternative = (fonte?.alternative ?? []).map(voce => ({ p: PER_ID.get(voce.id), probabilita: voce.probabilita })).filter(voce => voce.p);
 
-        if (q && !info.squadra.toLowerCase().includes(q) && !titolari.some(p => p.nome.toLowerCase().includes(q))) return '';
+        if (q && !info.squadra.toLowerCase().includes(q) && ![...titolari, ...alternative].some(voce => voce.p.nome.toLowerCase().includes(q))) return '';
 
-        const liberi = titolari.filter(p => !asseg.has(p.id)).length;
+        const liberi = titolari.filter(voce => !asseg.has(voce.p.id)).length;
+        const dataFonte = FORMAZIONI_PROBABILI.aggiornatoIl ? new Date(FORMAZIONI_PROBABILI.aggiornatoIl).toLocaleDateString('it-IT') : 'oggi';
 
         return \`
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
             <div class="flex justify-between items-start gap-2 mb-1">
               <h3 class="font-bold text-white">\${esc(info.squadra)}</h3>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400 shrink-0">\${esc(info.modulo)}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400 shrink-0">\${esc(fonte?.modulo || info.modulo)}</span>
             </div>
             <p class="text-[11px] text-slate-400">\${esc(info.allenatore)}</p>
-            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">\${esc(info.nota)}</p>
+            <p class="text-[10px] text-violet-300 mt-1">Probabile XI Fantacalcio.it · \${dataFonte}</p>
             <p class="text-[10px] mt-2 \${liberi ? 'text-emerald-400' : 'text-slate-600'}">\${liberi} titolari ancora liberi su \${titolari.length}</p>
             <div class="mt-2 space-y-1">
-              \${titolari.length ? titolari.map(p => {
+              \${titolari.length ? titolari.map(({ p, probabilita }) => {
                 const preso = asseg.get(p.id);
                 return \`<div class="flex justify-between items-center gap-2 text-[11px] \${preso ? 'opacity-50' : ''}">
                   <span class="truncate"><span class="font-black \${COLORE_RUOLO[p.ruolo]}">\${p.ruolo}</span> \${esc(p.nome)}</span>
-                  <span class="shrink-0 \${preso ? 'text-slate-500' : 'text-emerald-400'}">\${preso ? esc(squadre[preso.squadra].nome) + ' · ' + preso.pagato : 'libero'}</span>
+                  <span class="shrink-0 \${preso ? 'text-slate-500' : probabilita >= 80 ? 'text-emerald-400' : 'text-amber-300'}">\${probabilita}% · \${preso ? esc(squadre[preso.squadra].nome) : 'libero'}</span>
                 </div>\`;
               }).join('')
                 : '<p class="text-[11px] text-slate-600 italic">Formazione tipo non ancora raccolta per questa squadra.</p>'}
             </div>
+            \${alternative.length ? \`<div class="mt-3 pt-2 border-t border-slate-800"><p class="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Ballottaggi / alternative</p><p class="text-[11px] text-slate-300 leading-relaxed">\${alternative.map(({ p, probabilita }) => \`<span class="inline-block mr-2 \${probabilita >= 50 ? 'text-amber-300' : 'text-slate-400'}">\${esc(p.nome)} \${probabilita}%</span>\`).join('')}</p></div>\` : ''}
           </div>\`;
       }).join('');
 
