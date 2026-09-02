@@ -120,6 +120,9 @@ const htmlContent = `<!DOCTYPE html>
       </div>
     </header>
 
+    <!-- Segnali sintetici da leggere durante la chiamata -->
+    <div id="allarmi-asta" class="hidden bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 shadow-xl"></div>
+
     <!-- Prezzo che l'asta sta facendo, ruolo per ruolo -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
@@ -211,8 +214,21 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
 
-        <!-- La mia rosa -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col">
+        <div class="space-y-4">
+          <!-- Avversari: lettura rapida per i testa a testa -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+            <div class="flex justify-between items-center mb-1">
+              <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-crosshairs text-amber-400"></i> Rivali live
+              </h2>
+              <span class="text-[10px] text-slate-500">attacco aperto</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mb-3">Chi puo' ancora contenderti il prossimo attaccante.</p>
+            <div id="avversari-live" class="space-y-1.5"></div>
+          </div>
+
+          <!-- La mia rosa -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col">
           <div class="flex justify-between items-center mb-3">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-users-viewfinder text-indigo-400"></i> La mia rosa
@@ -226,6 +242,7 @@ const htmlContent = `<!DOCTYPE html>
             <button type="button" onclick="vaiAllaVista('simulatore')" class="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1">
               Simula XI <i class="fa-solid fa-chevron-right text-[9px]"></i>
             </button>
+          </div>
           </div>
         </div>
       </div>
@@ -499,6 +516,38 @@ ${playersData}
 
     const PER_ID = new Map(PLAYERS.map(p => [p.id, p]));
 
+    // Benchmark fisso dell'asta: distribuisce il budget di ogni reparto sui
+    // giocatori che servono davvero alla lega. Non cambia con le vendite, cosi'
+    // l'indice tavolo confronta prezzo reale e valore teorico sulla stessa base.
+    function prezziTeoriciBase() {
+      const valori = new Map();
+      const budgetLega = BUDGET * squadre.length;
+      for (const r of RUOLI) {
+        const necessari = TARGET[r] * squadre.length;
+        const profili = PLAYERS.filter(p => p.ruolo === r).sort((a, b) => b.fvm - a.fvm);
+        const contendibili = profili.slice(0, necessari);
+        const fvmTotale = contendibili.reduce((somma, p) => somma + Math.max(1, p.fvm), 0);
+        const budgetQualita = Math.max(0, budgetLega * PRIORI[r] / 100 - necessari);
+        contendibili.forEach(p => valori.set(p.id,
+          Math.max(1, 1 + Math.round((Math.max(1, p.fvm) / Math.max(1, fvmTotale)) * budgetQualita))));
+        profili.slice(necessari).forEach(p => valori.set(p.id, 1));
+      }
+      return valori;
+    }
+
+    // Tier relativo al numero di partecipanti: Tier 1 = un primo slot per
+    // squadra, Tier 2 = i due giri successivi. E' piu' utile della sola Q.
+    // ufficiale quando occorre capire se la fascia sta davvero finendo.
+    function tiersAsta() {
+      const tiers = new Map();
+      const ampiezza = Math.max(1, squadre.length);
+      for (const r of RUOLI) {
+        PLAYERS.filter(p => p.ruolo === r).sort((a, b) => b.fvm - a.fvm)
+          .forEach((p, indice) => tiers.set(p.id, indice < ampiezza ? 1 : indice < ampiezza * 3 ? 2 : 3));
+      }
+      return tiers;
+    }
+
     /* ====================== STATO ====================== */
 
     const store = (() => {
@@ -753,6 +802,13 @@ ${playersData}
         rapportiRuolo[r].push(rapporto);
       }
       const inflazioneGlobale = mediana(rapporti);
+      const benchmark = prezziTeoriciBase();
+      let pagatoTeorico = 0;
+      let pagatoReale = 0;
+      for (const [id, a] of asseg) {
+        pagatoReale += a.pagato;
+        pagatoTeorico += benchmark.get(id) ?? 1;
+      }
       const out = {};
       for (const r of RUOLI) {
         const slotTotali = TARGET[r] * squadre.length;
@@ -786,6 +842,10 @@ ${playersData}
           confidenza: Math.min(0.90, 0.35 + Math.min(0.30, rapporti.length / 40) + Math.min(0.25, quanti[r] / 20))
         };
       }
+      out.globale = {
+        indice: pagatoTeorico > 0 ? pagatoReale / pagatoTeorico : 1,
+        pagatoReale, pagatoTeorico, vendite: rapporti.length
+      };
       return out;
     }
 
@@ -1329,8 +1389,10 @@ ${playersData}
 
       renderMetriche(st, and, bestXI, modRes, nomine);
       renderAndamento(st, and);
+      renderAllarmiAsta(asseg, and);
       renderImpostazioni();
       renderTabellone();
+      renderAvversariLive(and);
       renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, tierMap, asseg, and, pianoAperto);
       renderRosa();
       renderSimulatore(miaRosaPlayers, bestXI, modRes);
@@ -1392,6 +1454,79 @@ ${playersData}
                    <span class="block text-slate-600 tabular-nums">fino a \${q.tetto} spingendo, ti mancano \${st.mancanti[r]} slot</span>\`}
             </p>
           </div>\`;
+      }).join('');
+    }
+
+    function renderAllarmiAsta(asseg, and) {
+      const el = document.getElementById('allarmi-asta');
+      const globale = and.globale;
+      const venditeSufficienti = globale.vendite >= 3;
+      const indice = globale.indice;
+      let stato = { etichetta: 'In osservazione', classe: 'text-slate-300', dettaglio: 'L’indice diventa affidabile dalla terza vendita.' };
+      if (venditeSufficienti && indice > 1.15) {
+        stato = { etichetta: 'Tavolo aggressivo', classe: 'text-rose-300', dettaglio: 'I massimali restano prudenti: i crediti residui valgono di più.' };
+      } else if (venditeSufficienti && indice < 0.85) {
+        stato = { etichetta: 'Tavolo a sconto', classe: 'text-emerald-300', dettaglio: 'C’è spazio per spingere sui profili che ti servono davvero.' };
+      } else if (venditeSufficienti) {
+        stato = { etichetta: 'Tavolo in linea', classe: 'text-sky-300', dettaglio: 'Prezzi reali e valori teorici sono allineati.' };
+      }
+
+      const tier = tiersAsta();
+      const avvisi = [];
+      for (const r of RUOLI) {
+        for (const fascia of [1, 2]) {
+          const iniziali = PLAYERS.filter(p => p.ruolo === r && tier.get(p.id) === fascia);
+          const rimasti = iniziali.filter(p => !asseg.has(p.id));
+          if (rimasti.length <= 2) {
+            const livello = fascia === 1 ? 'Tier 1' : 'Tier 2';
+            const nomi = rimasti.length ? rimasti.map(p => esc(p.nome)).join(', ') : 'fascia esaurita';
+            avvisi.push({
+              priorita: fascia === 1 ? 0 : 1,
+              html: \`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border \${fascia === 1 ? 'bg-rose-950/50 border-rose-800/60 text-rose-200' : 'bg-amber-950/50 border-amber-800/60 text-amber-200'}"><i class="fa-solid fa-triangle-exclamation"></i><strong>\${r} · \${livello}</strong> \${rimasti.length ? \`\${rimasti.length} rimast\${rimasti.length === 1 ? 'o' : 'i'}: \${nomi}\` : nomi}</span>\`
+            });
+          }
+        }
+      }
+      avvisi.sort((a, b) => a.priorita - b.priorita);
+      const altri = avvisi.length - 4;
+
+      el.innerHTML = \`
+        <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+          <div class="shrink-0 flex items-center gap-2 text-xs">
+            <i class="fa-solid fa-gauge-high text-indigo-400"></i>
+            <span class="text-slate-400">Indice tavolo</span>
+            <strong class="tabular-nums text-base \${stato.classe}">\${indice.toFixed(2)}×</strong>
+            <span class="font-bold \${stato.classe}">\${stato.etichetta}</span>
+          </div>
+          <p class="text-[11px] text-slate-500 flex-1">\${stato.dettaglio} <span class="tabular-nums">(\${globale.vendite} vendite, \${Math.round(globale.pagatoReale)}/\${Math.round(globale.pagatoTeorico)} cr)</span></p>
+          \${avvisi.length ? \`<div class="flex flex-wrap gap-1.5 text-[10px] lg:justify-end">\${avvisi.slice(0, 4).map(a => a.html).join('')}\${altri > 0 ? \`<span class="px-2 py-1 text-slate-500">+\${altri} avvisi</span>\` : ''}</div>\` : ''}
+        </div>\`;
+      el.classList.remove('hidden');
+    }
+
+    function renderAvversariLive(and) {
+      const el = document.getElementById('avversari-live');
+      const avversari = squadre.slice(1).map(sq => {
+        const stato = statoSquadra(sq);
+        const attacco = quantoPosso(stato, 'A', and);
+        return { nome: sq.nome, stato, attacco };
+      }).sort((a, b) => b.attacco.medio - a.attacco.medio || b.stato.residuo - a.stato.residuo);
+
+      if (!avversari.length) {
+        el.innerHTML = '<p class="text-xs text-slate-500">Aggiungi almeno un avversario.</p>';
+        return;
+      }
+      el.innerHTML = avversari.map(({ nome, stato, attacco }) => {
+        const aperto = stato.mancanti.A > 0;
+        return \`<div class="flex items-center justify-between gap-2 text-[11px] bg-slate-950/70 border border-slate-800 rounded-lg px-2.5 py-2">
+          <span class="font-semibold text-slate-300 truncate">\${esc(nome)}</span>
+          <span class="shrink-0 text-right tabular-nums">
+            <strong class="text-slate-100">\${stato.residuo}</strong><span class="text-slate-500"> cr</span>
+            <span class="mx-1.5 text-slate-700">·</span>
+            <span class="\${aperto ? 'text-rose-300' : 'text-slate-600'}">A \${stato.mancanti.A}/\${TARGET.A}</span>
+            <span class="block text-[9px] \${aperto ? 'text-amber-400' : 'text-slate-600'}">max realistico \${aperto ? attacco.medio : '—'} cr</span>
+          </span>
+        </div>\`;
       }).join('');
     }
 

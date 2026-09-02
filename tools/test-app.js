@@ -128,6 +128,8 @@ function check(nome, atteso, ottenuto) {
   check('quattro schede di andamento', 4, and0.length);
   check('nessun venduto in partenza', [0, 0, 0, 0], and0.map(a => a.venduti));
   check('gli attaccanti costano piu\' dei portieri', true, and0[3].medio > and0[0].medio);
+  check('indice tavolo live visibile', true, await page.evaluate(() => document.getElementById('allarmi-asta').textContent.includes('Indice tavolo')));
+  check('barra rivali: sette avversari', 7, await page.evaluate(() => document.querySelectorAll('#avversari-live > div').length));
   check('il massimo con rosa media sta sotto il tetto', true, and0[3].max < and0[3].tetto);
   check('il tetto e\' la capienza', 476, and0[3].tetto);
   check('un big si puo\' comprare risparmiando altrove', true,
@@ -185,6 +187,8 @@ function check(nome, atteso, ottenuto) {
   }
   const sq1pieno = await squadra(1);
   check('sei attaccanti presi', '6/6', sq1pieno.A);
+  check('indice live registra le sei vendite', 6, await page.evaluate(() => andamento(assegnazioni()).globale.vendite));
+  check('barra rivali segnala attacco chiuso', true, await page.evaluate(() => document.getElementById('avversari-live').textContent.includes('A 0/6')));
   check('attacco non compare fra i reparti aperti', false, sq1pieno.aperti.includes('A'));
   // Il tetto e' il massimo fra tutti: resta alto finche' qualcuno ha budget.
   // Cio' che cambia e' quanti avversari possono ancora contendere il ruolo.
