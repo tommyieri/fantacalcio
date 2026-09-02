@@ -1829,7 +1829,10 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         return vb - va;
       });
 
-      if (difensori.length < 3 || !portieri.length) {
+      // Il modificatore lo assegna la lega solo a chi schiera almeno
+      // difensoriMinimi difensori: il controllo sta qui e non nel solo
+      // simulatore, cosi' nessun chiamante puo' aggirarlo.
+      if (difensori.length < PROFILO_LEGA.modificatore.difensoriMinimi || !portieri.length) {
         return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: difensori.slice(0, 3), attivo: true };
       }
 
