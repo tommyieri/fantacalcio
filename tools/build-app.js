@@ -848,30 +848,49 @@ ${playersData}
       const scarsita = {};
       const baselinePunti = {};
       const mvarMap = new Map();
+      const tierMap = new Map();
 
       for (const r of RUOLI) {
         const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id)).sort((a, b) => b.fvm - a.fvm);
         const slots = slotRimasti[r];
         const validi = liberi.filter(p => p.fascia <= 3 || p.tag.includes('TITOLARE')).length;
+        const slotTitolari = { P: 1, D: 4, C: 4, A: 3 }[r];
+        const sogliaFascia = { 1: 1, 2: Math.max(1, Math.ceil(slotTitolari / 2)), 3: slotTitolari, 4: TARGET[r] };
+        const domandaFascia = Object.fromEntries([1, 2, 3, 4].map(fascia => [fascia,
+          stati.reduce((somma, stato) => somma + Math.max(0, sogliaFascia[fascia] - stato.presi[r]), 0)
+        ]));
         
         const sc = slots === 0 ? 0 : Math.min(100, Math.max(0, Math.round(100 * (1 - (validi - slots) / Math.max(1, slots)))));
         scarsita[r] = { score: sc, slots, validi, totLiberi: liberi.length };
 
-        // Realistic Replacement Index: non l'ultimo slot teorico, ma il giocatore al 130% degli slot o la base titolari
-        const realisticIndex = Math.min(liberi.length - 1, Math.max(0, Math.round(slots * 1.30) - 1));
+        // Rimpiazzo: il primo profilo immediatamente fuori dagli slot ancora necessari.
+        // Asta in corso: quando i top spariscono, la baseline sale/scende con il pool reale.
+        const realisticIndex = Math.min(liberi.length - 1, Math.max(0, slots - 1));
         const basePlayer = liberi[realisticIndex] ?? liberi[liberi.length - 1];
         const baseVal = basePlayer ? (VALUTAZIONI_CACHE.get(basePlayer.id)?.puntiMatch ?? 5.5) : 5.0;
         baselinePunti[r] = baseVal;
 
-        for (const p of liberi) {
+        for (let indice = 0; indice < liberi.length; indice++) {
+          const p = liberi[indice];
           const val = VALUTAZIONI_CACHE.get(p.id);
           const diffMatch = Math.max(0, (val?.puntiMatch ?? 5.5) - baseVal);
           const diffSeason = Number((diffMatch * (val?.presenzeAttese ?? 30)).toFixed(1));
           mvarMap.set(p.id, { diffMatch: Number(diffMatch.toFixed(2)), diffSeason });
+
+          // Scarsita' della fascia, non solo del reparto: per un top contiamo quanti
+          // giocatori della sua fascia (o migliore) sono ancora realmente disponibili.
+          const disponibiliFascia = liberi.filter(q => q.fascia <= p.fascia).length;
+          const domandaQualita = domandaFascia[p.fascia];
+          const scoreFascia = domandaQualita === 0 ? 0 : Math.round(100 * domandaQualita / Math.max(1, domandaQualita + disponibiliFascia));
+          const alternativa = liberi[Math.min(liberi.length - 1, Math.max(indice + 1, domandaQualita))];
+          const puntiAlternativa = alternativa ? (VALUTAZIONI_CACHE.get(alternativa.id)?.puntiStagione ?? 0) : 0;
+          const saltoPunti = Number(Math.max(0, (val?.puntiStagione ?? 0) - puntiAlternativa).toFixed(1));
+          const premioSalto = Math.min(0.12, saltoPunti / 250);
+          tierMap.set(p.id, { score: scoreFascia, disponibili: disponibiliFascia, domanda: domandaQualita, saltoPunti, premioSalto });
         }
       }
 
-      return { scarsita, mvarMap, baselinePunti };
+      return { scarsita, mvarMap, baselinePunti, tierMap };
     }
 
     // Frontiera esatta: per ogni budget disponibile restituisce il miglior totale di
@@ -964,7 +983,7 @@ ${playersData}
       };
     }
 
-    function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap) {
+    function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap) {
       const prezzi = new Map();
       const mioMaxMap = new Map();
       const marginiMap = new Map();
@@ -990,7 +1009,8 @@ ${playersData}
 
         // Integrazione rigorosa di Scarsita' e MVAR nel MAX BID
         const scScore = scarsita?.[r]?.score ?? 50;
-        const scarcityMultiplier = 1 + (scScore / 100) * 0.15;
+        const tier = tierMap?.get(p.id) ?? { score: 50, premioSalto: 0 };
+        const scarcityMultiplier = 1 + (scScore / 100) * 0.07 + (tier.score / 100) * 0.15 + tier.premioSalto;
 
         const mvar = mvarMap?.get(p.id);
         const diffSeason = mvar?.diffSeason ?? 0;
@@ -1225,8 +1245,8 @@ ${playersData}
       const st = statoSquadra(squadre[0]);
       const and = andamento(asseg);
       const mercato = prezziMercato(asseg, and);
-      const { scarsita, mvarMap } = calcolaMVAR_e_Scarsita(asseg);
-      const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap);
+      const { scarsita, mvarMap, tierMap } = calcolaMVAR_e_Scarsita(asseg);
+      const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap);
       const candidatoAperto = apertaRiga ? PER_ID.get(apertaRiga) : null;
       const pianoAperto = candidatoAperto && !asseg.has(candidatoAperto.id)
         ? calcolaPianoCompletamento(st, candidatoAperto, asseg, mercato)
@@ -1241,7 +1261,7 @@ ${playersData}
       renderAndamento(st, and);
       renderImpostazioni();
       renderTabellone();
-      renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and, pianoAperto);
+      renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, tierMap, asseg, and, pianoAperto);
       renderRosa();
       renderSimulatore(miaRosaPlayers, bestXI, modRes);
       renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap, and);
@@ -1459,7 +1479,7 @@ ${playersData}
       }
     }
 
-    function renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and, pianoAperto) {
+    function renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, tierMap, asseg, and, pianoAperto) {
       const q = document.getElementById('ricerca').value.trim().toLowerCase();
       const tetti = Object.fromEntries(RUOLI.map(r => [r, tettoAvversari(r, and)]));
 
@@ -1485,6 +1505,7 @@ ${playersData}
         const semaforo = semaforiMap.get(p.id) ?? 'ATTENDI';
         const mvar = mvarMap.get(p.id) ?? { diffMatch: 0, diffSeason: 0 };
         const scInfo = scarsita[p.ruolo] ?? { score: 50 };
+        const tierInfo = tierMap.get(p.id) ?? { score: 50, disponibili: 0, domanda: 0, saltoPunti: 0 };
 
         const mantra = p.mantra.map(m =>
           \`<span class="text-[10px] px-1 py-px rounded bg-slate-800/80 text-slate-400 border border-slate-700/50" title="\${NOMI_MANTRA[m] ?? m}">\${m}</span>\`).join(' ');
@@ -1511,6 +1532,8 @@ ${playersData}
                  <span title="Marginal Value Above Replacement: fantapunti stagionali rispetto al rimpiazzo">MVAR +\${mvar.diffSeason}pt</span>
                  <span>•</span>
                  <span class="\${scInfo.score >= 75 ? 'text-rose-400 font-bold' : ''}" title="Scarsita del ruolo">Scarsita \${scInfo.score}%</span>
+                 <span>•</span>
+                 <span class="\${tierInfo.score >= 75 ? 'text-rose-400 font-bold' : 'text-indigo-400'}" title="Scarsita della fascia: \${tierInfo.domanda} slot qualitativi ancora richiesti contro \${tierInfo.disponibili} profili di questa fascia o migliore; salto verso il rimpiazzo: \${tierInfo.saltoPunti} pt stagionali">Tier \${tierInfo.score}%</span>
                </div>
              </td>
              <td class="p-2.5 text-center align-top">
