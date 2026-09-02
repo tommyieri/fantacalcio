@@ -287,9 +287,10 @@ function check(nome, atteso, ottenuto) {
     const pannello = document.getElementById('prezzo-input').closest('td');
     const testo = pannello.textContent;
     const max = +(testo.match(/Max bid da piano rosa\s*(\d+) cr/) || [])[1];
-    return { presente: testo.includes('Calcolo esatto sugli slot rimasti'), max };
+    return { presente: testo.includes('Calcolo esatto sugli slot rimasti'), monteCarlo: testo.includes('Monte Carlo (800)'), max };
   });
   check('piano di completamento esatto visibile', true, piano.presente);
+  check('simulazione Monte Carlo avversari visibile', true, piano.monteCarlo);
   check('max bid del piano entro la capienza', true, piano.max >= 0 && piano.max <= (await mie()).capienza);
   await page.fill('#prezzo-input', '50');
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
