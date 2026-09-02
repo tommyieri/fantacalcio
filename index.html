@@ -18,7 +18,7 @@
             <i class="fa-solid fa-trophy text-amber-400"></i> FantaStrategy Pro
           </h1>
           <p class="text-xs text-slate-400 mt-0.5">
-            Serie A 2026/27 • 500 crediti • <span id="intestazione-lega"></span>
+            Serie A 2026/27 • <span id="intestazione-budget">500</span> crediti • <span id="intestazione-lega"></span>
           </p>
         </div>
 
@@ -78,6 +78,18 @@
 
       <!-- Impostazioni della lega -->
       <div id="pannello-impostazioni" class="hidden pt-3 border-t border-slate-800 space-y-4">
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+          <p class="text-[10px] uppercase tracking-wider font-bold text-indigo-300 mb-2">Regolamento attivo</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-[11px] text-slate-300">
+            <div><span class="text-slate-500">Asta</span><br><strong>A chiamata</strong></div>
+            <div><span class="text-slate-500">Rosa</span><br><strong>3P · 8D · 8C · 6A</strong></div>
+            <label><span class="text-slate-500">Rete inviolata P</span><br>
+              <input type="number" id="bonus-rete-inviolata" min="0" max="3" step="0.25" class="mt-1 w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-emerald-300 font-bold tabular-nums focus:outline-none focus:border-indigo-500"> pt
+            </label>
+            <label class="flex items-end gap-2 pb-0.5 cursor-pointer"><input id="modificatore-attivo" type="checkbox" class="accent-indigo-500"> <span>Modificatore: P + top 3 D<br><span class="text-slate-500">attivo da 4 difensori</span></span></label>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-2">Soglie modificatore: 6,00 → +1 · 6,25 → +2 · 6,50 → +3 · 6,75 → +4 · 7,00 → +6.</p>
+        </div>
         <div class="pt-3 border-t border-slate-800">
           <p class="text-[11px] text-slate-400 mb-2">
             Partecipanti alla lega. Il primo sei tu: i nomi servono a registrare chi si prende cosa.
@@ -101,6 +113,7 @@
           <strong class="text-sky-300">Modificatore Difesa Matematico</strong> (rendimento punti differenziale), <strong class="text-amber-300">MVAR & Indice di Scarsita'</strong> e
           <strong class="text-emerald-300">Radar Rilanci Avversari</strong>.
         </p>
+        <p>Il +1 per rete inviolata del portiere e' incluso in modo trasparente come probabilita' stimata dal valore FVM del listone. Finche' non colleghiamo proiezioni squadra/calendario, non va interpretato come una previsione puntuale di clean sheet.</p>
       </div>
     </header>
 
@@ -1082,13 +1095,26 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
 
     /* ====================== COSTANTI & MAPPE ====================== */
 
-    const BUDGET = 500;
+    const PROFILO_LEGA = Object.freeze({
+      budget: 500,
+      partecipanti: 8,
+      rosa: { P: 3, D: 8, C: 8, A: 6 },
+      asta: 'A chiamata',
+      modificatore: {
+        difensoriMinimi: 4,
+        scaglioni: [
+          { soglia: 7.00, bonus: 6 }, { soglia: 6.75, bonus: 4 }, { soglia: 6.50, bonus: 3 },
+          { soglia: 6.25, bonus: 2 }, { soglia: 6.00, bonus: 1 }
+        ]
+      }
+    });
+    const BUDGET = PROFILO_LEGA.budget;
     const RUOLI = ['P', 'D', 'C', 'A'];
-    const TARGET = { P: 3, D: 8, C: 8, A: 6 };
+    const TARGET = PROFILO_LEGA.rosa;
     const SLOT_TOT = Object.values(TARGET).reduce((s, n) => s + n, 0);
     const NOMI_RUOLO = { P: 'Portieri', D: 'Difensori', C: 'Centrocampisti', A: 'Attaccanti' };
     const PRIORI = { P: 7, D: 19, C: 32, A: 42 };
-    const N_SQUADRE_DEFAULT = 8;
+    const N_SQUADRE_DEFAULT = PROFILO_LEGA.partecipanti;
 
     const COLORE_RUOLO = { P: 'text-amber-400', D: 'text-emerald-400', C: 'text-blue-400', A: 'text-rose-400' };
     const BG_RUOLO = { P: 'bg-amber-950/80 border-amber-800/60', D: 'bg-emerald-950/80 border-emerald-800/60', C: 'bg-blue-950/80 border-blue-800/60', A: 'bg-rose-950/80 border-rose-800/60' };
@@ -1150,15 +1176,24 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       }));
     }
 
+    function normalizzaRegole(input) {
+      return {
+        bonusReteInviolata: Math.max(0, Math.min(3, Number(input?.bonusReteInviolata ?? 1))),
+        modificatoreAttivo: input?.modificatoreAttivo !== false
+      };
+    }
+
     function caricaStato() {
       let s;
       try { s = JSON.parse(store.getItem(CHIAVE)); } catch (e) { s = null; }
-      if (!s || !Array.isArray(s.squadre) || !s.squadre.length) return nuoveSquadre(N_SQUADRE_DEFAULT);
+      if (!s || !Array.isArray(s.squadre) || !s.squadre.length) return { squadre: nuoveSquadre(N_SQUADRE_DEFAULT), regole: normalizzaRegole() };
       for (const sq of s.squadre) sq.rosa = (sq.rosa ?? []).filter(a => PER_ID.has(a.id));
-      return s.squadre;
+      return { squadre: s.squadre, regole: normalizzaRegole(s.regole) };
     }
 
-    let squadre = caricaStato();
+    const statoIniziale = caricaStato();
+    let squadre = statoIniziale.squadre;
+    let regole = statoIniziale.regole;
     let filtroRuolo = 'ALL';
     let filtroTag = 'ALL';
     let soloLiberi = true;
@@ -1169,7 +1204,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     let moduloScelto = '3-4-3';
 
     function salva() {
-      store.setItem(CHIAVE, JSON.stringify({ squadre }));
+      store.setItem(CHIAVE, JSON.stringify({ squadre, regole }));
     }
 
     /* ====================== MOTORE MATEMATICO DEL VALORE ====================== */
@@ -1197,7 +1232,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       for (const p of PLAYERS) perRuolo[p.ruolo].push(p);
       for (const r of RUOLI) perRuolo[r].sort((a, b) => b.fvm - a.fvm);
 
-      const nSquadreBase = 8;
+      const nSquadreBase = squadre.length;
       const budgetTotLega = nSquadreBase * BUDGET; // 4000 cr
 
       const roleStats = {};
@@ -1214,7 +1249,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         excessSum = Math.max(1, excessSum);
         const excessPool = Math.max(0, roleBudget - nDrafted);
 
-        roleStats[r] = { nDrafted, baselineFvm, roleBudget, excessSum, excessPool };
+        roleStats[r] = { nDrafted, baselineFvm, maxFvm: perRuolo[r][0]?.fvm ?? 1, roleBudget, excessSum, excessPool };
       }
 
       for (const p of PLAYERS) {
@@ -1244,7 +1279,13 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
           bonusNet = 0.15 + 1.85 * Math.min(1, p.fvm / 260);
         }
 
-        const fma = Number((mv + bonusNet).toFixed(2));
+        // Il listone non contiene una proiezione di squadra/calendario: per ora rendiamo esplicita
+        // una proxy conservativa (16%-36%) ricavata dalla fascia FVM del portiere.
+        const probReteInviolata = r === 'P'
+          ? 0.16 + 0.20 * Math.min(1, p.fvm / Math.max(1, stRole.maxFvm))
+          : 0;
+        const puntiReteInviolata = regole.bonusReteInviolata * probReteInviolata;
+        const fma = Number((mv + bonusNet + puntiReteInviolata).toFixed(2));
         const puntiMatch = fma;
         const presenzeAttese = Math.round(38 * tit);
         const puntiStagione = Number((presenzeAttese * fma).toFixed(1));
@@ -1259,7 +1300,8 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         const valorePuro = Math.max(1, Math.round(rawVal));
 
         VALUTAZIONI_CACHE.set(p.id, {
-          tit, mv: Number(mv.toFixed(2)), fma, puntiMatch, presenzeAttese, puntiStagione, valorePuro
+          tit, mv: Number(mv.toFixed(2)), fma, puntiMatch, presenzeAttese, puntiStagione, valorePuro,
+          probReteInviolata: Number(probReteInviolata.toFixed(2)), puntiReteInviolata: Number(puntiReteInviolata.toFixed(2))
         });
       }
     }
@@ -1535,6 +1577,9 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     }
 
     function calcolaModificatoreSquadra(giocatoriDettaglio) {
+      if (!regole.modificatoreAttivo) {
+        return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: [], attivo: false };
+      }
       const portieri = giocatoriDettaglio.filter(p => p.ruolo === 'P');
       const difensori = giocatoriDettaglio.filter(p => p.ruolo === 'D').sort((a, b) => {
         const va = VALUTAZIONI_CACHE.get(a.id)?.mv ?? 6.0;
@@ -1543,36 +1588,23 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       });
 
       if (difensori.length < 3 || !portieri.length) {
-        return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: difensori.slice(0, 3) };
+        return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: difensori.slice(0, 3), attivo: true };
       }
 
       const gkMv = VALUTAZIONI_CACHE.get(portieri[0].id)?.mv ?? 6.0;
       const top3Mv = difensori.slice(0, 3).map(d => VALUTAZIONI_CACHE.get(d.id)?.mv ?? 6.0);
       const media = (gkMv + top3Mv.reduce((s, v) => s + v, 0)) / 4;
 
-      // Scaglione Base Esatto (Regole Ufficiali Serie A Classic)
-      let scaglioneBase = 0;
-      if (media >= 7.00) scaglioneBase = 6.0;
-      else if (media >= 6.75) scaglioneBase = 4.0;
-      else if (media >= 6.50) scaglioneBase = 3.0;
-      else if (media >= 6.25) scaglioneBase = 2.0;
-      else if (media >= 6.00) scaglioneBase = 1.0;
+      const scaglioni = PROFILO_LEGA.modificatore.scaglioni;
+      const scaglioneBase = scaglioni.find(s => media >= s.soglia)?.bonus ?? 0;
 
       // Rendimento atteso su 38 giornate integrando la varianza voto partita (sigma = 0.28)
       const sigma = 0.28;
-      const pGeq700 = 1 - normalCdf(7.00, media, sigma);
-      const pGeq675 = 1 - normalCdf(6.75, media, sigma);
-      const pGeq650 = 1 - normalCdf(6.50, media, sigma);
-      const pGeq625 = 1 - normalCdf(6.25, media, sigma);
-      const pGeq600 = 1 - normalCdf(6.00, media, sigma);
-
-      const p6 = pGeq700;
-      const p4 = pGeq675 - pGeq700;
-      const p3 = pGeq650 - pGeq675;
-      const p2 = pGeq625 - pGeq650;
-      const p1 = pGeq600 - pGeq625;
-
-      const expectedBonus = (1 * p1) + (2 * p2) + (3 * p3) + (4 * p4) + (6 * p6);
+      const expectedBonus = scaglioni.reduce((somma, scaglione, i) => {
+        const pRaggiunge = 1 - normalCdf(scaglione.soglia, media, sigma);
+        const pScaglioneSuperiore = i === 0 ? 0 : 1 - normalCdf(scaglioni[i - 1].soglia, media, sigma);
+        return somma + scaglione.bonus * Math.max(0, pRaggiunge - pScaglioneSuperiore);
+      }, 0);
       const bonusFinale = Number(expectedBonus.toFixed(2));
 
       return {
@@ -1580,7 +1612,8 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         scaglioneBase,
         mvMedia: Number(media.toFixed(2)),
         stagionale: Math.round(bonusFinale * 38),
-        topDif: difensori.slice(0, 3)
+        topDif: difensori.slice(0, 3),
+        attivo: true
       };
     }
 
@@ -1615,7 +1648,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       let puntiTitolari = titolari.reduce((s, p) => s + (VALUTAZIONI_CACHE.get(p.id)?.puntiMatch ?? 5.5), 0);
 
       let modBonus = 0;
-      if (nStrD >= 4) {
+      if (regole.modificatoreAttivo && nStrD >= PROFILO_LEGA.modificatore.difensoriMinimi) {
         const modRes = calcolaModificatoreSquadra(titolari);
         modBonus = modRes.bonusAtteso;
       }
@@ -1754,7 +1787,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
 
       const miaRosaPlayers = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
       const bestXI = trovaBestXI(miaRosaPlayers);
-      const modRes = calcolaModificatoreSquadra(miaRosaPlayers);
+      const modRes = calcolaModificatoreSquadra(bestXI.titolari);
       const nomine = generaSuggerimentiNomine(asseg, st, mercato, semaforiMap, marginiMap);
 
       renderMetriche(st, and, bestXI, modRes, nomine);
@@ -1784,6 +1817,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       document.getElementById('m-slot-tot').textContent = SLOT_TOT;
       document.getElementById('intestazione-lega').textContent =
         `${RUOLI.map(r => TARGET[r] + r).join(' ')} • ${squadre.length} partecipanti • ${squadre[0].nome}`;
+      document.getElementById('intestazione-budget').textContent = BUDGET;
 
       document.getElementById('m-best-xi-score').textContent = bestXI.puntiTotali > 0 ? bestXI.puntiTotali : '0.0';
       document.getElementById('m-best-xi-modulo').textContent = bestXI.modulo;
@@ -1838,6 +1872,9 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     function renderImpostazioni() {
       const nSq = document.getElementById('n-squadre');
       if (document.activeElement !== nSq) nSq.value = squadre.length;
+      const cleanSheet = document.getElementById('bonus-rete-inviolata');
+      if (document.activeElement !== cleanSheet) cleanSheet.value = regole.bonusReteInviolata;
+      document.getElementById('modificatore-attivo').checked = regole.modificatoreAttivo;
 
       const nomi = document.getElementById('nomi-squadre');
       if (Number(nomi.dataset.n) !== squadre.length) {
@@ -2242,11 +2279,15 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
 
       const renderCartaGiocatore = p => {
         const val = VALUTAZIONI_CACHE.get(p.id) ?? { puntiMatch: 5.5 };
+        const bonusPortaInviolata = p.ruolo === 'P' && val.puntiReteInviolata > 0
+          ? `<span class="text-[8px] text-sky-400 tabular-nums">RI +${val.puntiReteInviolata}</span>`
+          : '';
         return `
           <div class="flex flex-col items-center p-1.5 rounded-xl bg-slate-900/90 border border-slate-800 shadow-md min-w-[76px] sm:min-w-[90px] text-center backdrop-blur-sm">
             <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${BG_RUOLO[p.ruolo]} ${COLORE_RUOLO[p.ruolo]} mb-0.5">${p.ruolo}</span>
             <span class="text-[11px] font-bold text-white truncate max-w-[80px] sm:max-w-[95px]">${esc(p.nome)}</span>
             <span class="text-[9px] text-emerald-400 font-black tabular-nums">${val.puntiMatch} pt</span>
+            ${bonusPortaInviolata}
           </div>`;
       };
 
@@ -2286,16 +2327,19 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       }
 
       document.getElementById('sim-mod-bonus').textContent = (simCorrente.modBonus > 0 ? '+' : '') + simCorrente.modBonus.toFixed(2) + ' pt';
-      document.getElementById('sim-mod-mv').textContent = modRes.mvMedia > 0 ? `${modRes.mvMedia.toFixed(2)} (Scaglione +${modRes.scaglioneBase} pt)` : '0.00';
+      const modCorrente = calcolaModificatoreSquadra(simCorrente.titolari);
+      document.getElementById('sim-mod-mv').textContent = modCorrente.mvMedia > 0 ? `${modCorrente.mvMedia.toFixed(2)} (Scaglione +${modCorrente.scaglioneBase} pt)` : '0.00';
       document.getElementById('sim-mod-tot-stagione').textContent = `~${Math.round(simCorrente.modBonus * 38)} pt totali`;
 
       const modConsiglio = document.getElementById('sim-mod-consiglio');
-      if (nD < 4) {
-        modConsiglio.innerHTML = `<span class="text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Modificatore disattivato:</span> il modulo ${moduloScelto} schiera solo ${nD} difensori. Passa a un modulo a 4 difensori (es. 4-3-3 o 4-4-2) per sbloccare fino a +6 punti a giornata.`;
-      } else if (modRes.bonusAtteso >= 1.5) {
-        modConsiglio.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Difesa Top da Modificatore:</span> stai producendo +${modRes.bonusAtteso} pt medi a giornata (~+${modRes.stagionale} pt all'anno, pari a 12 gol di un bomber!).`;
+      if (!regole.modificatoreAttivo) {
+        modConsiglio.innerHTML = '<span class="text-slate-400 font-bold"><i class="fa-solid fa-toggle-off mr-1"></i> Modificatore non previsto:</span> attivalo dalle Impostazioni se il regolamento della lega lo applica.';
+      } else if (nD < PROFILO_LEGA.modificatore.difensoriMinimi) {
+        modConsiglio.innerHTML = `<span class="text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Modificatore disattivato:</span> il modulo ${moduloScelto} schiera solo ${nD} difensori. Passa a un modulo a ${PROFILO_LEGA.modificatore.difensoriMinimi} difensori (es. 4-3-3 o 4-4-2) per sbloccare fino a +6 punti a giornata.`;
+      } else if (modCorrente.bonusAtteso >= 1.5) {
+        modConsiglio.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Difesa Top da Modificatore:</span> stai producendo +${modCorrente.bonusAtteso} pt medi a giornata (~+${modCorrente.stagionale} pt all'anno).`;
       } else {
-        modConsiglio.innerHTML = `<span class="text-sky-400 font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Potenziale di crescita:</span> la tua difesa genera +${modRes.bonusAtteso} pt/giornata. Investire su 1 centrale da 6.3+ di MV puo' raddoppiare il bonus a +1.40 pt.`;
+        modConsiglio.innerHTML = `<span class="text-sky-400 font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Potenziale di crescita:</span> la tua difesa genera +${modCorrente.bonusAtteso} pt/giornata. Investire su un centrale affidabile aumenta la probabilita' di scaglioni alti.`;
       }
 
       const livelloCop = simCorrente.coperturaPct >= 85 ? 'Alta' : simCorrente.coperturaPct >= 65 ? 'Media' : 'Bassa';
@@ -2651,6 +2695,23 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       }
       apertaSquadra = null;
       document.getElementById('nomi-squadre').dataset.n = '';
+      inizializzaValutazioni();
+      render();
+    });
+
+    document.getElementById('bonus-rete-inviolata').addEventListener('change', e => {
+      const bonus = Number(e.target.value);
+      if (!Number.isFinite(bonus) || bonus < 0 || bonus > 3) {
+        e.target.value = regole.bonusReteInviolata;
+        return;
+      }
+      regole.bonusReteInviolata = bonus;
+      inizializzaValutazioni();
+      render();
+    });
+
+    document.getElementById('modificatore-attivo').addEventListener('change', e => {
+      regole.modificatoreAttivo = e.target.checked;
       render();
     });
 

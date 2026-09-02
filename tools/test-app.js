@@ -102,6 +102,20 @@ function check(nome, atteso, ottenuto) {
   check('capienza (500 - 24 slot vuoti)', 476, s0.capienza);
   check('rosa da 25 slot con tre portieri', '0/3 P • 0/8 D • 0/8 C • 0/6 A', s0.badge);
   check('avversario col budget pieno', 500, (await squadra(1)).residuo);
+  check('profilo +1 rete inviolata attivo', '1', await page.evaluate(() => document.getElementById('bonus-rete-inviolata').value));
+  check('profilo modificatore attivo', true, await page.evaluate(() => document.getElementById('modificatore-attivo').checked));
+  const bonusSalvato = await page.evaluate(() => {
+    const input = document.getElementById('bonus-rete-inviolata');
+    input.value = '0.5';
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    return JSON.parse(localStorage.getItem('fantastrategy.asta.2026')).regole.bonusReteInviolata;
+  });
+  check('bonus porta inviolata configurabile e persistito', 0.5, bonusSalvato);
+  await page.evaluate(() => {
+    const input = document.getElementById('bonus-rete-inviolata');
+    input.value = '1';
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
 
   // Il massimo sostenibile mette da parte il prezzo corrente degli altri slot
   const and0 = await page.evaluate(() => [...document.querySelectorAll('#andamento > div')]
