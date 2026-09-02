@@ -45,12 +45,45 @@ esattamente il modo in cui si prende un top. La riga del listone lo dice: *dovra
 altrove* quando il mercato chiede piu' della media sostenibile, *fuori portata* quando supera
 la capienza.
 
+## Il modificatore di difesa
+
+La lega paga il bonus a chi porta a referto almeno quattro difensori, e la media
+e' quella del portiere piu' i tre difensori migliori **fra quelli che hanno
+davvero giocato**. Per questo il calcolo non prende i tre con la MV piu' alta:
+enumera tutti gli scenari di presenza dei difensori in rosa (al piu' 2^8 su una
+rosa da otto) incrociati con il primo portiere disponibile, e pesa ogni scenario
+per la probabilita' di titolarita'.
+
+La differenza non e' teorica. Quattro difensori affidabili a MV 6.2 valgono circa
++1.05 punti a giornata; sostituendo il quarto con uno di pari MV ma al 15% di
+titolarita' si scende a +0.17, e aggiungendo un quinto difensore affidabile in
+panchina si risale a +1.04. E' la panchina a proteggere il modificatore, ed e'
+per questo che entra nel conto: un quarto difensore sicuro vale piu' di un terzo
+difensore forte ma incerto.
+
+Il bonus non e' una soglia secca: la media di quattro voti oscilla di giornata in
+giornata, quindi lo scaglione raggiunto e' una variabile casuale. `sigma = 0.28`
+e' la deviazione standard di quella media su una singola giornata — con quattro
+voti quasi indipendenti, all'incirca meta' della dispersione del singolo voto.
+
+## Il motore matematico
+
+`src/motore.js` contiene le funzioni che non toccano ne' il DOM ne' lo stato
+dell'asta: statistica di base, il modificatore di difesa e la frontiera esatta di
+completamento rosa. Vive in due mondi — lo inlinea il build per il browser e lo
+carica `require` per i test — quindi e' scritto senza `import`/`export` e senza
+template literal.
+
+Sono le funzioni che decidono i numeri, ed e' l'unica parte verificabile senza
+avviare un browser: `npm run test:unit` le copre in una frazione di secondo.
+
 ## Comandi
 
 | Comando | Cosa fa |
 | --- | --- |
 | `npm run build` | Genera `dist/artifact.html`, la stessa app senza richieste di rete (Tailwind compilato inline, icone in SVG), per la pubblicazione come Artifact |
-| `npm test` | Verifiche funzionali su `dist/artifact.html` con un browser headless |
+| `npm run test:unit` | Verifiche sulle funzioni pure di `src/motore.js`, senza browser (~120 ms) |
+| `npm test` | Prima `test:unit`, poi le verifiche funzionali su `dist/artifact.html` con un browser headless |
 | `npm run grid -- calendario.csv` | Ricalcola la griglia degli incroci portieri dal calendario ufficiale |
 | `npm run data` | Rigenera l'elenco giocatori da `data/listone.tsv` |
 
@@ -105,3 +138,8 @@ infortuni, allenatori).
 Il listone e' una fotografia: il mercato chiude il 1° settembre e alcune operazioni sono
 successive. La piu' pesante e' Vicario alla Juventus, ufficiale il 18 agosto e nuovo titolare,
 che nel listone non compare. L'app elenca queste lacune in apertura invece di nasconderle.
+
+## Licenza
+
+Il codice e' [MIT](LICENSE). I dati in `data/` sono trascritti da fonti di terzi,
+attribuiti in [DATA_SOURCES.md](DATA_SOURCES.md) e non rilicenziati.
