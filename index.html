@@ -1521,6 +1521,96 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       return { scarsita, mvarMap, baselinePunti };
     }
 
+    // Frontiera esatta: per ogni budget disponibile restituisce il miglior totale di
+    // fantapunti stagionali ottenibile, rispettando esattamente gli slot del ruolo.
+    // E' la versione leggera (senza Monte Carlo) del completion frontier: viene
+    // calcolata solo quando apri un giocatore, quindi non rallenta la tabella.
+    const IMPOSSIBILE = -1e15;
+
+    function frontieraRuolo(giocatori, quanti, budget, costoPer, valorePer) {
+      const dp = Array.from({ length: quanti + 1 }, () => {
+        const riga = new Float64Array(budget + 1);
+        riga.fill(IMPOSSIBILE);
+        return riga;
+      });
+      dp[0].fill(0);
+
+      for (const giocatore of giocatori) {
+        const costo = Math.max(1, Math.round(costoPer(giocatore)));
+        if (costo > budget) continue;
+        const valore = valorePer(giocatore);
+        for (let presi = quanti; presi >= 1; presi--) {
+          for (let crediti = budget; crediti >= costo; crediti--) {
+            if (dp[presi - 1][crediti - costo] <= IMPOSSIBILE / 2) continue;
+            dp[presi][crediti] = Math.max(dp[presi][crediti], dp[presi - 1][crediti - costo] + valore);
+          }
+        }
+      }
+
+      // "Al massimo questo budget": poter spendere meno non deve peggiorare il piano.
+      for (let crediti = 1; crediti <= budget; crediti++) {
+        dp[quanti][crediti] = Math.max(dp[quanti][crediti], dp[quanti][crediti - 1]);
+      }
+      return dp[quanti];
+    }
+
+    function frontieraCompletamento(pool, bisogni, budget, costoPer, valorePer) {
+      let combinata = new Float64Array(budget + 1);
+      combinata.fill(0);
+      for (const ruolo of RUOLI) {
+        const quanti = bisogni[ruolo] ?? 0;
+        if (!quanti) continue;
+        const valoriRuolo = frontieraRuolo(pool.filter(p => p.ruolo === ruolo), quanti, budget, costoPer, valorePer);
+        const successiva = new Float64Array(budget + 1);
+        successiva.fill(IMPOSSIBILE);
+        for (let crediti = 0; crediti <= budget; crediti++) {
+          for (let budgetRuolo = 0; budgetRuolo <= crediti; budgetRuolo++) {
+            if (combinata[crediti - budgetRuolo] <= IMPOSSIBILE / 2 || valoriRuolo[budgetRuolo] <= IMPOSSIBILE / 2) continue;
+            successiva[crediti] = Math.max(successiva[crediti], combinata[crediti - budgetRuolo] + valoriRuolo[budgetRuolo]);
+          }
+        }
+        combinata = successiva;
+      }
+      for (let crediti = 1; crediti <= budget; crediti++) {
+        combinata[crediti] = Math.max(combinata[crediti], combinata[crediti - 1]);
+      }
+      return combinata;
+    }
+
+    function calcolaPianoCompletamento(st, candidato, asseg, mercato) {
+      if (!candidato || st.mancanti[candidato.ruolo] <= 0) return null;
+      const budget = st.residuo;
+      const pool = PLAYERS.filter(p => !asseg.has(p.id) && p.id !== candidato.id);
+      const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
+      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiStagione ?? 0;
+      const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
+      const valoreBaseline = baseline[budget];
+      if (valoreBaseline <= IMPOSSIBILE / 2) return { nonFattibile: true };
+
+      const bisogniConCandidato = { ...st.mancanti, [candidato.ruolo]: st.mancanti[candidato.ruolo] - 1 };
+      const conCandidato = frontieraCompletamento(pool, bisogniConCandidato, budget, costoPer, valorePer);
+      const valoreCandidato = valorePer(candidato);
+      const massimoLegale = st.capienza;
+      let maxBid = 0;
+      for (let offerta = 1; offerta <= massimoLegale; offerta++) {
+        const completamento = conCandidato[budget - offerta];
+        if (completamento > IMPOSSIBILE / 2 && valoreCandidato + completamento >= valoreBaseline - 1e-7) maxBid = offerta;
+      }
+
+      const stimaMercato = mercato.get(candidato.id)?.atteso ?? 1;
+      const completamentoAlMercato = stimaMercato <= budget ? conCandidato[budget - stimaMercato] : IMPOSSIBILE;
+      const vantaggioAlMercato = completamentoAlMercato > IMPOSSIBILE / 2
+        ? valoreCandidato + completamentoAlMercato - valoreBaseline
+        : null;
+      return {
+        id: candidato.id,
+        maxBid,
+        valoreBaseline: Number(valoreBaseline.toFixed(1)),
+        vantaggioAlMercato: vantaggioAlMercato === null ? null : Number(vantaggioAlMercato.toFixed(1)),
+        fattibileAlMercato: stimaMercato <= maxBid
+      };
+    }
+
     function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap) {
       const prezzi = new Map();
       const mioMaxMap = new Map();
@@ -1784,6 +1874,10 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       const mercato = prezziMercato(asseg, and);
       const { scarsita, mvarMap } = calcolaMVAR_e_Scarsita(asseg);
       const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap);
+      const candidatoAperto = apertaRiga ? PER_ID.get(apertaRiga) : null;
+      const pianoAperto = candidatoAperto && !asseg.has(candidatoAperto.id)
+        ? calcolaPianoCompletamento(st, candidatoAperto, asseg, mercato)
+        : null;
 
       const miaRosaPlayers = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
       const bestXI = trovaBestXI(miaRosaPlayers);
@@ -1794,7 +1888,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       renderAndamento(st, and);
       renderImpostazioni();
       renderTabellone();
-      renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and);
+      renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and, pianoAperto);
       renderRosa();
       renderSimulatore(miaRosaPlayers, bestXI, modRes);
       renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap, and);
@@ -2012,7 +2106,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       }
     }
 
-    function renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and) {
+    function renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and, pianoAperto) {
       const q = document.getElementById('ricerca').value.trim().toLowerCase();
       const tetti = Object.fromEntries(RUOLI.map(r => [r, tettoAvversari(r, and)]));
 
@@ -2118,6 +2212,15 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         const pannello = apertaRiga === p.id && !preso ? `
           <tr class="bg-slate-950">
             <td colspan="7" class="p-3.5 border border-indigo-900/50 rounded-xl">
+              ${pianoAperto?.id === p.id ? (pianoAperto.nonFattibile
+                ? '<div class="mb-3 text-[11px] text-rose-300 bg-rose-950/40 border border-rose-900/60 rounded-lg px-3 py-2">Piano di completamento non fattibile con le stime di mercato correnti: conserva crediti o cerca alternative low-cost.</div>'
+                : `<div class="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] bg-indigo-950/35 border border-indigo-900/60 rounded-xl p-2.5">
+                    <div><span class="text-slate-500 block">Max bid da piano rosa</span><strong class="text-indigo-200 text-base tabular-nums">${pianoAperto.maxBid} cr</strong></div>
+                    <div><span class="text-slate-500 block">Vantaggio al prezzo mercato</span><strong class="${(pianoAperto.vantaggioAlMercato ?? -1) >= 0 ? 'text-emerald-300' : 'text-rose-300'} text-base tabular-nums">${pianoAperto.vantaggioAlMercato === null ? 'non fattibile' : (pianoAperto.vantaggioAlMercato >= 0 ? '+' : '') + pianoAperto.vantaggioAlMercato + ' pt'}</strong></div>
+                    <div><span class="text-slate-500 block">Confronto</span><strong class="${pianoAperto.fattibileAlMercato ? 'text-emerald-300' : 'text-amber-300'}">${pianoAperto.fattibileAlMercato ? 'migliore del rimpiazzo' : 'meglio alternativa'}</strong></div>
+                    <p class="sm:col-span-3 text-[10px] text-slate-400">Calcolo esatto sugli slot rimasti: confronta questo acquisto con il miglior completamento della rosa ai prezzi live stimati. I fantapunti sono una proxy finche' non importiamo proiezioni storiche/calendario.</p>
+                  </div>`)
+                : ''}
               <div class="flex flex-wrap items-end gap-3">
                 <label class="text-[10px] uppercase font-semibold text-slate-400">Prezzo pagato
                   <input type="number" id="prezzo-input" min="1" value="${prezzo}" class="mt-1 block w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-100 tabular-nums focus:outline-none focus:border-indigo-500">

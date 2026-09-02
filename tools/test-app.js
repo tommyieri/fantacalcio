@@ -279,6 +279,14 @@ function check(nome, atteso, ottenuto) {
     tr.querySelector('[data-apri]').click();
   });
   check('pannello assegnazione aperto con radar rilanci', true, await page.evaluate(() => !!document.getElementById('radar-messaggio')));
+  const piano = await page.evaluate(() => {
+    const pannello = document.getElementById('prezzo-input').closest('td');
+    const testo = pannello.textContent;
+    const max = +(testo.match(/Max bid da piano rosa\s*(\d+) cr/) || [])[1];
+    return { presente: testo.includes('Calcolo esatto sugli slot rimasti'), max };
+  });
+  check('piano di completamento esatto visibile', true, piano.presente);
+  check('max bid del piano entro la capienza', true, piano.max >= 0 && piano.max <= (await mie()).capienza);
   await page.fill('#prezzo-input', '50');
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
   await page.click('[data-chiudi]');
