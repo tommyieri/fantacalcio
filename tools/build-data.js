@@ -24,6 +24,8 @@ const SQUADRE = path.join(ROOT, 'data/squadre.tsv');
 const AGGIUNTE = path.join(ROOT, 'data/aggiunte.tsv');
 const TRASFERIMENTI = path.join(ROOT, 'data/trasferimenti.tsv');
 const GRIGLIA = path.join(ROOT, 'data/griglia.json');
+const SOS_TITOLARI = path.join(ROOT, 'data/sosfanta/titolari.csv');
+const SOS_PIAZZATI = path.join(ROOT, 'data/sosfanta/piazzati.csv');
 
 const CODICI = {
   Atalanta: 'ATA', Bologna: 'BOL', Cagliari: 'CAG', Como: 'COM', Fiorentina: 'FIO',
@@ -127,6 +129,60 @@ for (const riga of analisi) {
   annotati++;
 }
 
+/* --- Contesto SOS Fanta da FisherTiger ----------------------------------- */
+
+// Questi file non alimentano mai il listone: aggiungono soltanto segnali di
+// titolarita' e piazzati ai giocatori gia' presenti nel PDF ufficiale. Il match
+// richiede nome e squadra normalizzati, per evitare di creare voci estranee.
+function parseCsv(testo) {
+  const righeCsv = [];
+  let riga = [], campo = '', traVirgolette = false;
+  for (let i = 0; i < testo.length; i++) {
+    const ch = testo[i];
+    if (ch === '"') {
+      if (traVirgolette && testo[i + 1] === '"') { campo += '"'; i++; }
+      else traVirgolette = !traVirgolette;
+    } else if (ch === ',' && !traVirgolette) {
+      riga.push(campo); campo = '';
+    } else if ((ch === '\n' || ch === '\r') && !traVirgolette) {
+      if (ch === '\r' && testo[i + 1] === '\n') i++;
+      riga.push(campo); campo = '';
+      if (riga.some(c => c.length)) righeCsv.push(riga);
+      riga = [];
+    } else campo += ch;
+  }
+  if (campo.length || riga.length) { riga.push(campo); righeCsv.push(riga); }
+  const [header, ...corpo] = righeCsv;
+  return corpo.map(celle => Object.fromEntries(header.map((nome, i) => [nome, celle[i] ?? ''])));
+}
+
+function chiaveIdentita(nome, squadra) {
+  const pulisci = valore => String(valore ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `${pulisci(nome)}||${pulisci(squadra)}`;
+}
+
+const perIdentita = new Map(giocatori.map(g => [chiaveIdentita(g.nome, g.squadra), g]));
+let sosTitolariAgganciati = 0;
+let sosPiazzatiAgganciati = 0;
+for (const riga of parseCsv(fs.readFileSync(SOS_TITOLARI, 'utf8'))) {
+  const g = perIdentita.get(chiaveIdentita(riga.nome, riga.squadra));
+  if (!g) continue;
+  const status = String(riga.status).trim().toUpperCase();
+  if (!['TITOLARE', 'BALLOTTAGGIO', 'RISERVA'].includes(status)) continue;
+  g.sos = { ...(g.sos ?? {}), status, gerarchiaPortiere: String(riga.gerarchia_portiere ?? '').trim().toUpperCase() || undefined };
+  sosTitolariAgganciati++;
+}
+for (const riga of parseCsv(fs.readFileSync(SOS_PIAZZATI, 'utf8'))) {
+  const g = perIdentita.get(chiaveIdentita(riga.nome, riga.squadra));
+  if (!g) continue;
+  const tipo = String(riga.tipo).trim().toUpperCase();
+  const priorita = Number(riga.priorita);
+  if (!['RIGORI', 'PUNIZIONI', 'CORNER'].includes(tipo) || !Number.isInteger(priorita) || priorita < 1) continue;
+  g.sos = { ...(g.sos ?? {}), piazzati: { ...(g.sos?.piazzati ?? {}), [tipo]: Math.min(g.sos?.piazzati?.[tipo] ?? Infinity, priorita) } };
+  sosPiazzatiAgganciati++;
+}
+
 /* --- Tag ricavabili dai numeri ------------------------------------------- */
 
 const SLOT = { P: 3, D: 8, C: 8, A: 6 };
@@ -189,6 +245,7 @@ for (const p of giocatori) conteggi[p.ruolo] = (conteggi[p.ruolo] ?? 0) + 1;
 console.log(`righe listone:   ${dati.length}`);
 console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).map(([k, v]) => k + ':' + v).join(', ')})`);
 console.log(`annotati:        ${annotati}`);
+console.log(`SOS Fanta:       ${sosTitolariAgganciati} titolarita', ${sosPiazzatiAgganciati} piazzati agganciati al listone ufficiale`);
 console.log(`fuori listone:   ${aggiunti} aggiunti, ${spostati} spostati di squadra`);
 for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {
   console.log(`  ${t.padEnd(13)}${giocatori.filter(p => p.tag.includes(t)).length}`);

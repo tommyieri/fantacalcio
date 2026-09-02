@@ -136,6 +136,10 @@ function check(nome, atteso, ottenuto) {
   const lautaro0 = await rigaGiocatore('Martinez L.');
   check('Lautaro in 1ª fascia', '1ª fascia', lautaro0.fascia);
   check('Vicario presente nel listone ufficiale', true, (await rigaGiocatore('Vicario')) !== null);
+  check('SOS Fanta: Carnesecchi primo portiere', 'PRIMO', await page.evaluate(() =>
+    PLAYERS.find(p => p.nome === 'Carnesecchi')?.sos?.gerarchiaPortiere));
+  check('SOS Fanta: Orsolini primo rigorista', 1, await page.evaluate(() =>
+    PLAYERS.find(p => p.nome === 'Orsolini')?.sos?.piazzati?.RIGORI));
   check('Spence all\'Inter', 'Inter', await page.evaluate(() => {
     const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
       const n = t.querySelector('td:nth-child(2) span.font-semibold');

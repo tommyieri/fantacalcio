@@ -120,7 +120,7 @@ const htmlContent = `<!DOCTYPE html>
           <strong class="text-sky-300">Modificatore Difesa Matematico</strong> (rendimento punti differenziale), <strong class="text-amber-300">MVAR & Indice di Scarsita'</strong> e
           <strong class="text-emerald-300">Radar Rilanci Avversari</strong>.
         </p>
-        <p>Il +1 per rete inviolata del portiere e' incluso in modo trasparente come probabilita' stimata dal valore FVM del listone. Finche' non colleghiamo proiezioni squadra/calendario, non va interpretato come una previsione puntuale di clean sheet.</p>
+        <p>Titolarita' e gerarchie di rigori, punizioni e corner sono integrate dai dataset SOS Fanta presenti in FisherTiger, aggiornati al 31/08/2026: vengono usati solo dopo il match con nome e squadra del listone ufficiale (334 segnali di disponibilita', 110 sui piazzati). Il +1 per rete inviolata resta una probabilita' stimata dal valore FVM finche' non colleghiamo proiezioni squadra/calendario.</p>
       </div>
     </header>
 
@@ -610,9 +610,14 @@ ${playersData}
         const stRole = roleStats[r];
         
         let tit = 0.50;
-        if (p.tag.includes('TITOLARE')) tit = 0.90;
+        const statusSos = p.sos?.status;
+        if (statusSos === 'TITOLARE') tit = 0.88;
+        else if (statusSos === 'BALLOTTAGGIO') tit = 0.58;
+        else if (statusSos === 'RISERVA') tit = 0.15;
+        else if (p.tag.includes('TITOLARE')) tit = 0.90;
         else if (p.tag.includes('SCOMMESSA')) tit = 0.65;
         else if (p.tag.includes('LOWCOST')) tit = 0.30;
+        if (r === 'P' && p.sos?.gerarchiaPortiere === 'PRIMO') tit = Math.max(tit, 0.95);
         if (p.tag.includes('RISCHIO')) tit *= 0.70;
 
         // Media Voto base e Bonus attesi modellati con continuita' monotonicamente dal listone
@@ -631,6 +636,16 @@ ${playersData}
           mv = 5.85 + 0.55 * Math.min(1, p.fvm / 200);
           bonusNet = 0.15 + 1.85 * Math.min(1, p.fvm / 260);
         }
+
+        // Piazzati SOS Fanta: primo rigorista e battitori principali aumentano
+        // l'atteso; le priorita' successive pesano meno e non sovrascrivono FVM.
+        const piazzati = p.sos?.piazzati ?? {};
+        if (piazzati.RIGORI === 1) bonusNet += r === 'A' || r === 'C' ? 0.32 : 0.18;
+        else if (piazzati.RIGORI === 2) bonusNet += r === 'A' || r === 'C' ? 0.12 : 0.06;
+        if (piazzati.PUNIZIONI === 1) bonusNet += 0.08;
+        else if (piazzati.PUNIZIONI === 2) bonusNet += 0.03;
+        if (piazzati.CORNER === 1) bonusNet += 0.04;
+        else if (piazzati.CORNER === 2) bonusNet += 0.015;
 
         // Il listone non contiene una proiezione di squadra/calendario: per ora rendiamo esplicita
         // una proxy conservativa (16%-36%) ricavata dalla fascia FVM del portiere.
@@ -1506,6 +1521,12 @@ ${playersData}
         const mvar = mvarMap.get(p.id) ?? { diffMatch: 0, diffSeason: 0 };
         const scInfo = scarsita[p.ruolo] ?? { score: 50 };
         const tierInfo = tierMap.get(p.id) ?? { score: 50, disponibili: 0, domanda: 0, saltoPunti: 0 };
+        const segnaliSos = [];
+        if (p.sos?.status) segnaliSos.push(p.sos.status.toLowerCase());
+        if (p.sos?.gerarchiaPortiere) segnaliSos.push('portiere ' + p.sos.gerarchiaPortiere.toLowerCase());
+        if (p.sos?.piazzati?.RIGORI) segnaliSos.push('rigori #' + p.sos.piazzati.RIGORI);
+        if (p.sos?.piazzati?.PUNIZIONI) segnaliSos.push('punizioni #' + p.sos.piazzati.PUNIZIONI);
+        if (p.sos?.piazzati?.CORNER) segnaliSos.push('corner #' + p.sos.piazzati.CORNER);
 
         const mantra = p.mantra.map(m =>
           \`<span class="text-[10px] px-1 py-px rounded bg-slate-800/80 text-slate-400 border border-slate-700/50" title="\${NOMI_MANTRA[m] ?? m}">\${m}</span>\`).join(' ');
@@ -1643,6 +1664,7 @@ ${playersData}
             <td class="p-2.5 align-top max-w-xs">
               <p class="flex flex-wrap gap-1">\${p.tag.map(t => \`<span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider border \${STILE_TAG[t]}">\${ETICHETTA_TAG[t]}</span>\`).join('')}</p>
               \${p.nota ? \`<p class="text-[11px] text-slate-300 mt-1.5 leading-relaxed">\${esc(p.nota)}</p>\` : ''}
+              \${segnaliSos.length ? \`<p class="text-[10px] text-violet-300 mt-1 leading-relaxed" title="Segnale SOS Fanta/FisherTiger del 31/08/2026, abbinato per nome e squadra al listone ufficiale">SOS: \${esc(segnaliSos.join(' • '))}</p>\` : ''}
               <p class="text-[10px] text-slate-500 mt-1 tabular-nums">\${p.rank}° per FVM fra i \${NOMI_RUOLO[p.ruolo].toLowerCase()}\${p.fonti ? ' • fonti: ' + esc(p.fonti.join(', ')) : ''}</p>
             </td>
             \${celle}
