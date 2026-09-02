@@ -5,6 +5,15 @@ const ROOT = path.resolve(__dirname, '..');
 const PLAYERS_FILE = path.join(ROOT, 'data/players.generated.js');
 const playersData = fs.readFileSync(PLAYERS_FILE, 'utf8');
 
+// Il motore matematico e' un file .js vero, verificabile con `node --test`.
+// Viene interpolato alla lettera: essendo scritto senza template literal non
+// ha bisogno di nessun escape, al contrario del resto di questo file.
+const MOTORE_FILE = path.join(ROOT, 'src/motore.js');
+const motoreSource = fs.readFileSync(MOTORE_FILE, 'utf8');
+if (motoreSource.includes('</scr' + 'ipt>')) {
+  throw new Error('src/motore.js non puo\' contenere una chiusura di script');
+}
+
 const htmlContent = `<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -457,7 +466,17 @@ const htmlContent = `<!DOCTYPE html>
   </div>
 
   <script>
+${motoreSource}
+  </script>
+
+  <script>
 ${playersData}
+
+    const {
+      normalCdf, quantile, generatoreCasuale,
+      modificatoreDifesaAtteso, IMPOSSIBILE,
+      frontieraRuolo, frontieraCompletamento
+    } = MOTORE;
 
     /* ====================== COSTANTI & MAPPE ====================== */
 
@@ -608,19 +627,6 @@ ${playersData}
     /* ====================== MOTORE MATEMATICO DEL VALORE ====================== */
 
     const VALUTAZIONI_CACHE = new Map();
-
-    function erf(x) {
-      const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
-      const sign = x < 0 ? -1 : 1;
-      const absX = Math.abs(x);
-      const t = 1.0 / (1.0 + p * absX);
-      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
-      return sign * y;
-    }
-
-    function normalCdf(x, mean, std) {
-      return 0.5 * (1 + erf((x - mean) / (std * Math.sqrt(2))));
-    }
 
     function inizializzaValutazioni() {
       VALUTAZIONI_CACHE.clear();
@@ -969,78 +975,6 @@ ${playersData}
       return { scarsita, mvarMap, baselinePunti, tierMap };
     }
 
-    // Frontiera esatta: per ogni budget disponibile restituisce il miglior totale di
-    // fantapunti stagionali ottenibile, rispettando esattamente gli slot del ruolo.
-    // E' la versione leggera (senza Monte Carlo) del completion frontier: viene
-    // calcolata solo quando apri un giocatore, quindi non rallenta la tabella.
-    const IMPOSSIBILE = -1e15;
-
-    function frontieraRuolo(giocatori, quanti, budget, costoPer, valorePer) {
-      const dp = Array.from({ length: quanti + 1 }, () => {
-        const riga = new Float64Array(budget + 1);
-        riga.fill(IMPOSSIBILE);
-        return riga;
-      });
-      dp[0].fill(0);
-
-      for (const giocatore of giocatori) {
-        const costo = Math.max(1, Math.round(costoPer(giocatore)));
-        if (costo > budget) continue;
-        const valore = valorePer(giocatore);
-        for (let presi = quanti; presi >= 1; presi--) {
-          for (let crediti = budget; crediti >= costo; crediti--) {
-            if (dp[presi - 1][crediti - costo] <= IMPOSSIBILE / 2) continue;
-            dp[presi][crediti] = Math.max(dp[presi][crediti], dp[presi - 1][crediti - costo] + valore);
-          }
-        }
-      }
-
-      // "Al massimo questo budget": poter spendere meno non deve peggiorare il piano.
-      for (let crediti = 1; crediti <= budget; crediti++) {
-        dp[quanti][crediti] = Math.max(dp[quanti][crediti], dp[quanti][crediti - 1]);
-      }
-      return dp[quanti];
-    }
-
-    function frontieraCompletamento(pool, bisogni, budget, costoPer, valorePer) {
-      let combinata = new Float64Array(budget + 1);
-      combinata.fill(0);
-      for (const ruolo of RUOLI) {
-        const quanti = bisogni[ruolo] ?? 0;
-        if (!quanti) continue;
-        const valoriRuolo = frontieraRuolo(pool.filter(p => p.ruolo === ruolo), quanti, budget, costoPer, valorePer);
-        const successiva = new Float64Array(budget + 1);
-        successiva.fill(IMPOSSIBILE);
-        for (let crediti = 0; crediti <= budget; crediti++) {
-          for (let budgetRuolo = 0; budgetRuolo <= crediti; budgetRuolo++) {
-            if (combinata[crediti - budgetRuolo] <= IMPOSSIBILE / 2 || valoriRuolo[budgetRuolo] <= IMPOSSIBILE / 2) continue;
-            successiva[crediti] = Math.max(successiva[crediti], combinata[crediti - budgetRuolo] + valoriRuolo[budgetRuolo]);
-          }
-        }
-        combinata = successiva;
-      }
-      for (let crediti = 1; crediti <= budget; crediti++) {
-        combinata[crediti] = Math.max(combinata[crediti], combinata[crediti - 1]);
-      }
-      return combinata;
-    }
-
-    function generatoreCasuale(seme) {
-      let stato = seme >>> 0;
-      return () => {
-        stato += 0x6D2B79F5;
-        let t = stato;
-        t = Math.imul(t ^ (t >>> 15), t | 1);
-        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-
-    function quantile(valori, q) {
-      const indice = Math.min(valori.length - 1, Math.max(0, Math.ceil(valori.length * q) - 1));
-      return valori[indice] ?? 0;
-    }
-
     // Simulazione Monte Carlo dei soli rilanci avversari: il piano rosa rimane
     // deterministico/esatto, mentre qui rendiamo esplicita l'incertezza di mercato.
     function simulaConcorrenza(candidato, st, asseg, mercato, and, tierInfo, maxBid) {
@@ -1109,9 +1043,90 @@ ${playersData}
         valoreBaseline: Number(valoreBaseline.toFixed(1)),
         vantaggioAlMercato: vantaggioAlMercato === null ? null : Number(vantaggioAlMercato.toFixed(1)),
         fattibileAlMercato: stimaMercato <= maxBid,
+        scopo: classificaCandidato(candidato, st),
         monteCarlo
       };
     }
+
+    // A cosa ti serve, non solo quanto vale. Il confronto lo facciamo gia' con
+    // la frontiera esatta: qui lo traduciamo in una frase, riusando il Best XI
+    // per distinguere chi entra subito in campo da chi resta una copertura.
+    function classificaCandidato(candidato, st) {
+      const rosaOra = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
+      const prima = trovaBestXI(rosaOra);
+      const dopo = trovaBestXI([...rosaOra, candidato]);
+      const entra = dopo.titolari.some(g => g.id === candidato.id);
+      const guadagnoXI = Number((dopo.puntiTotali - prima.puntiTotali).toFixed(1));
+      const guadagnoMod = Number((dopo.mod.bonusAtteso - prima.mod.bonusAtteso).toFixed(2));
+
+      // Lo scopo non guarda il prezzo: quello lo dice la fascia. Qui conta solo
+      // cosa aggiunge alla rosa, cioe' la stessa utilita' marginale che usa
+      // fishertiger per distinguere STARTER da COVERAGE e DEPTH. Un difensore
+      // che non entra in formazione puo' comunque valere punti, perche' e' la
+      // panchina a proteggere il modificatore.
+      let codice = 'PROFONDITA';
+      if (entra) codice = 'TITOLARE';
+      else if (guadagnoXI > 0.05) codice = 'COPERTURA';
+
+      return {
+        codice,
+        entra,
+        guadagnoXI,
+        guadagnoMod,
+        moduloDopo: dopo.modulo,
+        slotRimasti: st.mancanti[candidato.ruolo]
+      };
+    }
+
+    function scopoDettaglio(scopo) {
+      const pezzi = [];
+      if (scopo.codice === 'TITOLARE') {
+        pezzi.push(\`+\${scopo.guadagnoXI} pt/giornata, modulo \${scopo.moduloDopo}\`);
+      } else if (scopo.codice === 'COPERTURA') {
+        pezzi.push(\`+\${scopo.guadagnoXI} pt/giornata restando in panchina\`);
+      } else {
+        pezzi.push(\`riempie uno slot senza cambiare XI: ne restano \${scopo.slotRimasti} nel ruolo\`);
+      }
+      if (scopo.guadagnoMod >= 0.05) pezzi.push(\`+\${scopo.guadagnoMod.toFixed(2)} di modificatore\`);
+      return esc(pezzi.join(' • '));
+    }
+
+    // Fascia di prezzo: dove sta il mercato rispetto al tetto esatto del piano
+    // rosa. Sostituisce un numero secco con l'intervallo in cui la decisione
+    // e' ancora reversibile, che e' l'informazione che serve durante il rilancio.
+    function fasciaPrezzo(piano, mkt) {
+      const max = Math.max(1, piano.maxBid);
+      if (!mkt) return '';
+      const scala = Math.max(max, mkt.max ?? max) * 1.15;
+      const pct = v => Math.max(0, Math.min(100, (v / scala) * 100));
+      const inizio = pct(mkt.min ?? 1);
+      const largh = Math.max(1.5, pct(mkt.max ?? max) - inizio);
+      const tono = piano.fattibileAlMercato ? 'bg-emerald-500' : 'bg-rose-500';
+      return \`
+        <div>
+          <div class="flex items-baseline justify-between text-[10px] text-slate-400 mb-1">
+            <span title="Prezzo oltre il quale la rosa migliore che riesci ancora a chiudere vale meno di quella che chiudi senza di lui">Prezzo di indifferenza <strong class="text-indigo-200 text-sm tabular-nums">\${max} cr</strong></span>
+            <span>Mercato <strong class="text-slate-200 tabular-nums">\${mkt.min}–\${mkt.max}</strong> (atteso \${mkt.atteso})</span>
+          </div>
+          <div class="relative h-3 rounded-full bg-slate-900 border border-slate-800 overflow-hidden">
+            <span class="absolute inset-y-0 left-0 \${tono} opacity-25" style="width:\${pct(max)}%"></span>
+            <span class="absolute inset-y-0 bg-slate-500/50 border-x border-slate-400/60" style="left:\${inizio}%;width:\${largh}%"></span>
+            <span class="absolute inset-y-0 w-0.5 bg-indigo-300" style="left:\${pct(max)}%"></span>
+            <span class="absolute inset-y-0 w-0.5 bg-amber-300" style="left:\${pct(mkt.atteso)}%"></span>
+          </div>
+          <p class="text-[10px] mt-1 \${piano.fattibileAlMercato ? 'text-emerald-300' : 'text-amber-300'}">
+            \${piano.fattibileAlMercato
+              ? \`Il mercato sta sotto il prezzo di indifferenza: fino a \${max} cr resta l'acquisto migliore che puoi fare con questi crediti.\`
+              : \`Prezzo di indifferenza \${max} cr, mercato \${mkt.atteso}: sopra quella soglia gli stessi crediti rendono di piu' sul resto della rosa. Pagarlo comunque significa scegliere di risparmiare altrove.\`}
+          </p>
+        </div>\`;
+    }
+
+    const ETICHETTA_SCOPO = {
+      TITOLARE: { testo: 'Entra subito nel Best XI', classe: 'text-emerald-300' },
+      COPERTURA: { testo: 'Copertura che vale punti', classe: 'text-amber-300' },
+      PROFONDITA: { testo: 'Solo profondita', classe: 'text-slate-300' }
+    };
 
     function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap) {
       const prezzi = new Map();
@@ -1169,45 +1184,42 @@ ${playersData}
       return { prezzi, mioMaxMap, marginiMap, semaforiMap };
     }
 
-    function calcolaModificatoreSquadra(giocatoriDettaglio) {
-      if (!regole.modificatoreAttivo) {
-        return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: [], attivo: false };
-      }
-      const portieri = giocatoriDettaglio.filter(p => p.ruolo === 'P');
-      const difensori = giocatoriDettaglio.filter(p => p.ruolo === 'D').sort((a, b) => {
-        const va = VALUTAZIONI_CACHE.get(a.id)?.mv ?? 6.0;
-        const vb = VALUTAZIONI_CACHE.get(b.id)?.mv ?? 6.0;
-        return vb - va;
+    const SIGMA_MODIFICATORE = 0.28;
+
+    // Il modificatore si calcola sulla rosa intera, non sui soli titolari: la
+    // panchina e' proprio cio' che lo protegge, perche' se un difensore non
+    // gioca il suo posto lo prende il primo disponibile. difensoriSchierati
+    // e' quanti ne prevede il modulo, e sotto la soglia di lega il bonus non
+    // scatta comunque.
+    function calcolaModificatoreSquadra(rosaGiocatori, difensoriSchierati) {
+      const perMv = (a, b) => (VALUTAZIONI_CACHE.get(b.id)?.mv ?? 6.0) - (VALUTAZIONI_CACHE.get(a.id)?.mv ?? 6.0);
+      const difensori = rosaGiocatori.filter(p => p.ruolo === 'D').sort(perMv);
+      const portieri = rosaGiocatori.filter(p => p.ruolo === 'P').sort(perMv);
+      const inattivo = {
+        bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0,
+        probAttivo: 0, topDif: difensori.slice(0, 3), attivo: false
+      };
+      if (!regole.modificatoreAttivo) return { ...inattivo, topDif: [] };
+
+      const disponibile = p => ({
+        p: VALUTAZIONI_CACHE.get(p.id)?.tit ?? 0.5,
+        mv: VALUTAZIONI_CACHE.get(p.id)?.mv ?? 6.0
+      });
+      const res = modificatoreDifesaAtteso({
+        portieri: portieri.map(disponibile),
+        difensori: difensori.map(disponibile),
+        difensoriSchierati,
+        scaglioni: PROFILO_LEGA.modificatore.scaglioni,
+        sigma: SIGMA_MODIFICATORE,
+        difensoriMinimi: PROFILO_LEGA.modificatore.difensoriMinimi
       });
 
-      // Il modificatore lo assegna la lega solo a chi schiera almeno
-      // difensoriMinimi difensori: il controllo sta qui e non nel solo
-      // simulatore, cosi' nessun chiamante puo' aggirarlo.
-      if (difensori.length < PROFILO_LEGA.modificatore.difensoriMinimi || !portieri.length) {
-        return { bonusAtteso: 0, scaglioneBase: 0, mvMedia: 0, stagionale: 0, topDif: difensori.slice(0, 3), attivo: true };
-      }
-
-      const gkMv = VALUTAZIONI_CACHE.get(portieri[0].id)?.mv ?? 6.0;
-      const top3Mv = difensori.slice(0, 3).map(d => VALUTAZIONI_CACHE.get(d.id)?.mv ?? 6.0);
-      const media = (gkMv + top3Mv.reduce((s, v) => s + v, 0)) / 4;
-
-      const scaglioni = PROFILO_LEGA.modificatore.scaglioni;
-      const scaglioneBase = scaglioni.find(s => media >= s.soglia)?.bonus ?? 0;
-
-      // Rendimento atteso su 38 giornate integrando la varianza voto partita (sigma = 0.28)
-      const sigma = 0.28;
-      const expectedBonus = scaglioni.reduce((somma, scaglione, i) => {
-        const pRaggiunge = 1 - normalCdf(scaglione.soglia, media, sigma);
-        const pScaglioneSuperiore = i === 0 ? 0 : 1 - normalCdf(scaglioni[i - 1].soglia, media, sigma);
-        return somma + scaglione.bonus * Math.max(0, pRaggiunge - pScaglioneSuperiore);
-      }, 0);
-      const bonusFinale = Number(expectedBonus.toFixed(2));
-
       return {
-        bonusAtteso: bonusFinale,
-        scaglioneBase,
-        mvMedia: Number(media.toFixed(2)),
-        stagionale: Math.round(bonusFinale * 38),
+        bonusAtteso: Number(res.bonusAtteso.toFixed(2)),
+        scaglioneBase: res.scaglioneBase,
+        mvMedia: res.mvMedia,
+        stagionale: Math.round(res.bonusAtteso * 38),
+        probAttivo: res.probAttivo,
         topDif: difensori.slice(0, 3),
         attivo: true
       };
@@ -1243,11 +1255,11 @@ ${playersData}
 
       let puntiTitolari = titolari.reduce((s, p) => s + (VALUTAZIONI_CACHE.get(p.id)?.puntiMatch ?? 5.5), 0);
 
-      let modBonus = 0;
-      if (regole.modificatoreAttivo && nStrD >= PROFILO_LEGA.modificatore.difensoriMinimi) {
-        const modRes = calcolaModificatoreSquadra(titolari);
-        modBonus = modRes.bonusAtteso;
-      }
+      // Unico punto in cui il modificatore viene calcolato: cosi' il numero in
+      // testa, quello del simulatore e quello che decide il Best XI sono per
+      // costruzione lo stesso, e nessun chiamante puo' saltare i vincoli.
+      const mod = calcolaModificatoreSquadra(rosaGiocatori, nStrD);
+      const modBonus = mod.bonusAtteso;
 
       const puntiTotali = Number((puntiTitolari + modBonus).toFixed(1));
 
@@ -1263,6 +1275,7 @@ ${playersData}
         modulo,
         titolari,
         panchina,
+        mod,
         titolariCompleti,
         puntiTitolari: Number(puntiTitolari.toFixed(1)),
         modBonus,
@@ -1387,7 +1400,7 @@ ${playersData}
 
       const miaRosaPlayers = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
       const bestXI = trovaBestXI(miaRosaPlayers);
-      const modRes = calcolaModificatoreSquadra(bestXI.titolari);
+      const modRes = bestXI.mod;
       const nomine = generaSuggerimentiNomine(asseg, st, mercato, semaforiMap, marginiMap);
 
       renderMetriche(st, and, bestXI, modRes, nomine);
@@ -1799,12 +1812,14 @@ ${playersData}
             <td colspan="7" class="p-3.5 border border-indigo-900/50 rounded-xl">
               \${pianoAperto?.id === p.id ? (pianoAperto.nonFattibile
                 ? '<div class="mb-3 text-[11px] text-rose-300 bg-rose-950/40 border border-rose-900/60 rounded-lg px-3 py-2">Piano di completamento non fattibile con le stime di mercato correnti: conserva crediti o cerca alternative low-cost.</div>'
-                : \`<div class="mb-3 grid grid-cols-1 sm:grid-cols-4 gap-2 text-[11px] bg-indigo-950/35 border border-indigo-900/60 rounded-xl p-2.5">
-                    <div><span class="text-slate-500 block">Max bid da piano rosa</span><strong class="text-indigo-200 text-base tabular-nums">\${pianoAperto.maxBid} cr</strong></div>
-                    <div><span class="text-slate-500 block">Vantaggio al prezzo mercato</span><strong class="\${(pianoAperto.vantaggioAlMercato ?? -1) >= 0 ? 'text-emerald-300' : 'text-rose-300'} text-base tabular-nums">\${pianoAperto.vantaggioAlMercato === null ? 'non fattibile' : (pianoAperto.vantaggioAlMercato >= 0 ? '+' : '') + pianoAperto.vantaggioAlMercato + ' pt'}</strong></div>
-                    <div><span class="text-slate-500 block">Confronto</span><strong class="\${pianoAperto.fattibileAlMercato ? 'text-emerald-300' : 'text-amber-300'}">\${pianoAperto.fattibileAlMercato ? 'migliore del rimpiazzo' : 'meglio alternativa'}</strong></div>
-                    <div><span class="text-slate-500 block">Monte Carlo (\${pianoAperto.monteCarlo.scenari})</span><strong class="text-amber-300 tabular-nums">P50 \${pianoAperto.monteCarlo.p50} · P75 \${pianoAperto.monteCarlo.p75}</strong><span class="block text-[10px] text-slate-400">\${pianoAperto.monteCarlo.probabilitaVittoria}% entro il tuo max</span></div>
-                    <p class="sm:col-span-4 text-[10px] text-slate-400">Calcolo esatto sugli slot rimasti: confronta questo acquisto con il miglior completamento della rosa ai prezzi live stimati. Monte Carlo simula l'incertezza dei rilanci avversari; i fantapunti sono una proxy finche' non importiamo proiezioni storiche/calendario.</p>
+                : \`<div class="mb-3 bg-indigo-950/35 border border-indigo-900/60 rounded-xl p-2.5 space-y-2.5">
+                    \${fasciaPrezzo(pianoAperto, mercato.get(p.id))}
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                      <div><span class="text-slate-500 block">A cosa ti serve</span><strong class="\${ETICHETTA_SCOPO[pianoAperto.scopo.codice].classe}">\${ETICHETTA_SCOPO[pianoAperto.scopo.codice].testo}</strong><span class="block text-[10px] text-slate-400">\${scopoDettaglio(pianoAperto.scopo)}</span></div>
+                      <div><span class="text-slate-500 block">Vantaggio al prezzo mercato</span><strong class="\${(pianoAperto.vantaggioAlMercato ?? -1) >= 0 ? 'text-emerald-300' : 'text-rose-300'} text-base tabular-nums">\${pianoAperto.vantaggioAlMercato === null ? 'non fattibile' : (pianoAperto.vantaggioAlMercato >= 0 ? '+' : '') + pianoAperto.vantaggioAlMercato + ' pt'}</strong></div>
+                      <div><span class="text-slate-500 block">Monte Carlo (\${pianoAperto.monteCarlo.scenari})</span><strong class="text-amber-300 tabular-nums">P50 \${pianoAperto.monteCarlo.p50} · P75 \${pianoAperto.monteCarlo.p75}</strong><span class="block text-[10px] text-slate-400">\${pianoAperto.monteCarlo.probabilitaVittoria}% entro il tuo max</span></div>
+                    </div>
+                    <p class="text-[10px] text-slate-400">Calcolo esatto sugli slot rimasti: confronta questo acquisto con il miglior completamento della rosa ai prezzi live stimati. Monte Carlo simula l'incertezza dei rilanci avversari; i fantapunti sono una proxy finche' non importiamo proiezioni storiche/calendario.</p>
                   </div>\`)
                 : ''}
               <div class="flex flex-wrap items-end gap-3">
@@ -2017,7 +2032,7 @@ ${playersData}
       }
 
       document.getElementById('sim-mod-bonus').textContent = (simCorrente.modBonus > 0 ? '+' : '') + simCorrente.modBonus.toFixed(2) + ' pt';
-      const modCorrente = calcolaModificatoreSquadra(simCorrente.titolari);
+      const modCorrente = simCorrente.mod;
       document.getElementById('sim-mod-mv').textContent = modCorrente.mvMedia > 0 ? \`\${modCorrente.mvMedia.toFixed(2)} (Scaglione +\${modCorrente.scaglioneBase} pt)\` : '0.00';
       document.getElementById('sim-mod-tot-stagione').textContent = \`~\${Math.round(simCorrente.modBonus * 38)} pt totali\`;
 

@@ -295,12 +295,21 @@ function check(nome, atteso, ottenuto) {
   const piano = await page.evaluate(() => {
     const pannello = document.getElementById('prezzo-input').closest('td');
     const testo = pannello.textContent;
-    const max = +(testo.match(/Max bid da piano rosa\s*(\d+) cr/) || [])[1];
-    return { presente: testo.includes('Calcolo esatto sugli slot rimasti'), monteCarlo: testo.includes('Monte Carlo (800)'), max };
+    const max = +(testo.match(/Prezzo di indifferenza\s*(\d+) cr/) || [])[1];
+    return {
+      presente: testo.includes('Calcolo esatto sugli slot rimasti'),
+      monteCarlo: testo.includes('Monte Carlo (800)'),
+      max,
+      fascia: !!pannello.querySelector('[style*="width"]') && /Mercato\s*\d+.\d+/.test(testo),
+      scopo: ['Entra subito nel Best XI', 'Copertura che vale punti', 'Solo profondita']
+        .filter(e => testo.includes(e)).length
+    };
   });
   check('piano di completamento esatto visibile', true, piano.presente);
   check('simulazione Monte Carlo avversari visibile', true, piano.monteCarlo);
   check('max bid del piano entro la capienza', true, piano.max >= 0 && piano.max <= (await mie()).capienza);
+  check('fascia di prezzo con intervallo di mercato', true, piano.fascia);
+  check('un solo scopo dichiarato per il candidato', 1, piano.scopo);
   await page.fill('#prezzo-input', '50');
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
   await page.click('[data-chiudi]');

@@ -4,6 +4,10 @@ Confronto fra questo repo e [Zannael/fishertiger](https://github.com/Zannael/fis
 piu' le semplificazioni che emergono leggendo il codice. Ogni voce e' verificata sul
 codice, non dedotta dai README.
 
+> **Stato.** I punti 1.1, 1.2, 1.4, 1.5 e 2.5 sono stati implementati; il 1.3 e'
+> fatto nel pannello del candidato e in tabella resta legato al §2.3. Le voci
+> restanti (2.1, 2.2, 2.3, 2.4, 3.2–3.4) sono ancora proposte.
+
 Le due app risolvono lo stesso problema con due filosofie opposte:
 
 | | fantacalcio (questo) | fishertiger |
@@ -22,7 +26,7 @@ funzione di FVM. Le proposte sotto prendono il secondo senza perdere il primo.
 
 ## 1. Cosa conviene prendere
 
-### 1.1 La disponibilita' dentro il modificatore di difesa — alto valore, ~30 righe
+### 1.1 La disponibilita' dentro il modificatore di difesa — FATTO
 
 `calcolaModificatoreSquadra` prende i 3 difensori con MV piu' alta e li media col
 portiere. `tit` (la probabilita' di giocare, che gia' calcoliamo in
@@ -33,58 +37,101 @@ fishertiger (`web/src/defense-modifier.js`) marginalizza in modo esatto: enumera
 2^n scenari di presenza, e in ognuno calcola il bonus con i difensori effettivamente
 in campo.
 
-Da noi si innesta senza toccare altro: enumerare i sottoinsiemi dei primi ~6
-difensori, pesare per `tit`, prendere i 3 migliori presenti, e passare la media alla
-gaussiana che gia' abbiamo. Costo trascurabile (64 combinazioni), e il numero in testa
-smette di essere ottimista sulle rose fragili.
+Implementato in `src/motore.js` come `modificatoreDifesaAtteso`: enumera gli scenari
+di presenza dei difensori in rosa (al piu' 2^8 = 256) incrociati con il primo portiere
+disponibile, e pesa ciascuno per `tit`. La panchina entra nel conto, perche' e' proprio
+cio' che protegge il modificatore.
 
-### 1.2 Dire *a cosa serve* un giocatore, non solo quanto vale — alto valore, ~40 righe
+Misurato sull'app, a parita' di MV:
+
+| difesa | bonus atteso | probabilita' che il bonus scatti |
+| --- | --- | --- |
+| quattro difensori al 95% | **+1.05** | 77% |
+| stesso reparto, quarto al 15% | **+0.17** | 12% |
+| piu' un quinto difensore al 90% in panchina | **+1.04** | 76% |
+
+Prima le tre righe davano lo stesso numero. La seconda e' la rosa che tradisce; la
+terza dice perche' un quarto difensore affidabile vale piu' di un terzo difensore
+forte ma incerto.
+
+Ricaduta collaterale: il modificatore ora si calcola in un punto solo
+(`simulaFormazione`), e le altre due viste leggono quel risultato invece di
+ricalcolarlo. E' la stessa classe di bug del §3.1, chiusa per costruzione.
+
+### 1.2 Dire *a cosa serve* un giocatore, non solo quanto vale — FATTO
 
 fishertiger classifica ogni candidato in `STARTER` / `ROTATION` / `HANDCUFF` /
 `COVERAGE` / `DEPTH`, confrontando l'utilita' della rosa con e senza di lui.
 
-Noi quel confronto **lo facciamo gia'**, ed e' pure esatto invece che euristico:
-`calcolaPianoCompletamento` calcola `valoreBaseline` e `vantaggioAlMercato` con una DP.
-Manca solo tradurre il numero in una frase. Con i valori gia' in mano:
+Implementato come `classificaCandidato`, con tre esiti:
 
-- `vantaggioAlMercato <= 0` → «non migliora il piano rosa»
-- primo del suo ruolo → «titolare»
-- ruolo gia' coperto ma vantaggio positivo → «copertura»
+| esito | quando | dettaglio mostrato |
+| --- | --- | --- |
+| **Entra subito nel Best XI** | il candidato compare nell'XI ricalcolato | guadagno in pt/giornata e modulo risultante |
+| **Copertura che vale punti** | resta fuori dall'XI ma la rosa guadagna comunque | quanto, e quanto di quello e' modificatore |
+| **Solo profondita'** | riempie uno slot senza cambiare ne' XI ne' modificatore | quanti slot restano nel ruolo |
 
-E' il cambiamento con il miglior rapporto fra utilita' e righe: rende leggibile un
-calcolo che gia' paghiamo.
+Una lezione presa strada facendo: la prima versione classificava sul
+`vantaggioAlMercato` della DP, e finiva per dire «non migliora il piano rosa» su
+**ogni** giocatore. Non era un difetto della DP: la frontiera e' per definizione il
+massimo, quindi impegnarsi su un giocatore *preciso* al prezzo di mercato non puo'
+che valere meno del paniere ottimo. Come fa fishertiger, lo scopo va tenuto separato
+dal prezzo — `purpose` da una parte, `recommendation` dall'altra. Ora lo scopo guarda
+solo l'utilita' marginale in rosa; il prezzo lo dice la fascia.
+
+La categoria «copertura» e' interessante proprio grazie al §1.1: con un quarto
+difensore al 15%, un quinto difensore affidabile che **non entra in formazione** vale
++0.6 pt/giornata, di cui +0.58 di solo modificatore. Prima il modello non sapeva
+nemmeno esprimere quel caso.
 
 Nota: sui portieri la **griglia degli incroci** che abbiamo e' piu' forte del loro
 `HANDCUFF`/`ROTATION`, perche' modella la regola dei tre portieri da squadre diverse
 che loro non hanno. Quella resta com'e'.
 
-### 1.3 Una fascia di prezzo al posto del semaforo — medio valore, ~20 righe
+### 1.3 Una fascia di prezzo al posto del semaforo — FATTO nel pannello
 
-Loro mostrano una barra con `idealMin … idealMax … maxBid` e il prezzo corrente
-sopra. Noi mostriamo un semaforo `COMPRA/ATTENDI/LASCIA` piu' due tetti diversi
-(vedi §2.3). Con `mkt.min`, `mkt.atteso` e il `maxBid` del piano — numeri che gia'
-calcoliamo — la barra e' piu' informativa del semaforo e rende superfluo tararne le
-soglie.
+Il pannello del candidato ora mostra una barra con l'intervallo di mercato
+(`mkt.min`–`mkt.max`), il prezzo atteso e il **prezzo di indifferenza** dato dalla DP.
 
-### 1.4 Test unitari sulla matematica — medio valore
+Rinominare quel numero e' stata la parte che conta. Si chiamava «max bid», e a inizio
+asta sta *sotto* il prezzo di mercato per quasi tutti: letto come tetto sembrava dire
+«non comprare nessuno». E' invece la soglia oltre la quale gli stessi crediti rendono
+di piu' sul resto della rosa — la disciplina del VOR, non un divieto. La frase sotto
+la barra ora lo dice: pagare di piu' e' legittimo, significa scegliere di risparmiare
+altrove.
 
-`npm test` (Playwright su `dist/artifact.html`) e' una buona suite end-to-end: 26
+**Resta da fare in tabella**: la riga del listone mostra ancora «Tetto rapido» e
+semaforo, entrambi euristici. Sostituirli richiede il §2.3, perche' oggi il numero
+esatto si calcola solo sulla riga aperta.
+
+### 1.4 Test unitari sulla matematica — FATTO
+
+`npm test` (Playwright su `dist/artifact.html`) e' una buona suite end-to-end: 86
 verifiche, tutte verdi, incluse quelle sull'igiene della pagina. Ma non riesce a
 fissare le proprieta' del modello, perche' deve passare dal DOM.
 
-fishertiger tiene la matematica in moduli puri e li verifica con `node --test`
-(`web/tests/lineup-utility.test.js`, `auction-state.test.js`, …). Se estraiamo le
-funzioni pure (§2.1 lo rende naturale) possiamo asserire cose come:
+Ora `src/motore.js` e' un file `.js` vero — statistica di base, modificatore di difesa,
+frontiera di completamento — inlinato dal build per il browser e caricato con `require`
+dai test. `npm run test:unit` esegue 16 verifiche in circa 120 ms: monotonia della
+frontiera nel budget, rispetto esatto degli slot, riproducibilita' del generatore,
+e le proprieta' del modificatore (crolla con un difensore fragile, risale con la
+panchina, cresce con la disponibilita', vale 1 a presenze certe).
 
-- il max bid non supera mai `st.capienza`;
-- a economia chiusa la somma dei `valorePuro` sta dentro il monte crediti della lega;
-- MVAR e' monotona nella fascia.
+Controllati per mutazione: forzando `pDif = 1` nel motore — cioe' rimettendo il
+comportamento di prima — due test diventano rossi. Non sono test che passano e basta.
 
-### 1.5 Licenza e attribuzione dei dati — basso costo, va fatto
+E' anche il primo passo concreto verso il §2.1: `src/motore.js` viene interpolato alla
+lettera nel build, senza un solo escape, perche' e' scritto senza template literal.
 
-fishertiger ha `LICENSE` (MIT), `DATA_LICENSE.md` (CC BY 4.0) e `DATA_SOURCES.md`.
-Noi pubblichiamo su GitHub Pages una trascrizione del listone Fantacalcio.it **senza
-nessun file di licenza**. Il README cita gia' le fonti: basta formalizzarle.
+### 1.5 Licenza e attribuzione dei dati — FATTO
+
+Aggiunti `LICENSE` (MIT, per il codice) e `DATA_SOURCES.md`, che elenca file per file
+da dove viene ogni dato.
+
+Una differenza voluta rispetto a loro: fishertiger licenzia `data/raw/` come CC BY 4.0.
+Noi no, e non possiamo — il listone e' materiale di Fantacalcio.it, trascritto per uso
+personale: attribuirlo si', rilicenziarlo no. `DATA_SOURCES.md` lo dice esplicitamente
+invece di lasciarlo implicito.
 
 ## Cosa invece non conviene prendere
 
@@ -186,10 +233,14 @@ Un file che si autoproclama verde senza verificare nulla e' peggio di nessun fil
 fiducia falsa. Le due o tre verifiche che valgono (semaforo su tag RISCHIO, scaglioni
 del modificatore) si spostano in `npm test` come assertion vere.
 
-### 2.5 `package-lock.json` e' in `.gitignore`
+### 2.5 `package-lock.json` e' in `.gitignore` — FATTO
 
-Con `playwright: ^1.48.0` non pinnato, due cloni possono installare due Playwright
-diversi e ottenere due risultati diversi da `npm test`. Il lock va committato.
+Con `playwright: ^1.48.0` non pinnato, due cloni potevano installare due Playwright
+diversi e ottenere due risultati diversi da `npm test`. Il lock e' ora committato.
+
+Vale la pena aggiungere anche un workflow minimo (`npm ci && npm run build && npm test`):
+il repository non ha nessuna CI, ed e' il motivo per cui il file del §2.4 ha potuto
+restare rotto senza che nessuno se ne accorgesse.
 
 ### 2.6 Sette pannelli di consiglio in tre viste
 
@@ -203,7 +254,7 @@ nell'ultima asta? Quelli mai guardati sono le prime «cose che non servono».
 
 ## 3. Difetti confermati
 
-### 3.1 Modificatore di difesa concesso a un modulo da 3 difensori — corretto in questo ramo
+### 3.1 Modificatore di difesa concesso a un modulo da 3 difensori — CORRETTO
 
 `PROFILO_LEGA.modificatore.difensoriMinimi` vale 4, come la regola di lega.
 `simulaFormazione` lo rispetta (riga 1893: `nStrD >= difensoriMinimi`), ma `render()`
@@ -219,8 +270,9 @@ Riproduzione (rosa da 1 P, 3 D, 4 C, 3 A → Best XI 3-4-3):
 | Header «Mod Difesa» | **+1.23** | **0.00** |
 
 Con 5 difensori in rosa il Best XI passa a 4-3-3 e il modificatore torna a +1.23,
-com'e' giusto. La correzione sposta il controllo **dentro** `calcolaModificatoreSquadra`,
-cosi' nessun chiamante puo' piu' aggirarlo. `npm test`: 26 verifiche verdi.
+com'e' giusto. La correzione ha spostato il controllo **dentro**
+`calcolaModificatoreSquadra`; il §1.1 e' poi andato oltre, riducendo a uno solo i punti
+in cui il modificatore viene calcolato, cosi' la divergenza non e' piu' esprimibile.
 
 ### 3.2 «La mia squadra e' `squadre[0]`» e' una convenzione implicita
 
@@ -245,18 +297,20 @@ il motore del budget nel dettaglio e su questo tace.
 
 ## 4. Ordine consigliato
 
-| # | Intervento | § | Effetto |
+| # | Intervento | § | Stato |
 | --- | --- | --- | --- |
-| 1 | Cancellare `test-matematico-8punti.js` | 2.4 | toglie fiducia falsa |
-| 2 | Committare `package-lock.json` | 2.5 | test riproducibili |
-| 3 | `LICENSE` + attribuzione dati | 1.5 | dovuto, siamo pubblici |
-| 4 | Invertire `build-app.js` → `index.html` sorgente | 2.1 | −2413 righe, codice modificabile |
-| 5 | Estrarre la matematica e testarla con `node --test` | 1.4 | abilitato dal 4 |
-| 6 | Frontiera in cache → un solo MAX BID esatto | 2.3 | −5 fattori euristici |
-| 7 | Disponibilita' nel modificatore di difesa | 1.1 | numero onesto sulle rose fragili |
-| 8 | «A cosa serve» il giocatore | 1.2 | rende leggibile la DP |
-| 9 | Fascia di prezzo al posto del semaforo | 1.3 | dipende dal 6 |
+| 1 | Committare `package-lock.json` | 2.5 | fatto |
+| 2 | `LICENSE` + attribuzione dati | 1.5 | fatto |
+| 3 | Estrarre la matematica e testarla con `node --test` | 1.4 | fatto (`src/motore.js`) |
+| 4 | Disponibilita' nel modificatore di difesa | 1.1 | fatto |
+| 5 | «A cosa serve» il giocatore | 1.2 | fatto |
+| 6 | Fascia di prezzo | 1.3 | fatto nel pannello; in tabella dipende dal 8 |
+| 7 | Cancellare `test-matematico-8punti.js` | 2.4 | da fare |
+| 8 | Frontiera in cache → un solo MAX BID esatto | 2.3 | da fare |
+| 9 | Invertire `build-app.js` → `index.html` sorgente | 2.1 | da fare |
+| 10 | Workflow CI minimo | 2.5 | da fare |
 
-I primi tre sono manutenzione e si fanno in mezz'ora. Il 4 e' il vero spartiacque:
-finche' l'app vive in una stringa con l'escape, ogni modifica successiva costa il
-doppio.
+Il 9 resta lo spartiacque. Scrivendo le modifiche di questo giro ho rotto il build
+**due volte** con un backtick dentro un commento: finche' l'app vive in una stringa con
+l'escape, ogni modifica costa il doppio. `src/motore.js` mostra la direzione — un file
+`.js` normale, interpolato alla lettera, senza un solo carattere di escape.
