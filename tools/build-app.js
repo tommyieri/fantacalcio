@@ -673,10 +673,32 @@ ${playersData}
       }
 
       const budgetLega = BUDGET * squadre.length;
+      const prioriPerRuolo = Object.fromEntries(RUOLI.map(r => [
+        r, (budgetLega * PRIORI[r] / 100) / (TARGET[r] * squadre.length)
+      ]));
+
+      // Il prezzo assoluto varia fra leghe con budget diversi. Per imparare
+      // dall'asta confrontiamo quindi ogni vendita con il suo prezzo-base e
+      // usiamo la mediana: un singolo rilancio folle non riscrive il mercato.
+      const mediana = valori => {
+        if (!valori.length) return 1;
+        const ordinati = valori.slice().sort((a, b) => a - b);
+        const m = Math.floor(ordinati.length / 2);
+        return ordinati.length % 2 ? ordinati[m] : (ordinati[m - 1] + ordinati[m]) / 2;
+      };
+      const rapporti = [];
+      const rapportiRuolo = { P: [], D: [], C: [], A: [] };
+      for (const [id, a] of asseg) {
+        const r = PER_ID.get(id).ruolo;
+        const rapporto = Math.max(0.25, Math.min(4, a.pagato / Math.max(1, prioriPerRuolo[r])));
+        rapporti.push(rapporto);
+        rapportiRuolo[r].push(rapporto);
+      }
+      const inflazioneGlobale = mediana(rapporti);
       const out = {};
       for (const r of RUOLI) {
         const slotTotali = TARGET[r] * squadre.length;
-        const priori = (budgetLega * PRIORI[r] / 100) / slotTotali;
+        const priori = prioriPerRuolo[r];
 
         // Calcolo per fascia con media winsorizzata (evita distorsioni da singoli outlier)
         const fasceStats = {};
@@ -693,10 +715,17 @@ ${playersData}
         }
 
         const osservato = quanti[r] ? speso[r] / quanti[r] : null;
-        const w = Math.min(1, quanti[r] / Math.max(4, slotTotali * 0.25));
+        // Shrinkage bayesiano: le prime poche vendite orientano la stima, ma
+        // non la fanno oscillare. Dopo cinque osservazioni del ruolo il dato
+        // live pesa gia' quanto il mercato complessivo; continua a crescere.
+        const inflazioneOsservata = mediana(rapportiRuolo[r]);
+        const w = quanti[r] / (quanti[r] + 5);
+        const inflazioneRuolo = inflazioneGlobale + (inflazioneOsservata - inflazioneGlobale) * w;
         out[r] = {
-          medio: osservato === null ? priori : w * osservato + (1 - w) * priori,
-          osservato, quanti: quanti[r], speso: speso[r], priori, fasceStats
+          medio: Math.max(1, priori * inflazioneRuolo),
+          osservato, quanti: quanti[r], speso: speso[r], priori, fasceStats,
+          inflazione: inflazioneRuolo,
+          confidenza: Math.min(0.90, 0.35 + Math.min(0.30, rapporti.length / 40) + Math.min(0.25, quanti[r] / 20))
         };
       }
       return out;
@@ -712,13 +741,19 @@ ${playersData}
       };
     }
 
-    function tettoAvversari(ruolo) {
-      const migliore = { cr: 0, nome: null, quanti: 0 };
+    function tettoAvversari(ruolo, and) {
+      const migliore = { cr: 0, realistico: 0, nome: null, quanti: 0 };
       for (let i = 1; i < squadre.length; i++) {
-        const c = capienzaRuolo(statoSquadra(squadre[i]), ruolo);
+        const stato = statoSquadra(squadre[i]);
+        const c = capienzaRuolo(stato, ruolo);
         if (c <= 0) continue;
         migliore.quanti++;
-        if (c > migliore.cr) { migliore.cr = c; migliore.nome = squadre[i].nome; }
+        migliore.cr = Math.max(migliore.cr, c);
+        const realistico = quantoPosso(stato, ruolo, and).medio;
+        if (realistico > migliore.realistico) {
+          migliore.realistico = realistico;
+          migliore.nome = squadre[i].nome;
+        }
       }
       return migliore;
     }
@@ -745,13 +780,18 @@ ${playersData}
         const contesi = new Set(liberi.slice(0, n).map(p => p.id));
         const somma = liberi.slice(0, n).reduce((s, p) => s + p.fvm, 0) || 1;
         const monte = Math.max(0, grezzo[r] * scala - n);
+        const acquirenti = stati.filter(st => st.mancanti[r] > 0).length;
+        const confidenza = and[r].confidenza;
 
         for (const p of liberi) {
           const atteso = contesi.has(p.id) ? 1 + (p.fvm / somma) * monte : 1;
+          const ampiezza = 0.12 + (1 - confidenza) * 0.18 + Math.min(0.08, acquirenti * 0.01);
           mercato.set(p.id, {
             atteso: Math.max(1, Math.round(atteso)),
-            min: Math.max(1, Math.round(atteso * 0.8)),
-            max: Math.max(1, Math.round(atteso * 1.25))
+            min: Math.max(1, Math.round(atteso * (1 - ampiezza))),
+            max: Math.max(1, Math.round(atteso * (1 + ampiezza))),
+            acquirenti,
+            confidenza
           });
         }
       }
@@ -983,9 +1023,11 @@ ${playersData}
         const mancRuolo = st.mancanti[ruolo];
 
         if (mancRuolo > 0 && cap >= prezzoOfferta + 1) {
-          const mancAltri = st.mancantiTot - mancRuolo;
-          const costoMinAltri = mancAltri * 1.5;
-          const maxRealistico = Math.max(1, Math.min(cap, Math.round(st.residuo - costoMinAltri)));
+          // Non basta che il rivale possa tecnicamente bruciare tutti i suoi
+          // crediti: gli riserviamo i prezzi che l'asta sta facendo per gli
+          // altri slot. Questo e' il suo rilancio plausibile, non il limite
+          // teorico di emergenza che gli lascerebbe solo giocatori da 1.
+          const maxRealistico = quantoPosso(st, ruolo, and).medio;
 
           // Pressione d'acquisto specifica per ruolo
           const quotaSpesaRuolo = (mancRuolo * and[ruolo].medio) / Math.max(1, st.residuo);
@@ -1134,7 +1176,7 @@ ${playersData}
               prezzo medio <span class="text-slate-200 font-black tabular-nums text-sm">\${Math.round(a.medio)}</span> cr
               \${a.osservato === null
                 ? '<span class="block text-slate-600">stima iniziale, nessun acquisto</span>'
-                : \`<span class="block text-slate-600 tabular-nums">osservato \${Math.round(a.osservato)} su \${a.quanti}</span>\`}
+                : \`<span class="block text-slate-600 tabular-nums">osservato \${Math.round(a.osservato)} su \${a.quanti} • mercato \${a.inflazione.toFixed(2)}x</span>\`}
             </p>
             <p class="mt-1.5 pt-1.5 border-t border-slate-800 text-[10px] text-slate-400">
               \${chiuso
@@ -1288,7 +1330,7 @@ ${playersData}
 
     function renderTabella(st, mercato, prezzi, mioMaxMap, marginiMap, semaforiMap, scarsita, mvarMap, asseg, and) {
       const q = document.getElementById('ricerca').value.trim().toLowerCase();
-      const tetti = Object.fromEntries(RUOLI.map(r => [r, tettoAvversari(r)]));
+      const tetti = Object.fromEntries(RUOLI.map(r => [r, tettoAvversari(r, and)]));
 
       const righe = PLAYERS.filter(p => {
         if (soloLiberi && asseg.has(p.id)) return false;
@@ -1342,7 +1384,7 @@ ${playersData}
              </td>
              <td class="p-2.5 text-center align-top">
                <span class="font-black text-amber-300 text-sm tabular-nums" title="Quanto ti conviene offrire">\${prezzo} cr</span>
-               <span class="block text-[10px] text-slate-500 mt-0.5 tabular-nums">mercato \${mkt.min}–\${mkt.max}</span>
+               <span class="block text-[10px] text-slate-500 mt-0.5 tabular-nums">mercato \${mkt.min}–\${mkt.max} • conf. \${Math.round((mkt.confidenza ?? 0.35) * 100)}%</span>
                <span class="block text-[10px] font-bold tabular-nums mt-0.5 \${margine >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
                  Margine \${margine >= 0 ? '+' : ''}\${margine} cr
                </span>
@@ -1353,7 +1395,7 @@ ${playersData}
                    : ''}
                 <span class="block text-[9px] text-slate-600 mt-0.5 tabular-nums">\${
                   avv.cr > 0
-                    ? \`\${avv.quanti} in corsa, fino a \${avv.cr} (\${esc(avv.nome)})\`
+                    ? \`\${avv.quanti} in corsa, ~\${avv.realistico} (\${esc(avv.nome)})\`
                     : "nessun rivale puo' piu' prenderlo"}</span>
               </td>
               <td class="p-2.5 text-right align-top">

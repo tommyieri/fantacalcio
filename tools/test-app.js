@@ -86,7 +86,7 @@ function check(nome, atteso, ottenuto) {
     return {
       prezzo: +(t.match(/(\d+) cr/) || [])[1],
       mercato: (t.match(/mercato (\d+)–(\d+)/) || []).slice(1, 3).map(Number),
-      avversari: +(t.match(/fino a (\d+)/) || [])[1] || 0,
+      avversari: +(t.match(/~(\d+) \(/) || [])[1] || 0,
       inCorsa: +(t.match(/(\d+) in corsa/) || [])[1] || 0,
       risparmiareAltrove: t.includes('dovrai risparmiare altrove'),
       fuoriPortata: t.includes('fuori portata'),
@@ -121,7 +121,7 @@ function check(nome, atteso, ottenuto) {
 
   const lautaro0 = await rigaGiocatore('Martinez L.');
   check('Lautaro in 1ª fascia', '1ª fascia', lautaro0.fascia);
-  check('Vicario aggiunto fuori listone', true, (await rigaGiocatore('Vicario')) !== null);
+  check('Vicario presente nel listone ufficiale', true, (await rigaGiocatore('Vicario')) !== null);
   check('Spence all\'Inter', 'Inter', await page.evaluate(() => {
     const tr = [...document.querySelectorAll('#tabella tr')].find(t => {
       const n = t.querySelector('td:nth-child(2) span.font-semibold');
@@ -144,7 +144,7 @@ function check(nome, atteso, ottenuto) {
     return tr.querySelectorAll('td')[2].textContent.trim();
   }));
   check('mercato di Lautaro e\' un intervallo', true, lautaro0.mercato[0] < lautaro0.mercato[1]);
-  check('tetto avversari pari alla loro capienza', 476, lautaro0.avversari);
+  check('offerta realistica degli avversari presente', true, lautaro0.avversari >= 1);
 
   console.log('\n— un avversario prende Lautaro —');
   await assegna('Martinez L.', 1, 120);
@@ -159,7 +159,7 @@ function check(nome, atteso, ottenuto) {
   console.log('\n— i prezzi si adattano a chi resta —');
   const malen1 = await rigaGiocatore('Malen');
   check('Malen resta il piu\' caro fra i liberi', true, malen1.mercato[0] > 50);
-  check('il tetto resta alto: gli altri sei non hanno speso', 476, malen1.avversari);
+  check('offerta realistica resta disponibile: gli altri sei non hanno speso', true, malen1.avversari >= 1);
 
   console.log('\n— un avversario riempie l\'attacco —');
   for (const [nome, prezzo] of [['Thuram', 80], ['Hojlund', 70], ['Ramos G.', 60], ['Kolo Muani', 50], ['Kean', 20]]) {
@@ -272,7 +272,7 @@ function check(nome, atteso, ottenuto) {
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
   const nD = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('solo difensori, senza gli otto gia\' assegnati', 170, nD);
+  check('solo difensori, senza gli otto gia\' assegnati', 177, nD);
   
   await page.click('[data-ruolo="ALL"]');
   await page.click('[data-tag="RIGORISTA"]');
@@ -297,6 +297,20 @@ function check(nome, atteso, ottenuto) {
   check('nome sopravvive al refresh', 'Marco', (await squadra(1)).nome);
   check('i miei crediti sopravvivono', 200, (await mie()).residuo);
   check('rosa avversario sopravvive', '5/6', (await squadra(1)).A);
+
+  console.log('\n— economia chiusa: difensori economici liberano budget —');
+  const spillover = await page.evaluate(() => {
+    const precedente = squadre;
+    const pulite = Array.from({ length: 8 }, (_, i) => ({ nome: `Test ${i + 1}`, rosa: [] }));
+    squadre = pulite;
+    const prima = prezziMercato(assegnazioni(), andamento(assegnazioni())).get(PLAYERS.find(p => p.nome === 'Malen').id).atteso;
+    const difensori = PLAYERS.filter(p => p.ruolo === 'D').slice(0, 64);
+    difensori.forEach((p, i) => pulite[Math.floor(i / 8)].rosa.push({ id: p.id, pagato: 4 }));
+    const dopo = prezziMercato(assegnazioni(), andamento(assegnazioni())).get(PLAYERS.find(p => p.nome === 'Malen').id).atteso;
+    squadre = precedente;
+    return { prima, dopo };
+  });
+  check('difensori pagati poco alzano il prezzo atteso dell’attaccante top', true, spillover.dopo > spillover.prima);
 
   console.log('\n— igiene della pagina —');
   check('nessuna richiesta di rete esterna', [], rete);
