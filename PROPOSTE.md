@@ -86,7 +86,35 @@ nemmeno esprimere quel caso.
 
 Nota: sui portieri la **griglia degli incroci** che abbiamo e' piu' forte del loro
 `HANDCUFF`/`ROTATION`, perche' modella la regola dei tre portieri da squadre diverse
-che loro non hanno. Quella resta com'e'.
+che loro non hanno.
+
+Aggiornamento: quella regola non e' l'unica. Questa lega compra la porta **a blocchi** —
+si chiama la squadra e ci si prende tutti i suoi portieri — e li' non c'e' niente da
+incrociare, perche' vengono tutti dalla stessa squadra. La griglia resta com'e' ma vale
+solo a portieri singoli, e con i blocchi accesi la scheda Portieri la nasconde invece di
+mostrare un numero che non significa piu' niente. Vedi §1.6.
+
+### 1.6 Portieri a blocchi — FATTO
+
+Un blocco non vale la somma dei portieri che contiene: in porta ne gioca uno per volta.
+Vale quanto rende **il posto in porta** di quella squadra, e il vantaggio vero e' che quel
+posto non resta mai scoperto. Il punto delicato e' la riserva: pesarla con la sua
+titolarita' (circa 0,05) direbbe che la porta resta scoperta quasi sempre quando il
+titolare manca, cioe' l'opposto di quello che compri con un blocco. La probabilita'
+giusta e' quella condizionata (`DISPONIBILITA_RISERVA`).
+
+Nel piano rosa i blocchi liberi prendono il posto dei portieri singoli nel pool della
+frontiera, con `mancanti.P` ridotto a un lotto solo: cosi' il prezzo di indifferenza di
+un blocco esce dagli stessi conti degli altri ruoli, senza un ramo di codice dedicato.
+Comprare due blocchi vuol dire pagare due volte lo stesso posto, e il tetto lo dice da
+solo.
+
+Resta un limite dichiarato: il contributo del modificatore e' calcolato su una **difesa
+di riferimento** (MV mediana dei difensori che finiscono davvero fra i primi tre della
+lega), non sulla tua difesa reale. A blocchi i portieri si chiamano di solito per primi,
+quando di difensori non ne hai ancora nessuno, e un termine che valesse zero proprio
+allora sarebbe stato peggio di un riferimento dichiarato. Quando la difesa e' completa il
+numero giusto lo da' gia' il simulatore.
 
 ### 1.3 Una fascia di prezzo al posto del semaforo — FATTO nel pannello
 
@@ -309,8 +337,10 @@ il motore del budget nel dettaglio e su questo tace.
 | 8 | Frontiera in cache → un solo MAX BID esatto | 2.3 | da fare |
 | 9 | Invertire `build-app.js` → `index.html` sorgente | 2.1 | da fare |
 | 10 | Workflow CI minimo | 2.5 | da fare |
+| 11 | Portieri a blocchi | 1.6 | fatto |
 
-Il 9 resta lo spartiacque. Scrivendo le modifiche di questo giro ho rotto il build
-**due volte** con un backtick dentro un commento: finche' l'app vive in una stringa con
+Il 9 resta lo spartiacque. Scrivendo le modifiche di questi giri ho rotto il build
+piu' volte con un backtick dentro un commento, e una volta con un `\'` dentro un `alert`
+(dentro un template literal quell'escape sparisce, e il risultato non compila): finche' l'app vive in una stringa con
 l'escape, ogni modifica costa il doppio. `src/motore.js` mostra la direzione — un file
 `.js` normale, interpolato alla lettera, senza un solo carattere di escape.

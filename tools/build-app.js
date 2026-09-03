@@ -99,6 +99,10 @@ const htmlContent = `<!DOCTYPE html>
               <input type="number" id="bonus-rete-inviolata" min="0" max="3" step="0.25" class="mt-1 w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-emerald-300 font-bold tabular-nums focus:outline-none focus:border-indigo-500"> pt
             </label>
             <label class="flex items-end gap-2 pb-0.5 cursor-pointer"><input id="modificatore-attivo" type="checkbox" class="accent-indigo-500"> <span>Modificatore: P + top 3 D<br><span class="text-slate-500">attivo da 4 difensori</span></span></label>
+            <label class="flex items-end gap-2 pb-0.5 cursor-pointer"><input id="blocchi-portieri" type="checkbox" class="accent-indigo-500"> <span>Portieri a blocchi<br><span class="text-slate-500">tutti i portieri di una squadra in un lotto</span></span></label>
+            <label><span class="text-slate-500">Blocchi max</span><br>
+              <input type="number" id="max-blocchi" min="1" max="3" step="1" class="mt-1 w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-amber-300 font-bold tabular-nums focus:outline-none focus:border-indigo-500">
+            </label>
           </div>
           <p class="text-[10px] text-slate-500 mt-2">Soglie modificatore: 6,00 → +1 · 6,25 → +2 · 6,50 → +3 · 6,75 → +4 · 7,00 → +6.</p>
         </div>
@@ -431,9 +435,41 @@ const htmlContent = `<!DOCTYPE html>
       <div id="formazioni" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- ============ VISTA GRIGLIA ============ -->
-    <section id="vista-griglia" class="hidden">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+    <!-- ============ VISTA PORTIERI ============ -->
+    <section id="vista-griglia" class="hidden space-y-4">
+      <div id="pannello-blocchi" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-amber-400"></i> Blocchi portieri
+          </h2>
+          <span id="blocchi-riepilogo" class="text-[11px] text-slate-400"></span>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">
+          Si chiama la squadra, non il portiere: chi vince l'offerta si prende tutti i suoi portieri.
+          Il <strong class="text-slate-200">valore</strong> non e' la somma dei portieri del lotto, perche' in porta
+          ne gioca uno per volta: e' quanto rende il posto in porta di quella squadra per una stagione, riserve comprese.
+          Il <strong class="text-amber-300">tetto</strong> e' il prezzo di indifferenza: oltre quella cifra gli stessi
+          crediti rendono di piu' sul resto della rosa.
+        </p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[11px]">
+            <thead>
+              <tr class="text-[9px] uppercase tracking-wider text-slate-500 border-b border-slate-800">
+                <th class="text-left py-2 px-2">Blocco</th>
+                <th class="text-left py-2 px-2">Portieri</th>
+                <th class="text-center py-2 px-2">Posto coperto</th>
+                <th class="text-center py-2 px-2">Punti stagione</th>
+                <th class="text-center py-2 px-2">vs rimpiazzo</th>
+                <th class="text-center py-2 px-2">Mercato</th>
+                <th class="text-center py-2 px-2">Tuo tetto</th>
+                <th class="text-right py-2 px-2">Assegna</th>
+              </tr>
+            </thead>
+            <tbody id="blocchi-corpo" class="divide-y divide-slate-800/70"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="pannello-griglia" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
           <h2 class="text-sm font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-shield-halved text-amber-400"></i> Calcolatore coppia portieri
@@ -474,7 +510,7 @@ ${playersData}
 
     const {
       normalCdf, quantile, generatoreCasuale,
-      modificatoreDifesaAtteso, IMPOSSIBILE,
+      modificatoreDifesaAtteso, bonusGaussiano, IMPOSSIBILE, bloccoPortieri, DISPONIBILITA_RISERVA,
       frontieraRuolo, frontieraCompletamento, tettoDaFrontiera
     } = MOTORE;
 
@@ -606,7 +642,13 @@ ${playersData}
     function normalizzaRegole(input) {
       return {
         bonusReteInviolata: Math.max(0, Math.min(3, Number(input?.bonusReteInviolata ?? 1))),
-        modificatoreAttivo: input?.modificatoreAttivo !== false
+        modificatoreAttivo: input?.modificatoreAttivo !== false,
+        // Asta a blocchi: i portieri di una squadra si comprano in un lotto
+        // solo, e chi lo vince se li prende tutti. Cambia il modo di comprare,
+        // non il numero di slot: si continua a chiudere con TARGET.P portieri,
+        // e per arrivarci puo' servire piu' di un blocco se il primo non basta.
+        blocchiPortieri: input?.blocchiPortieri !== false,
+        maxBlocchi: Math.max(1, Math.min(TARGET.P, Math.round(Number(input?.maxBlocchi ?? TARGET.P)) || TARGET.P))
       };
     }
 
@@ -889,6 +931,16 @@ ${playersData}
       return st.mancanti[ruolo] > 0 ? st.capienza : 0;
     }
 
+    // Quanto si puo' offrire per un lotto che riempie piu' di uno slot in una
+    // volta sola. La capienza normale tiene da parte 1 credito per ogni slot
+    // che resta scoperto; un blocco portieri ne copre due o tre insieme, e quei
+    // crediti tornano disponibili subito.
+    function capienzaLotto(st, slotCoperti) {
+      if (st.mancantiTot <= 0) return 0;
+      const coperti = Math.max(1, Math.min(slotCoperti, st.mancantiTot));
+      return Math.max(1, st.residuo - (st.mancantiTot - coperti));
+    }
+
     function andamento(asseg) {
       const speso = { P: 0, D: 0, C: 0, A: 0 };
       const quanti = { P: 0, D: 0, C: 0, A: 0 };
@@ -904,7 +956,11 @@ ${playersData}
         const r = p.ruolo;
         speso[r] += a.pagato;
         quanti[r]++;
-        vendutiPerRuoloEFascia[r][p.fascia].push(a.pagato);
+        // I portieri che arrivano dentro un blocco sono registrati a zero:
+        // il prezzo del lotto sta tutto sul primo. Sono acquisti veri per il
+        // conto dei crediti spesi, ma non sono chiamate, e non devono
+        // insegnare all'app che i portieri si prendono a zero crediti.
+        if (a.pagato > 0) vendutiPerRuoloEFascia[r][p.fascia].push(a.pagato);
       }
 
       const budgetLega = BUDGET * squadre.length;
@@ -936,6 +992,7 @@ ${playersData}
       let pagatoTeorico = 0;
       let pagatoReale = 0;
       for (const [id, a] of asseg) {
+        if (a.pagato <= 0) continue;  // vedi sopra: comparse di un lotto, non offerte
         const g = PER_ID.get(id);
         const riferimento = Math.max(1, ancoraPrezzo(g));
         const rapporto = Math.max(0.2, Math.min(3, a.pagato / riferimento));
@@ -1501,15 +1558,171 @@ ${playersData}
      * giocatore, quindi il costo e' quello di una manciata di millisecondi per
      * assegnazione invece che per riga.
      */
+    /* ====================== BLOCCHI PORTIERI ====================== */
+
+    /*
+     * Asta a blocchi: non si chiama un portiere, si chiama una squadra, e chi
+     * vince l'offerta si prende tutti i suoi portieri.
+     *
+     * Questo cambia due cose che il resto del motore dava per scontate.
+     *
+     * 1. Il prezzo. Un blocco costa quanto costerebbero insieme i portieri che
+     *    contiene: i crediti del reparto sono gli stessi, cambia solo che si
+     *    spendono in un colpo solo.
+     * 2. Il valore. Un blocco NON vale la somma dei portieri che contiene,
+     *    perche' in porta ne gioca uno per volta. Vale quanto rende il posto in
+     *    porta di quella squadra, e il vantaggio vero e' che quel posto non
+     *    resta mai scoperto: a coprirlo e' la riserva della stessa squadra.
+     *
+     * Comprare due blocchi vuol dire pagare due volte lo stesso posto: il
+     * secondo aggiunge quasi niente, e il tetto lo dice da solo senza bisogno
+     * di regole speciali. L'unico caso in cui serve davvero e' quando il primo
+     * blocco non copre tutti gli slot di portiere - l'Atalanta ne ha due.
+     */
+    const BLOCCHI = (() => {
+      const per = new Map();
+      for (const p of PLAYERS) {
+        if (p.ruolo !== 'P') continue;
+        if (!per.has(p.cod)) {
+          per.set(p.cod, { id: 'BLK:' + p.cod, ruolo: 'P', cod: p.cod, squadra: p.squadra, portieri: [] });
+        }
+        per.get(p.cod).portieri.push(p);
+      }
+      // Ordine di gerarchia: prima il portiere dato titolare da SOS Fanta, poi
+      // per valore di listone. E' l'ordine con cui il posto viene coperto.
+      const primo = g => Number(g.sos?.gerarchiaPortiere === 'PRIMO');
+      for (const b of per.values()) {
+        b.portieri.sort((a, c) => primo(c) - primo(a) || c.fvm - a.fvm);
+      }
+      return per;
+    })();
+
+    const BLOCCO_DI = new Map();
+    for (const b of BLOCCHI.values()) for (const p of b.portieri) BLOCCO_DI.set(p.id, b);
+
+    // Le squadre di cui hai gia' comprato dei portieri: sono i blocchi che
+    // occupi, e la lega ne concede al massimo regole.maxBlocchi.
+    function codBlocchiPresi(sq) {
+      const cod = new Set();
+      for (const a of sq.rosa) {
+        const p = PER_ID.get(a.id);
+        if (p && p.ruolo === 'P') cod.add(p.cod);
+      }
+      return cod;
+    }
+
+    /*
+     * Fotografia dei blocchi nell'asta in corso: chi li ha presi, quanto rende
+     * il posto in porta, quanto costano a mercato, e quanti punti valgono
+     * sopra il blocco di rimpiazzo - cioe' quello che resterebbe comunque
+     * libero se lasciassi andare questo.
+     */
+    function statoBlocchi(asseg, mercato) {
+      const stati = squadre.map(statoSquadra);
+      const inCorsa = stati.filter(st => st.mancanti.P > 0).length;
+      const mio = stati[0];
+
+      /*
+       * Col modificatore attivo la media voto del portiere pesa un quarto della
+       * media che decide il bonus, e due blocchi con la stessa fantamedia non
+       * valgono lo stesso se uno para meglio dell'altro.
+       *
+       * Il contributo si misura su una difesa di riferimento: la MV mediana dei
+       * difensori che in questa lega finiscono davvero nei primi tre posti,
+       * cioe' i migliori 3 per squadra. Cosi' il numero isola il contributo del
+       * portiere e non salta a ogni difensore che compri.
+       */
+      const mvRiferimentoDifesa = (() => {
+        const mv = PLAYERS.filter(p => p.ruolo === 'D')
+          .map(p => VALUTAZIONI_CACHE.get(p.id)?.mv ?? 6.0)
+          .sort((a, b) => b - a)
+          .slice(0, 3 * Math.max(1, squadre.length));
+        return mv.length ? mv[Math.floor(mv.length / 2)] : 6.0;
+      })();
+      const bonusDaPortiere = mv => regole.modificatoreAttivo
+        ? bonusGaussiano((mv + 3 * mvRiferimentoDifesa) / 4,
+            PROFILO_LEGA.modificatore.scaglioni, SIGMA_MODIFICATORE)
+        : 0;
+
+      const lista = [];
+      for (const b of BLOCCHI.values()) {
+        const presi = b.portieri.filter(p => asseg.has(p.id));
+        const val = bloccoPortieri(b.portieri.map(p => {
+          const v = VALUTAZIONI_CACHE.get(p.id);
+          return { p: v?.tit ?? 0.5, mv: v?.mv ?? 6.0, fma: v?.fma ?? 6.0 };
+        }));
+
+        const costoBlocco = Math.max(1, Math.round(b.portieri.reduce(
+          (somma, p) => somma + (mercato.get(p.id)?.atteso ?? Math.max(1, Math.round(ancoraPrezzo(p)))), 0)));
+        // La forchetta del blocco e' quella del suo titolare, riportata sul
+        // prezzo del lotto: l'incertezza e' la stessa, cambia la scala.
+        const rif = mercato.get(b.portieri[0]?.id);
+        const ampiezza = rif && rif.atteso > 0 ? (rif.max - rif.min) / (2 * rif.atteso) : 0.15;
+
+        lista.push({
+          id: b.id, ruolo: 'P', cod: b.cod, squadra: b.squadra, portieri: b.portieri,
+          venduto: presi.length > 0,
+          completo: presi.length === b.portieri.length,
+          proprietario: presi.length ? asseg.get(presi[0].id).squadra : null,
+          pagato: presi.reduce((somma, p) => somma + asseg.get(p.id).pagato, 0),
+          puntiStagione: val.puntiStagione, fma: val.fma, mv: val.mv,
+          puntiModificatore: Number((38 * bonusDaPortiere(val.mv)).toFixed(1)),
+          disponibilita: val.disponibilita,
+          costoBlocco,
+          mercato: {
+            atteso: costoBlocco,
+            min: Math.max(1, Math.round(costoBlocco * (1 - ampiezza))),
+            max: Math.max(1, Math.round(costoBlocco * (1 + ampiezza))),
+            acquirenti: inCorsa,
+            confidenza: rif?.confidenza ?? 0.5
+          },
+          // Quanti dei tuoi slot di portiere chiuderebbe questo lotto: serve
+          // sia a dire quanto puoi offrire, sia ad avvisarti quando un blocco
+          // da solo non basta a completare il reparto.
+          slotCoperti: Math.min(b.portieri.length - presi.length, mio.mancanti.P),
+          valoreBlocco: 0, tetto: 0, semaforo: 'ATTENDI'
+        });
+      }
+
+      // Rimpiazzo: il primo blocco fuori da quelli che la lega si prendera'
+      // comunque. Stessa idea del rimpiazzo per ruolo, applicata ai lotti.
+      // Il totale che conta e' fantapunti del posto in porta piu' il
+      // modificatore che quel portiere porta con se'.
+      for (const b of lista) b.puntiTotali = Number((b.puntiStagione + b.puntiModificatore).toFixed(1));
+      const liberi = lista.filter(b => !b.venduto).sort((a, c) => c.puntiTotali - a.puntiTotali);
+      const indice = Math.min(Math.max(0, liberi.length - 1), Math.max(0, inCorsa));
+      const bloccoRimpiazzo = liberi[indice];
+      const rimpiazzo = bloccoRimpiazzo?.puntiTotali ?? 0;
+      const modRimpiazzo = bloccoRimpiazzo?.puntiModificatore ?? 0;
+      for (const b of lista) {
+        b.valoreBlocco = Number(Math.max(0, b.puntiTotali - rimpiazzo).toFixed(1));
+        // Quanta parte del vantaggio viene dal modificatore e non dalla
+        // fantamedia: e' la differenza col portiere che avresti comunque.
+        b.deltaModificatore = Number((b.puntiModificatore - modRimpiazzo).toFixed(1));
+      }
+
+      lista.sort((a, c) =>
+        Number(a.venduto) - Number(c.venduto) ||
+        c.valoreBlocco - a.valoreBlocco ||
+        c.puntiTotali - a.puntiTotali);
+      return {
+        lista,
+        liberi: lista.filter(b => !b.venduto),
+        perCod: new Map(lista.map(b => [b.cod, b])),
+        rimpiazzo, inCorsa
+      };
+    }
+
     const FRONTIERE_CACHE = { firma: null, dati: null };
 
-    function frontiere(st, mercato, asseg) {
+    function frontiere(st, mercato, asseg, blocchi) {
       // La firma deve contenere tutto cio' da cui la frontiera dipende: i costi
       // stimati cambiano col numero di partecipanti, e i valori cambiano ogni
       // volta che le regole vengono ritarate. Senza, cambiare lega dava un
       // colpo di cache con i numeri della lega precedente.
       const firma = [
         VALUTAZIONI_VERSIONE, squadre.length, st.residuo,
+        regole.blocchiPortieri ? 'B' + (blocchi?.liberi.length ?? 0) : 'S',
         RUOLI.map(r => st.mancanti[r]).join('-'), asseg.size,
         // I livelli di rimpiazzo cambiano col pool: due aste con lo stesso
         // numero di vendite ma nomi diversi non devono condividere la cache.
@@ -1518,36 +1731,49 @@ ${playersData}
       if (FRONTIERE_CACHE.firma === firma) return FRONTIERE_CACHE.dati;
 
       const budget = st.residuo;
-      const pool = PLAYERS.filter(p => !asseg.has(p.id));
-      const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
-      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiVor ?? 0;
+      // In asta a blocchi la porta non si compra un portiere per volta: nel
+      // piano rosa e' un lotto solo, e i candidati sono i blocchi ancora
+      // liberi. Sostituirli ai portieri nel pool basta perche' frontiera e
+      // tetto restino gli stessi identici conti, senza casi particolari.
+      const aBlocchi = regole.blocchiPortieri && !!blocchi;
+      const pool = PLAYERS
+        .filter(p => !asseg.has(p.id) && !(aBlocchi && p.ruolo === 'P'))
+        .concat(aBlocchi ? blocchi.liberi : []);
+      const bisogni = aBlocchi ? { ...st.mancanti, P: st.mancanti.P > 0 ? 1 : 0 } : st.mancanti;
+      const costoPer = p => p.costoBlocco ?? (mercato.get(p.id)?.atteso ?? 1);
+      const valorePer = p => p.valoreBlocco ?? (VALUTAZIONI_CACHE.get(p.id)?.puntiVor ?? 0);
 
-      const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
+      const baseline = frontieraCompletamento(pool, bisogni, budget, costoPer, valorePer);
       const senzaSlot = {};
       for (const r of RUOLI) {
-        if (st.mancanti[r] <= 0) continue;
+        if (bisogni[r] <= 0) continue;
         senzaSlot[r] = frontieraCompletamento(
-          pool, { ...st.mancanti, [r]: st.mancanti[r] - 1 }, budget, costoPer, valorePer
+          pool, { ...bisogni, [r]: bisogni[r] - 1 }, budget, costoPer, valorePer
         );
       }
 
-      const dati = { budget, baseline, valoreBaseline: baseline[budget], senzaSlot, valorePer };
+      const dati = { budget, baseline, valoreBaseline: baseline[budget], senzaSlot, valorePer, aBlocchi };
       FRONTIERE_CACHE.firma = firma;
       FRONTIERE_CACHE.dati = dati;
       return dati;
     }
 
-    function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap) {
+    function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap, blocchi) {
       const prezzi = new Map();
       const mioMaxMap = new Map();
       const marginiMap = new Map();
       const semaforiMap = new Map();
-      const fr = frontiere(st, mercato, asseg);
+      const fr = frontiere(st, mercato, asseg, blocchi);
 
       for (const p of PLAYERS) {
         if (asseg.has(p.id)) continue;
         const r = p.ruolo;
-        const mkt = mercato.get(p.id) ?? { atteso: 1, min: 1, max: 1 };
+        // In asta a blocchi un portiere non ha un prezzo suo: quello che si
+        // paga e' il blocco della sua squadra, e la riga del singolo mostra i
+        // numeri del lotto in cui e' compreso.
+        const blocco = fr.aBlocchi && r === 'P' ? blocchi.perCod.get(p.cod) : null;
+        const mkt = blocco ? blocco.mercato : (mercato.get(p.id) ?? { atteso: 1, min: 1, max: 1 });
+        const cap = blocco ? capienzaLotto(st, blocco.slotCoperti) : st.capienza;
         const val = VALUTAZIONI_CACHE.get(p.id);
         const trueVal = val?.valorePuro ?? p.fvm;
 
@@ -1559,7 +1785,7 @@ ${playersData}
           continue;
         }
 
-        const prezzoConsigliato = Math.max(1, Math.min(mkt.atteso, st.capienza));
+        const prezzoConsigliato = Math.max(1, Math.min(mkt.atteso, cap));
         prezzi.set(p.id, prezzoConsigliato);
 
         // Prezzo di indifferenza esatto: la soglia oltre la quale gli stessi
@@ -1567,15 +1793,17 @@ ${playersData}
         // "tetto rapido", che moltiplicava cinque fattori tarati a mano e
         // consigliava COMPRA a 56 crediti su un portiere da 30-40.
         const mioMax = fr.senzaSlot[r]
-          ? tettoDaFrontiera(fr.valorePer(p), fr.senzaSlot[r], fr.valoreBaseline, fr.budget, st.capienza)
+          ? tettoDaFrontiera(blocco ? blocco.valoreBlocco : fr.valorePer(p),
+              fr.senzaSlot[r], fr.valoreBaseline, fr.budget, cap)
           : 0;
         mioMaxMap.set(p.id, mioMax);
+        if (blocco) blocco.tetto = mioMax;
 
         const margine = mioMax - mkt.atteso;
         marginiMap.set(p.id, margine);
 
         let sem = 'ATTENDI';
-        if (mioMax < 1 || mkt.atteso > st.capienza) {
+        if (mioMax < 1 || mkt.atteso > cap) {
           sem = 'LASCIA';
         } else if (mkt.atteso <= mioMax) {
           // Il mercato sta sotto il tuo tetto: e' un affare vero.
@@ -1587,6 +1815,7 @@ ${playersData}
           sem = 'LASCIA';
         }
         semaforiMap.set(p.id, sem);
+        if (blocco) blocco.semaforo = sem;
       }
 
       return { prezzi, mioMaxMap, marginiMap, semaforiMap };
@@ -1613,8 +1842,20 @@ ${playersData}
         p: VALUTAZIONI_CACHE.get(p.id)?.tit ?? 0.5,
         mv: VALUTAZIONI_CACHE.get(p.id)?.mv ?? 6.0
       });
+      // Due portieri della stessa squadra non si contendono il posto con le
+      // rispettive titolarita': si alternano. Pesare la riserva con la sua
+      // probabilita' di partire titolare (circa 0,05) direbbe che la porta
+      // resta scoperta quasi sempre quando manca il primo, cioe' l'opposto di
+      // quello che ti compra un blocco.
+      const codVisti = new Set();
+      const disponibilePortiere = p => {
+        const riserva = regole.blocchiPortieri && codVisti.has(p.cod);
+        codVisti.add(p.cod);
+        const base = disponibile(p);
+        return riserva ? { p: DISPONIBILITA_RISERVA, mv: base.mv } : base;
+      };
       const res = modificatoreDifesaAtteso({
-        portieri: portieri.map(disponibile),
+        portieri: portieri.map(disponibilePortiere),
         difensori: difensori.map(disponibile),
         difensoriSchierati,
         scaglioni: PROFILO_LEGA.modificatore.scaglioni,
@@ -1803,7 +2044,8 @@ ${playersData}
       const and = andamento(asseg);
       const mercato = prezziMercato(asseg, and);
       const { scarsita, mvarMap, tierMap } = calcolaMVAR_e_Scarsita(asseg);
-      const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap);
+      const blocchi = regole.blocchiPortieri ? statoBlocchi(asseg, mercato) : null;
+      const { prezzi, mioMaxMap, marginiMap, semaforiMap } = calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap, blocchi);
       const candidatoAperto = apertaRiga ? PER_ID.get(apertaRiga) : null;
       const pianoAperto = candidatoAperto && !asseg.has(candidatoAperto.id)
         ? calcolaPianoCompletamento(st, candidatoAperto, asseg, mercato, and, tierMap)
@@ -1828,7 +2070,7 @@ ${playersData}
       renderSimulatore(miaRosaPlayers, bestXI, modRes);
       renderStrategia(asseg, st, mercato, scarsita, mvarMap, nomine, semaforiMap, marginiMap, and);
       renderFormazioni(asseg);
-      renderCoppie(asseg);
+      renderPortieri(asseg, blocchi, st);
       aggiornaFiltriAttivi();
       salva();
     }
@@ -1966,6 +2208,11 @@ ${playersData}
       const cleanSheet = document.getElementById('bonus-rete-inviolata');
       if (document.activeElement !== cleanSheet) cleanSheet.value = regole.bonusReteInviolata;
       document.getElementById('modificatore-attivo').checked = regole.modificatoreAttivo;
+      document.getElementById('blocchi-portieri').checked = regole.blocchiPortieri;
+      const maxBl = document.getElementById('max-blocchi');
+      maxBl.max = TARGET.P;
+      maxBl.disabled = !regole.blocchiPortieri;
+      if (document.activeElement !== maxBl) maxBl.value = regole.maxBlocchi;
 
       const nomi = document.getElementById('nomi-squadre');
       if (Number(nomi.dataset.n) !== squadre.length) {
@@ -2277,6 +2524,9 @@ ${playersData}
             <td class="p-2.5 align-top">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-semibold text-white">\${esc(p.nome)}</span>
+                \${regole.blocchiPortieri && p.ruolo === 'P'
+                  ? \`<span class="text-[9px] px-1.5 py-px rounded bg-amber-950 text-amber-300 border border-amber-800/60" title="Asta a blocchi: si compra il lotto con tutti i portieri del \${esc(p.squadra)}, non il singolo. Prezzo e tetto in questa riga sono quelli del blocco.">blocco \${esc(p.cod)}</span>\`
+                  : ''}
                 \${p.fuoriListone ? \`<span class="text-[9px] px-1.5 py-px rounded bg-orange-950 text-orange-300 border border-orange-800/60" title="\${
                   p.fuoriListone === 'voce'
                     ? 'Non presente nel listone in mio possesso: aggiunto a mano'
@@ -2682,6 +2932,143 @@ ${playersData}
       testo.textContent = giudizioIncrocio(v);
     }
 
+    /*
+     * La porta, come la compra questa lega.
+     *
+     * A blocchi si mostra l'elenco dei lotti; a portieri singoli resta la
+     * griglia degli incroci. Le due cose si escludono: incrociare le trasferte
+     * di due squadre ha senso solo se i portieri vengono da squadre diverse, e
+     * in un'asta a blocchi vengono tutti dalla stessa.
+     */
+    function renderPortieri(asseg, blocchi, st) {
+      const aBlocchi = regole.blocchiPortieri && !!blocchi;
+      document.getElementById('pannello-blocchi').classList.toggle('hidden', !aBlocchi);
+      document.getElementById('pannello-griglia').classList.toggle('hidden', aBlocchi);
+      if (aBlocchi) renderBlocchi(blocchi, st);
+      else renderCoppie(asseg);
+    }
+
+    const STILE_SEMAFORO_BLOCCO = {
+      COMPRA: 'bg-emerald-950 text-emerald-300 border-emerald-800/60',
+      ATTENDI: 'bg-amber-950 text-amber-300 border-amber-800/60',
+      LASCIA: 'bg-slate-800 text-slate-500 border-slate-700/60'
+    };
+
+    function renderBlocchi(blocchi, st) {
+      const miei = codBlocchiPresi(squadre[0]);
+      document.getElementById('blocchi-riepilogo').textContent =
+        \`Portieri \${st.presi.P}/\${TARGET.P} · blocchi tuoi \${miei.size}/\${regole.maxBlocchi} · \` +
+        \`\${blocchi.liberi.length} liberi · \${blocchi.inCorsa} squadre ancora senza porta\`;
+
+      const opzioni = squadre.map((sq, i) => \`<option value="\${i}">\${esc(sq.nome)}</option>\`).join('');
+
+      document.getElementById('blocchi-corpo').innerHTML = blocchi.lista.map(b => {
+        const nomi = b.portieri.map((p, i) =>
+          \`<span class="\${i === 0 ? 'text-slate-200 font-semibold' : 'text-slate-500'}">\${esc(p.nome)}</span>\`
+        ).join('<span class="text-slate-700"> + </span>');
+
+        if (b.venduto) {
+          const chi = b.proprietario === null ? '—' : squadre[b.proprietario].nome;
+          return \`<tr class="opacity-40">
+            <td class="py-2 px-2 font-bold text-slate-300">\${esc(b.squadra)}</td>
+            <td class="py-2 px-2">\${nomi}</td>
+            <td class="py-2 px-2 text-center text-slate-500" colspan="4">preso da \${esc(chi)}</td>
+            <td class="py-2 px-2 text-center tabular-nums text-slate-400">\${b.pagato} cr</td>
+            <td class="py-2 px-2"></td>
+          </tr>\`;
+        }
+
+        const scoperto = st.mancanti.P - b.slotCoperti;
+        const suggerito = Math.max(1, Math.min(b.tetto || b.mercato.atteso, capienzaLotto(st, b.slotCoperti)));
+
+        return \`<tr class="hover:bg-slate-800/40 transition align-top">
+          <td class="py-2 px-2">
+            <span class="font-bold text-slate-100">\${esc(b.squadra)}</span>
+            <span class="block text-[9px] text-slate-500">\${b.portieri.length} portieri</span>
+          </td>
+          <td class="py-2 px-2">\${nomi}\${st.mancanti.P > 0 && scoperto > 0
+            ? \`<span class="block text-[9px] text-amber-400">chiude \${b.slotCoperti} dei \${st.mancanti.P} slot: ne resterebbero \${scoperto} da coprire con un altro blocco</span>\`
+            : ''}</td>
+          <td class="py-2 px-2 text-center tabular-nums">
+            <span class="text-slate-200">\${Math.round(b.disponibilita * 100)}%</span>
+            <span class="block text-[9px] text-slate-500">MV \${b.mv}</span>
+          </td>
+          <td class="py-2 px-2 text-center tabular-nums text-slate-300">\${Math.round(b.puntiStagione)}
+            \${b.deltaModificatore ? \`<span class="block text-[9px] \${b.deltaModificatore > 0 ? 'text-sky-300' : 'text-slate-600'}">\${b.deltaModificatore > 0 ? '+' : ''}\${b.deltaModificatore} di modificatore vs rimpiazzo</span>\` : ''}
+          </td>
+          <td class="py-2 px-2 text-center tabular-nums \${b.valoreBlocco > 0 ? 'text-emerald-300' : 'text-slate-600'}">+\${b.valoreBlocco}</td>
+          <td class="py-2 px-2 text-center tabular-nums">
+            <span class="text-slate-200">\${b.mercato.atteso}</span>
+            <span class="block text-[9px] text-slate-500">\${b.mercato.min}–\${b.mercato.max}</span>
+          </td>
+          <td class="py-2 px-2 text-center">
+            <span class="font-black tabular-nums text-amber-300">\${b.tetto}</span>
+            <span class="block mt-0.5 text-[9px] px-1.5 py-px rounded border \${STILE_SEMAFORO_BLOCCO[b.semaforo]}">\${b.semaforo}</span>
+          </td>
+          <td class="py-2 px-2">
+            <div class="flex items-center gap-1 justify-end">
+              <input type="number" min="1" id="blk-p-\${b.cod}" value="\${suggerito}" aria-label="Prezzo blocco \${esc(b.squadra)}"
+                class="w-14 bg-slate-950 border border-slate-800 rounded px-1.5 py-1 text-[11px] text-slate-200 tabular-nums focus:outline-none focus:border-indigo-500">
+              <select id="blk-s-\${b.cod}" aria-label="Squadra che prende il blocco \${esc(b.squadra)}"
+                class="bg-slate-950 border border-slate-800 rounded px-1 py-1 text-[10px] text-slate-300 focus:outline-none focus:border-indigo-500">\${opzioni}</select>
+              <button type="button" onclick="assegnaBlocco('\${b.cod}')"
+                class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition">OK</button>
+            </div>
+          </td>
+        </tr>\`;
+      }).join('');
+    }
+
+    /*
+     * Assegna un blocco intero. Il prezzo e' uno solo, quindi finisce tutto sul
+     * portiere di gerarchia piu' alta e gli altri entrano a zero: e' cio' che
+     * succede davvero al tavolo, e tenere il conto cosi' evita di dividere una
+     * cifra che nessuno ha diviso.
+     */
+    function assegnaBlocco(cod) {
+      const b = BLOCCHI.get(cod);
+      const sel = document.getElementById('blk-s-' + cod);
+      const sq = squadre[Number(sel ? sel.value : 0)];
+      if (!b || !sq) return;
+
+      const asseg = assegnazioni();
+      const liberi = b.portieri.filter(p => !asseg.has(p.id));
+      if (!liberi.length) {
+        alert('Il blocco ' + b.squadra + ' risulta gia assegnato.');
+        return;
+      }
+
+      const st = statoSquadra(sq);
+      if (st.mancanti.P <= 0) {
+        alert(sq.nome + ' ha gia tutti e ' + TARGET.P + ' gli slot di portiere.');
+        return;
+      }
+      const presi = codBlocchiPresi(sq);
+      if (!presi.has(cod) && presi.size >= regole.maxBlocchi) {
+        alert(sq.nome + ' ha gia ' + presi.size + ' blocchi: il regolamento ne concede al massimo ' + regole.maxBlocchi + '.');
+        return;
+      }
+
+      const campo = document.getElementById('blk-p-' + cod);
+      const pagato = Number.parseInt(campo ? campo.value : '', 10);
+      if (!Number.isFinite(pagato) || pagato < 1) {
+        alert('Inserisci un prezzo valido: minimo 1 credito.');
+        return;
+      }
+
+      const coperti = Math.min(liberi.length, st.mancanti.P);
+      const cap = capienzaLotto(st, coperti);
+      if (pagato > cap) {
+        alert(pagato + ' cr sforano la capienza di ' + sq.nome + ': ' + cap + ' cr.\\n'
+          + 'Il blocco chiude ' + coperti + ' slot, ma per ognuno degli altri deve restare 1 credito.');
+        return;
+      }
+
+      liberi.forEach((p, i) => sq.rosa.push({ id: p.id, pagato: i === 0 ? pagato : 0 }));
+      apertaRiga = null;
+      render();
+    }
+
     function renderCoppie(asseg) {
       const blocchi = PLAYERS.filter(p => p.ruolo === 'P' && !asseg.has(p.id));
       const coppie = [];
@@ -2781,7 +3168,7 @@ ${playersData}
       { k: 'simulatore', et: 'Simulatore & Best XI', i: '<i class="fa-solid fa-futbol mr-1.5"></i>' },
       { k: 'strategia', et: 'Strategia & Avversari', i: '<i class="fa-solid fa-crosshairs mr-1.5"></i>' },
       { k: 'formazioni', et: 'Formazioni tipo', i: '<i class="fa-solid fa-clipboard-list mr-1.5"></i>' },
-      { k: 'griglia', et: 'Griglia portieri', i: '<i class="fa-solid fa-shield-halved mr-1.5"></i>' }
+      { k: 'griglia', et: 'Portieri', i: '<i class="fa-solid fa-shield-halved mr-1.5"></i>' }
     ];
 
     function initNavigazione() {
@@ -2864,6 +3251,24 @@ ${playersData}
 
     document.getElementById('modificatore-attivo').addEventListener('change', e => {
       regole.modificatoreAttivo = e.target.checked;
+      render();
+    });
+
+    document.getElementById('blocchi-portieri').addEventListener('change', e => {
+      regole.blocchiPortieri = e.target.checked;
+      // Cambia il modo di comprare i portieri, quindi cambia la frontiera:
+      // la cache va invalidata prima del prossimo tetto.
+      inizializzaValutazioni();
+      render();
+    });
+
+    document.getElementById('max-blocchi').addEventListener('change', e => {
+      const n = Math.round(Number(e.target.value));
+      if (!Number.isFinite(n) || n < 1 || n > TARGET.P) {
+        e.target.value = regole.maxBlocchi;
+        return;
+      }
+      regole.maxBlocchi = n;
       render();
     });
 

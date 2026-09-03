@@ -272,6 +272,82 @@ function check(nome, atteso, ottenuto) {
   await page.fill('#ricerca-formazioni', '');
 
   await page.click('[data-vista="griglia"]');
+
+  console.log('\n— portieri a blocchi —');
+  const blocchiOn = async attivo => page.evaluate(v => {
+    const el = document.getElementById('blocchi-portieri');
+    el.checked = v;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, attivo);
+
+  check('a blocchi si vede l elenco dei lotti, non la griglia', true, await page.evaluate(() =>
+    !document.getElementById('pannello-blocchi').classList.contains('hidden')
+    && document.getElementById('pannello-griglia').classList.contains('hidden')));
+  check('venti blocchi, uno per squadra', 20, await page.evaluate(() =>
+    document.querySelectorAll('#blocchi-corpo tr').length));
+
+  const bloccoRoma = await page.evaluate(() => {
+    const riga = [...document.querySelectorAll('#blocchi-corpo tr')]
+      .find(tr => tr.querySelector('td')?.textContent.includes('Roma'));
+    const celle = [...riga.querySelectorAll('td')].map(td => td.textContent.trim());
+    return {
+      portieri: celle[1],
+      coperto: +(celle[2].match(/(\d+)%/) || [])[1],
+      punti: +celle[3],
+      mercato: +(celle[5].match(/^(\d+)/) || [])[1],
+      tetto: +(celle[6].match(/^(\d+)/) || [])[1],
+      prezzoProposto: +riga.querySelector('input').value
+    };
+  });
+  check('il blocco Roma contiene tutti i suoi portieri', true,
+    bloccoRoma.portieri.includes('Svilar') && bloccoRoma.portieri.includes('Gollini'));
+  // Il senso del blocco: se il titolare salta gioca la sua riserva, non resta
+  // scoperta la porta. La copertura deve stare vicino al 100%.
+  check('il blocco copre il posto in porta', true, bloccoRoma.coperto >= 97);
+  check('il tetto del blocco resta nell ordine del prezzo di mercato', true,
+    bloccoRoma.tetto > 0 && bloccoRoma.tetto < 120 && bloccoRoma.mercato > 0);
+  check('il prezzo proposto non supera il tetto', true, bloccoRoma.prezzoProposto <= Math.max(1, bloccoRoma.tetto));
+
+  // Assegnare un blocco porta in rosa tutti i portieri con una chiamata sola.
+  // La rosa a questo punto della suite ha gia' i difensori delle prove
+  // precedenti: si misurano le differenze, e alla fine si rimette com'era.
+  const primaDelBlocco = await mie();
+  const rosaPrima = await page.evaluate(() => JSON.parse(JSON.stringify(squadre[0].rosa)));
+  await page.evaluate(() => {
+    document.getElementById('blk-p-ROM').value = '40';
+    document.getElementById('blk-s-ROM').value = '0';
+    assegnaBlocco('ROM');
+  });
+  const dopoBlocco = await mie();
+  check('un blocco chiude il reparto portieri', true, dopoBlocco.badge.startsWith('3/3 P'));
+  check('il lotto costa una volta sola', primaDelBlocco.residuo - 40, dopoBlocco.residuo);
+  check('i tre portieri entrano insieme', 3, await page.evaluate(() =>
+    squadre[0].rosa.filter(a => PER_ID.get(a.id).ruolo === 'P').length));
+  check('il blocco preso sparisce dai lotti liberi', true, await page.evaluate(() =>
+    [...document.querySelectorAll('#blocchi-corpo tr')]
+      .find(tr => tr.querySelector('td')?.textContent.includes('Roma'))
+      .textContent.includes('preso da')));
+  check('nessun secondo blocco quando la porta e chiusa', true, await page.evaluate(() => {
+    const prima = squadre[0].rosa.length;
+    window.alert = () => {};
+    document.getElementById('blk-p-INT').value = '10';
+    document.getElementById('blk-s-INT').value = '0';
+    assegnaBlocco('INT');
+    return squadre[0].rosa.length === prima;
+  }));
+
+  // Ripristino: le prove successive contano su questa rosa.
+  await page.evaluate(rosa => {
+    squadre[0].rosa = rosa;
+    render();
+  }, rosaPrima);
+
+  // La griglia degli incroci ha senso solo con i portieri singoli: due
+  // portieri della stessa squadra non hanno niente da incrociare.
+  await blocchiOn(false);
+  check('a portieri singoli torna la griglia', true, await page.evaluate(() =>
+    document.getElementById('pannello-blocchi').classList.contains('hidden')
+    && !document.getElementById('pannello-griglia').classList.contains('hidden')));
   await page.selectOption('#griglia-a', 'JUV');
   await page.selectOption('#griglia-b', 'TOR');
   check('JUV/TOR alternanza perfetta', '0', await page.evaluate(() => document.getElementById('griglia-valore').textContent));
@@ -280,6 +356,7 @@ function check(nome, atteso, ottenuto) {
   check('NAP/ROM indice 3', '3', await page.evaluate(() => document.getElementById('griglia-valore').textContent));
   check('coppie consigliate fra i blocchi liberi', true, await page.evaluate(() =>
     document.querySelectorAll('#coppie-consigliate > div').length > 0));
+  await blocchiOn(true);
   await page.click('[data-vista="asta"]');
 
   console.log('\n— radar rilanci live e semafori —');

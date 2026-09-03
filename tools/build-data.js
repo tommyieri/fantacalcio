@@ -3,8 +3,9 @@
  * Converte il listone ufficiale (data/listone.tsv, trascritto dal PDF
  * Fantacalcio.it 2026/27) nell'array PLAYERS usato da index.html.
  *
- * I portieri sono singoli: la lega assegna tre slot di portiere e possono
- * venire da tre squadre diverse.
+ * I portieri restano voci singole, una per portiere: e' l'app a raggrupparli
+ * per squadra quando la lega compra la porta a blocchi, e serve comunque poter
+ * assegnare il singolo quando i blocchi sono spenti.
  *
  * I tag ricavabili dai numeri (TOP, LOWCOST) vengono calcolati qui dal FVM.
  * Quelli che dipendono da valutazioni esterne (RIGORISTA, RISCHIO, TITOLARE,
