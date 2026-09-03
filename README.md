@@ -2,7 +2,9 @@
 
 Assistente per l'asta del fantacalcio, **Serie A 2026/27**.
 Budget 500 crediti, rosa da 25 slot (3 portieri, 8 difensori, 8 centrocampisti, 6 attaccanti).
-I portieri sono singoli: possono venire da tre squadre diverse.
+I tre slot di portiere si riempiono in due modi, e l'app li gestisce entrambi: a portieri
+singoli, presi anche da tre squadre diverse, oppure **a blocchi**, chiamando una squadra e
+prendendo tutti i suoi portieri in un lotto solo. Si sceglie in *Impostazioni della lega*.
 
 ## Come si usa
 
@@ -123,7 +125,39 @@ avviare un browser: `npm run test:unit` le copre in una frazione di secondo.
 | `npm run grid -- calendario.csv` | Ricalcola la griglia degli incroci portieri dal calendario ufficiale |
 | `npm run data` | Rigenera l'elenco giocatori da `data/listone.tsv` |
 
+## La porta: blocchi oppure incroci
+
+Le due formule si escludono, e l'app cambia di conseguenza la scheda **Portieri**.
+
+**A blocchi.** Si chiama la squadra, non il portiere. Un blocco non vale la somma dei portieri
+che contiene, perche' in porta ne gioca uno per volta: vale quanto rende il posto in porta di
+quella squadra per una stagione. Il vantaggio vero e' che quel posto non resta mai scoperto,
+perche' a coprirlo e' la riserva della stessa squadra - e per questo la riserva non va pesata
+con la sua titolarita' (circa 0,05) ma con la probabilita' di giocare *quando il titolare
+manca*, che e' un'altra cosa (`DISPONIBILITA_RISERVA`, 0,90 in `src/motore.js`).
+
+Nel piano rosa il blocco prende il posto dei singoli portieri: la frontiera di completamento
+tratta la porta come un lotto solo, quindi il prezzo di indifferenza di un blocco esce dagli
+stessi identici conti degli altri ruoli. Comprarne due significa pagare due volte lo stesso
+posto, e il tetto lo dice da solo senza bisogno di regole speciali; l'unico caso in cui serve
+davvero un secondo blocco e' quando il primo non copre tutti gli slot - l'Atalanta ha due soli
+portieri, e la tabella lo segnala.
+
+Col modificatore attivo la media voto del portiere pesa un quarto della media che decide il
+bonus: la tabella mostra a parte quanti punti di modificatore un blocco porta **rispetto al
+blocco di rimpiazzo**, calcolati su una difesa di riferimento (la MV mediana dei difensori che
+in questa lega finiscono davvero fra i primi tre). E' un riferimento dichiarato, non la tua
+difesa reale: serve a isolare il contributo del portiere invece di farlo ballare a ogni
+difensore che compri.
+
+Il prezzo del lotto viene registrato tutto sul portiere di gerarchia piu' alta e a zero sugli
+altri, perche' e' quello che succede al tavolo. Le voci a zero contano per i crediti spesi ma
+non insegnano prezzi all'app: non sono chiamate.
+
 ## Griglia degli incroci portieri
+
+Serve solo all'asta a portieri singoli, e con i blocchi accesi la scheda la nasconde: due
+portieri della stessa squadra non hanno niente da incrociare.
 
 L'indice fra due squadre e' il numero di giornate in cui giocano **entrambe in trasferta**:
 indice 0 significa che una delle due e' sempre in casa. `tools/build-grid.js` lo calcola da
@@ -137,7 +171,8 @@ sbagliata.
 `data/listone.tsv` e' la trascrizione del listone ufficiale Fantacalcio.it 2026/27:
 496 calciatori delle 20 squadre, con ruolo Classic, ruoli Mantra, FVM e quotazione
 (valori Classic e Mantra). `npm run data` lo converte in `data/players.generated.js`,
-con i portieri come voci singole.
+con i portieri come voci singole - il raggruppamento in blocchi lo fa l'app, che deve poter
+assegnare anche il singolo quando la lega non usa i blocchi.
 
 La trascrizione e' stata verificata su tre fronti: numerazione per squadra contigua
 senza salti, coerenza fra ruolo Classic e Mantra, e confronto di FVM e quotazioni con

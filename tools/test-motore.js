@@ -12,7 +12,8 @@ const assert = require('node:assert/strict');
 const {
   normalCdf, quantile, generatoreCasuale, bonusGaussiano,
   modificatoreDifesaAtteso, IMPOSSIBILE,
-  frontieraRuolo, frontieraCompletamento
+  frontieraRuolo, frontieraCompletamento,
+  bloccoPortieri, gerarchiaBlocco, DISPONIBILITA_RISERVA
 } = require('../src/motore.js');
 
 /* --- Statistica ----------------------------------------------------------- */
@@ -203,4 +204,64 @@ test('frontieraCompletamento: un ruolo senza candidati rende il piano infattibil
 test('frontieraCompletamento: nessun bisogno significa nessun vincolo', () => {
   const f = frontieraCompletamento([], {}, 10, costo, valore);
   assert.equal(f[10], 0);
+});
+
+/* --- Blocco portieri ------------------------------------------------------ */
+
+const gk = (p, mv, fma) => ({ p, mv, fma });
+
+test('bloccoPortieri: un blocco copre il posto quasi sempre', () => {
+  const solo = bloccoPortieri([gk(0.95, 6.1, 6.3)]);
+  const blocco = bloccoPortieri([gk(0.95, 6.1, 6.3), gk(0.05, 5.9, 6.0), gk(0.05, 5.8, 5.9)]);
+
+  assert.ok(Math.abs(solo.disponibilita - 0.95) < 1e-6, 'un portiere solo vale la sua titolarita');
+  assert.ok(blocco.disponibilita > 0.99, `il blocco copre il posto: ${blocco.disponibilita}`);
+  assert.ok(blocco.presenzeAttese > solo.presenzeAttese);
+  assert.ok(blocco.puntiStagione > solo.puntiStagione, 'le giornate coperte in piu valgono punti');
+});
+
+test('bloccoPortieri: la riserva non usa la propria titolarita ma la condizionata', () => {
+  // Se la riserva pesasse 0,05 il posto resterebbe scoperto nel 95% delle
+  // giornate senza il titolare: e' proprio l'errore che il blocco corregge.
+  const g = gerarchiaBlocco([gk(0.90, 6.1, 6.3), gk(0.05, 5.9, 6.0)]);
+  assert.equal(g[0].p, 0.90, 'il titolare tiene la sua titolarita');
+  assert.equal(g[1].p, DISPONIBILITA_RISERVA);
+
+  const blocco = bloccoPortieri([gk(0.90, 6.1, 6.3), gk(0.05, 5.9, 6.0)]);
+  assert.ok(blocco.disponibilita > 0.98, `atteso >0,98, ottenuto ${blocco.disponibilita}`);
+});
+
+test('bloccoPortieri: la fantamedia resta quella di chi gioca davvero', () => {
+  const blocco = bloccoPortieri([gk(1, 6.5, 7.0), gk(1, 5.0, 5.0)]);
+  // Il titolare c'e' sempre: la riserva non deve abbassare la media.
+  assert.equal(blocco.fma, 7.0);
+  assert.equal(blocco.mv, 6.5);
+  assert.equal(blocco.disponibilita, 1);
+});
+
+test('bloccoPortieri: piu forte non vale meno, e un blocco vuoto non esplode', () => {
+  const debole = bloccoPortieri([gk(0.9, 5.8, 5.7), gk(0.05, 5.6, 5.5)]);
+  const forte = bloccoPortieri([gk(0.9, 6.4, 6.8), gk(0.05, 6.0, 6.1)]);
+  assert.ok(forte.puntiStagione > debole.puntiStagione);
+
+  const vuoto = bloccoPortieri([]);
+  assert.equal(vuoto.puntiStagione, 0);
+  assert.equal(vuoto.disponibilita, 0);
+});
+
+test('bloccoPortieri: il modificatore vede la stessa disponibilita del blocco', () => {
+  const portieri = [gk(0.90, 6.1, 6.3), gk(0.05, 5.9, 6.0), gk(0.05, 5.8, 5.9)];
+  const blocco = bloccoPortieri(portieri);
+  const difensori = [dif(6.3, 1), dif(6.2, 1), dif(6.2, 1), dif(6.1, 1)];
+
+  const conBlocco = modificatoreDifesaAtteso({
+    ...base, portieri: blocco.gerarchia, difensori
+  });
+  const soloTitolare = modificatoreDifesaAtteso({
+    ...base, portieri: [portieri[0]], difensori
+  });
+
+  assert.ok(conBlocco.probAttivo > soloTitolare.probAttivo,
+    'il blocco tiene acceso il modificatore anche quando il titolare non c e');
+  assert.ok(conBlocco.bonusAtteso > soloTitolare.bonusAtteso);
 });

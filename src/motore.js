@@ -177,6 +177,71 @@ var MOTORE = (function () {
     };
   }
 
+  /* --- Blocco portieri ----------------------------------------------------- */
+
+  /*
+   * In un'asta a blocchi i portieri di una squadra si comprano in un lotto
+   * solo: si chiama la squadra, si fa un'offerta, e chi la vince si prende
+   * tutti i suoi portieri.
+   *
+   * Un blocco non vale la somma dei portieri che contiene, perche' in porta ne
+   * gioca sempre uno solo: vale quanto rende il posto in porta di quella
+   * squadra per una stagione. Il secondo portiere conta unicamente per le
+   * giornate in cui il primo non c'e' - ed e' proprio quello il vantaggio del
+   * blocco, perche' il posto non resta mai scoperto.
+   *
+   * Per la stessa ragione la riserva NON va pesata con la sua titolarita': un
+   * secondo portiere ha una probabilita' di partire titolare intorno a 0,05, ma
+   * quando il titolare manca gioca lui quasi sempre. La probabilita' giusta e'
+   * quella condizionata, non quella marginale.
+   */
+  var DISPONIBILITA_RISERVA = 0.90;
+
+  // portieri: [{ p, mv, fma }] in ordine di gerarchia, il primo e' il titolare.
+  // Restituisce le probabilita' da usare nel modificatore e nel valore.
+  function gerarchiaBlocco(portieri) {
+    var out = [];
+    for (var i = 0; i < (portieri || []).length; i++) {
+      out.push({
+        p: i === 0 ? clamp01(portieri[i].p) : DISPONIBILITA_RISERVA,
+        mv: Number(portieri[i].mv) || 0,
+        fma: Number(portieri[i].fma) || 0
+      });
+    }
+    return out;
+  }
+
+  function bloccoPortieri(portieri, giornate) {
+    var g = giornate > 0 ? giornate : 38;
+    var lista = gerarchiaBlocco(portieri);
+    var vuoto = { disponibilita: 0, presenzeAttese: 0, fma: 0, mv: 0, puntiStagione: 0, gerarchia: lista };
+    if (!lista.length) return vuoto;
+
+    // Catena: gioca il primo disponibile. La somma dei pesi e' la probabilita'
+    // che il posto sia coperto, e le medie sono condizionate a quel caso.
+    var restante = 1, disponibilita = 0, sommaFma = 0, sommaMv = 0;
+    for (var i = 0; i < lista.length; i++) {
+      var quota = restante * lista[i].p;
+      if (quota <= 0) continue;
+      disponibilita += quota;
+      sommaFma += quota * lista[i].fma;
+      sommaMv += quota * lista[i].mv;
+      restante -= quota;
+    }
+    if (disponibilita <= 0) return vuoto;
+
+    return {
+      disponibilita: Number(disponibilita.toFixed(4)),
+      presenzeAttese: Number((g * disponibilita).toFixed(1)),
+      fma: Number((sommaFma / disponibilita).toFixed(2)),
+      mv: Number((sommaMv / disponibilita).toFixed(2)),
+      // Punti stagionali del posto in porta: giornate coperte per fantamedia
+      // di chi le copre.
+      puntiStagione: Number((g * sommaFma).toFixed(1)),
+      gerarchia: lista
+    };
+  }
+
   /* --- Frontiera esatta di completamento rosa ------------------------------ */
 
   // Per ogni budget disponibile, il miglior totale di fantapunti stagionali
@@ -267,6 +332,9 @@ var MOTORE = (function () {
     generatoreCasuale: generatoreCasuale,
     bonusGaussiano: bonusGaussiano,
     modificatoreDifesaAtteso: modificatoreDifesaAtteso,
+    DISPONIBILITA_RISERVA: DISPONIBILITA_RISERVA,
+    gerarchiaBlocco: gerarchiaBlocco,
+    bloccoPortieri: bloccoPortieri,
     IMPOSSIBILE: IMPOSSIBILE,
     frontieraRuolo: frontieraRuolo,
     frontieraCompletamento: frontieraCompletamento
