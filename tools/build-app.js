@@ -475,7 +475,7 @@ ${playersData}
     const {
       normalCdf, quantile, generatoreCasuale,
       modificatoreDifesaAtteso, IMPOSSIBILE,
-      frontieraRuolo, frontieraCompletamento
+      frontieraRuolo, frontieraCompletamento, tettoDaFrontiera
     } = MOTORE;
 
     /* ====================== COSTANTI & MAPPE ====================== */
@@ -619,6 +619,9 @@ ${playersData}
     let apertaSquadra = null;
     let apertaRiga = null;
     let moduloScelto = '3-4-3';
+    // Riferimenti all'ultimo render, usati dal verdetto live sul campo prezzo.
+    let pianoLive = null;
+    let mercatoLive = null;
 
     function salva() {
       store.setItem(CHIAVE, JSON.stringify({ squadre, regole }));
@@ -627,9 +630,11 @@ ${playersData}
     /* ====================== MOTORE MATEMATICO DEL VALORE ====================== */
 
     const VALUTAZIONI_CACHE = new Map();
+    let VALUTAZIONI_VERSIONE = 0;
 
     function inizializzaValutazioni() {
       VALUTAZIONI_CACHE.clear();
+      VALUTAZIONI_VERSIONE++;
 
       // Raggruppamento per ruolo per determinare la baseline di rimpiazzo e il monte crediti chiuso (Nessun double counting)
       const perRuolo = { P: [], D: [], C: [], A: [] };
@@ -980,31 +985,65 @@ ${playersData}
     function simulaConcorrenza(candidato, st, asseg, mercato, and, tierInfo, maxBid) {
       const mkt = mercato.get(candidato.id) ?? { atteso: 1, min: 1, max: 1, confidenza: 0.35 };
       const concorrenti = squadre.slice(1).map(sq => statoSquadra(sq)).filter(stato => stato.mancanti[candidato.ruolo] > 0);
-      const random = generatoreCasuale(candidato.id * 1009 + asseg.size * 7919 + st.residuo);
-      const chiusure = [];
-      let vittorie = 0;
       const scenari = 800;
       const volatilita = 0.10 + (1 - (mkt.confidenza ?? 0.35)) * 0.18;
       const pressioneTier = (tierInfo?.score ?? 50) / 100 * 0.12;
+      const seme = candidato.id * 1009 + asseg.size * 7919 + st.residuo;
 
-      for (let s = 0; s < scenari; s++) {
-        let chiusura = Math.max(1, mkt.min);
-        for (const avversario of concorrenti) {
-          // Box-Muller: propensione al rilancio differente ma riproducibile per ogni scenario.
-          const u1 = Math.max(1e-9, random());
-          const u2 = random();
-          const rumore = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-          const necessita = 0.04 + 0.10 * (avversario.mancanti[candidato.ruolo] / TARGET[candidato.ruolo]);
-          const propensione = mkt.atteso * (1 + pressioneTier + necessita + rumore * volatilita);
-          const cap = Math.min(avversario.capienza, quantoPosso(avversario, candidato.ruolo, and).tetto);
-          chiusura = Math.max(chiusura, Math.max(1, Math.min(cap, Math.round(propensione))));
+      // Un giro di scenari con una data propensione media. Il prezzo di
+      // chiusura e' il massimo fra i rilanci dei rivali che possono ancora
+      // permetterselo: ognuno e' limitato dalla propria capienza reale.
+      function giro(media) {
+        const random = generatoreCasuale(seme);
+        const chiusure = [];
+        for (let s = 0; s < scenari; s++) {
+          let chiusura = 1;
+          for (const avversario of concorrenti) {
+            // Box-Muller: propensione diversa per rivale ma riproducibile.
+            const u1 = Math.max(1e-9, random());
+            const u2 = random();
+            const rumore = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            const necessita = 0.04 + 0.10 * (avversario.mancanti[candidato.ruolo] / TARGET[candidato.ruolo]);
+            const propensione = media * (1 + pressioneTier + necessita + rumore * volatilita);
+            const cap = Math.min(avversario.capienza, quantoPosso(avversario, candidato.ruolo, and).tetto);
+            chiusura = Math.max(chiusura, Math.max(1, Math.min(cap, Math.round(propensione))));
+          }
+          chiusure.push(chiusura);
         }
-        chiusure.push(chiusura);
-        if (maxBid >= chiusura) vittorie++;
+        chiusure.sort((a, b) => a - b);
+        return chiusure;
       }
-      chiusure.sort((a, b) => a - b);
+
+      /*
+       * Calibrazione. Il prezzo di mercato e' gia' la stima di quanto va il giocatore
+       * adesso: e' ricavata dai crediti ancora in circolazione e dagli slot
+       * ancora da riempire. Far partire ogni rivale da quella cifra e poi
+       * prendere il massimo fra nove rivali la gonfia di parecchio — il massimo
+       * di nove estrazioni sta molto sopra la loro media — ed e' il motivo per
+       * cui i prezzi simulati uscivano sistematicamente troppo alti.
+       *
+       * Quindi il primo giro serve solo a misurare quel fattore, e il secondo
+       * gira con la propensione corretta perche' la mediana di chiusura torni
+       * sul prezzo di mercato. La simulazione cosi' non ridecide il livello:
+       * dice la dispersione e chi puo' ancora permetterselo.
+       */
+      let chiusure;
+      if (!concorrenti.length) {
+        chiusure = new Array(scenari).fill(1);
+      } else {
+        const prova = giro(mkt.atteso);
+        const medianaProva = quantile(prova, 0.50);
+        const fattore = medianaProva > 0 ? mkt.atteso / medianaProva : 1;
+        // Se la correzione e' trascurabile evitiamo il secondo giro.
+        chiusure = Math.abs(fattore - 1) < 0.02 ? prova : giro(mkt.atteso * fattore);
+      }
+
+      let vittorie = 0;
+      for (let i = 0; i < chiusure.length; i++) if (maxBid >= chiusure[i]) vittorie++;
+
       return {
         scenari,
+        chiusure,
         p50: quantile(chiusure, 0.50),
         p75: quantile(chiusure, 0.75),
         probabilitaVittoria: Math.round(100 * vittorie / scenari)
@@ -1013,23 +1052,17 @@ ${playersData}
 
     function calcolaPianoCompletamento(st, candidato, asseg, mercato, and, tierMap) {
       if (!candidato || st.mancanti[candidato.ruolo] <= 0) return null;
-      const budget = st.residuo;
-      const pool = PLAYERS.filter(p => !asseg.has(p.id) && p.id !== candidato.id);
-      const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
-      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiStagione ?? 0;
-      const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
-      const valoreBaseline = baseline[budget];
+      // Stesse frontiere della tabella: il numero nella riga e quello nel
+      // pannello sono lo stesso calcolo, non due stime che possono divergere.
+      const fr = frontiere(st, mercato, asseg);
+      const budget = fr.budget;
+      const valoreBaseline = fr.valoreBaseline;
       if (valoreBaseline <= IMPOSSIBILE / 2) return { nonFattibile: true };
 
-      const bisogniConCandidato = { ...st.mancanti, [candidato.ruolo]: st.mancanti[candidato.ruolo] - 1 };
-      const conCandidato = frontieraCompletamento(pool, bisogniConCandidato, budget, costoPer, valorePer);
-      const valoreCandidato = valorePer(candidato);
-      const massimoLegale = st.capienza;
-      let maxBid = 0;
-      for (let offerta = 1; offerta <= massimoLegale; offerta++) {
-        const completamento = conCandidato[budget - offerta];
-        if (completamento > IMPOSSIBILE / 2 && valoreCandidato + completamento >= valoreBaseline - 1e-7) maxBid = offerta;
-      }
+      const conCandidato = fr.senzaSlot[candidato.ruolo];
+      if (!conCandidato) return { nonFattibile: true };
+      const valoreCandidato = fr.valorePer(candidato);
+      const maxBid = tettoDaFrontiera(valoreCandidato, conCandidato, valoreBaseline, budget, st.capienza);
 
       const stimaMercato = mercato.get(candidato.id)?.atteso ?? 1;
       const completamentoAlMercato = stimaMercato <= budget ? conCandidato[budget - stimaMercato] : IMPOSSIBILE;
@@ -1076,6 +1109,83 @@ ${playersData}
         moduloDopo: dopo.modulo,
         slotRimasti: st.mancanti[candidato.ruolo]
       };
+    }
+
+    /*
+     * Verdetto a un prezzo preciso. Gira a ogni battuta di freccia mentre segui
+     * il rilancio, quindi non ricalcola niente di pesante: usa il tetto gia'
+     * calcolato per la riga aperta e la distribuzione di chiusura del Monte
+     * Carlo, che e' un semplice conteggio.
+     */
+    function verdettoLive(prezzo, piano, st, mkt) {
+      const tetto = piano?.maxBid ?? 0;
+      const chiusure = piano?.monteCarlo?.chiusure ?? [];
+      // Quota di scenari in cui questa offerta basta a portarlo a casa.
+      let vinti = 0;
+      for (let i = 0; i < chiusure.length; i++) if (prezzo >= chiusure[i]) vinti++;
+      const vittoria = chiusure.length ? Math.round(100 * vinti / chiusure.length) : null;
+
+      const residuoDopo = st.residuo - prezzo;
+      const slotDopo = st.mancantiTot - 1;
+      const perSlot = slotDopo > 0 ? (residuoDopo / slotDopo) : 0;
+
+      let stato, testo, nota;
+      if (prezzo < 1) {
+        stato = 'neutro'; testo = 'Imposta un prezzo'; nota = '';
+      } else if (prezzo > st.capienza) {
+        stato = 'stop';
+        testo = 'Non puoi arrivarci';
+        nota = \`sforerebbe la capienza di \${st.capienza} cr: non resterebbe 1 credito per ognuno degli altri \${slotDopo} slot\`;
+      } else if (tetto < 1) {
+        stato = 'stop';
+        testo = 'Lascialo andare';
+        nota = 'nemmeno 1 credito e giustificato: i crediti rendono di piu sul resto della rosa';
+      } else if (prezzo <= tetto) {
+        stato = 'ok';
+        testo = \`Puoi salire, ancora \${tetto - prezzo} cr\`;
+        nota = \`resti sotto il prezzo di indifferenza (\${tetto} cr)\`;
+      } else {
+        stato = 'oltre';
+        testo = \`Sopra il tetto di \${prezzo - tetto} cr\`;
+        nota = \`prezzo di indifferenza \${tetto} cr: da qui in su stai scegliendo di risparmiare altrove\`;
+      }
+
+      return {
+        stato, testo, nota, vittoria, tetto,
+        residuoDopo, slotDopo,
+        perSlot: Number(perSlot.toFixed(1)),
+        mercato: mkt?.atteso ?? null
+      };
+    }
+
+    const STILE_VERDETTO = {
+      ok:     { barra: 'bg-emerald-500', testo: 'text-emerald-300', bordo: 'border-emerald-700/60 bg-emerald-950/30' },
+      oltre:  { barra: 'bg-amber-500',   testo: 'text-amber-300',   bordo: 'border-amber-700/60 bg-amber-950/30' },
+      stop:   { barra: 'bg-rose-500',    testo: 'text-rose-300',    bordo: 'border-rose-800/60 bg-rose-950/30' },
+      neutro: { barra: 'bg-slate-600',   testo: 'text-slate-300',   bordo: 'border-slate-700 bg-slate-900/40' }
+    };
+
+    function verdettoHtml(v) {
+      const st = STILE_VERDETTO[v.stato];
+      const scala = Math.max(v.tetto, v.mercato ?? 0, 1) * 1.6;
+      const pct = x => Math.max(0, Math.min(100, (x / scala) * 100));
+      const prezzo = v.residuoDopo === null ? 0 : 0;
+      return \`
+        <div class="rounded-xl border \${st.bordo} px-3 py-2 space-y-1.5">
+          <div class="flex items-baseline justify-between gap-3 flex-wrap">
+            <strong class="\${st.testo} text-base leading-tight">\${esc(v.testo)}</strong>
+            \${v.vittoria === null ? '' : \`<span class="text-[11px] text-slate-400">lo vinci nel <strong class="text-white tabular-nums">\${v.vittoria}%</strong> degli scenari</span>\`}
+          </div>
+          <p class="text-[10px] text-slate-400">\${esc(v.nota)}</p>
+          <div class="relative h-2 rounded-full bg-slate-900 border border-slate-800 overflow-hidden">
+            <span class="absolute inset-y-0 left-0 \${st.barra} opacity-30" style="width:\${pct(v.tetto)}%"></span>
+            <span class="absolute inset-y-0 w-0.5 bg-indigo-300" style="left:\${pct(v.tetto)}%" title="prezzo di indifferenza"></span>
+            \${v.mercato === null ? '' : \`<span class="absolute inset-y-0 w-0.5 bg-amber-300" style="left:\${pct(v.mercato)}%" title="prezzo di mercato"></span>\`}
+          </div>
+          <p class="text-[10px] text-slate-500 tabular-nums">
+            Se lo prendi: \${v.residuoDopo} cr per \${v.slotDopo} slot = <strong class="text-slate-300">\${v.perSlot} cr/slot</strong>
+          </p>
+        </div>\`;
     }
 
     function scopoDettaglio(scopo) {
@@ -1128,11 +1238,54 @@ ${playersData}
       PROFONDITA: { testo: 'Solo profondita', classe: 'text-slate-300' }
     };
 
+    /*
+     * Tetto esatto per ogni giocatore libero, non piu' un'euristica.
+     *
+     * La frontiera dipende solo dallo stato della rosa e dai prezzi stimati,
+     * non dai filtri: basta ricalcolarla quando cambia qualcosa. Servono cinque
+     * DP (la baseline piu' una per ruolo, con uno slot in meno), non una per
+     * giocatore, quindi il costo e' quello di una manciata di millisecondi per
+     * assegnazione invece che per riga.
+     */
+    const FRONTIERE_CACHE = { firma: null, dati: null };
+
+    function frontiere(st, mercato, asseg) {
+      // La firma deve contenere tutto cio' da cui la frontiera dipende: i costi
+      // stimati cambiano col numero di partecipanti, e i valori cambiano ogni
+      // volta che le regole vengono ritarate. Senza, cambiare lega dava un
+      // colpo di cache con i numeri della lega precedente.
+      const firma = [
+        VALUTAZIONI_VERSIONE, squadre.length, st.residuo,
+        RUOLI.map(r => st.mancanti[r]).join('-'), asseg.size
+      ].join('|');
+      if (FRONTIERE_CACHE.firma === firma) return FRONTIERE_CACHE.dati;
+
+      const budget = st.residuo;
+      const pool = PLAYERS.filter(p => !asseg.has(p.id));
+      const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
+      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiStagione ?? 0;
+
+      const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
+      const senzaSlot = {};
+      for (const r of RUOLI) {
+        if (st.mancanti[r] <= 0) continue;
+        senzaSlot[r] = frontieraCompletamento(
+          pool, { ...st.mancanti, [r]: st.mancanti[r] - 1 }, budget, costoPer, valorePer
+        );
+      }
+
+      const dati = { budget, baseline, valoreBaseline: baseline[budget], senzaSlot, valorePer };
+      FRONTIERE_CACHE.firma = firma;
+      FRONTIERE_CACHE.dati = dati;
+      return dati;
+    }
+
     function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap) {
       const prezzi = new Map();
       const mioMaxMap = new Map();
       const marginiMap = new Map();
       const semaforiMap = new Map();
+      const fr = frontiere(st, mercato, asseg);
 
       for (const p of PLAYERS) {
         if (asseg.has(p.id)) continue;
@@ -1152,30 +1305,28 @@ ${playersData}
         const prezzoConsigliato = Math.max(1, Math.min(mkt.atteso, st.capienza));
         prezzi.set(p.id, prezzoConsigliato);
 
-        // Integrazione rigorosa di Scarsita' e MVAR nel MAX BID
-        const scScore = scarsita?.[r]?.score ?? 50;
-        const tier = tierMap?.get(p.id) ?? { score: 50, premioSalto: 0 };
-        const scarcityMultiplier = 1 + (scScore / 100) * 0.07 + (tier.score / 100) * 0.15 + tier.premioSalto;
-
-        const mvar = mvarMap?.get(p.id);
-        const diffSeason = mvar?.diffSeason ?? 0;
-        const mvarBoost = 1 + Math.min(0.20, Math.max(-0.10, (diffSeason - 20) / 150));
-
-        const budgetRatio = (st.residuo / BUDGET) * (SLOT_TOT / Math.max(1, st.mancantiTot));
-        const roleNeedBoost = 0.85 + 0.30 * (st.mancanti[r] / TARGET[r]);
-        const rawMax = trueVal * Math.min(1.4, Math.max(0.65, budgetRatio)) * roleNeedBoost * scarcityMultiplier * mvarBoost;
-        const mioMax = Math.max(1, Math.min(st.capienza, Math.round(rawMax)));
+        // Prezzo di indifferenza esatto: la soglia oltre la quale gli stessi
+        // crediti rendono di piu' sul resto della rosa. Sostituisce il vecchio
+        // "tetto rapido", che moltiplicava cinque fattori tarati a mano e
+        // consigliava COMPRA a 56 crediti su un portiere da 30-40.
+        const mioMax = fr.senzaSlot[r]
+          ? tettoDaFrontiera(fr.valorePer(p), fr.senzaSlot[r], fr.valoreBaseline, fr.budget, st.capienza)
+          : 0;
         mioMaxMap.set(p.id, mioMax);
 
-        const margine = trueVal - mkt.atteso;
+        const margine = mioMax - mkt.atteso;
         marginiMap.set(p.id, margine);
 
         let sem = 'ATTENDI';
-        if (mkt.atteso > st.capienza || (p.tag.includes('RISCHIO') && margine < 0)) {
+        if (mioMax < 1 || mkt.atteso > st.capienza) {
           sem = 'LASCIA';
-        } else if (margine >= 3 && mioMax >= mkt.atteso) {
+        } else if (mkt.atteso <= mioMax) {
+          // Il mercato sta sotto il tuo tetto: e' un affare vero.
           sem = 'COMPRA';
-        } else if (margine <= -5) {
+        } else if (mkt.min <= mioMax) {
+          // Ci arrivi solo se l'asta resta nella parte bassa della forbice.
+          sem = 'ATTENDI';
+        } else {
           sem = 'LASCIA';
         }
         semaforiMap.set(p.id, sem);
@@ -1397,6 +1548,9 @@ ${playersData}
       const pianoAperto = candidatoAperto && !asseg.has(candidatoAperto.id)
         ? calcolaPianoCompletamento(st, candidatoAperto, asseg, mercato, and, tierMap)
         : null;
+
+      pianoLive = pianoAperto;
+      mercatoLive = mercato;
 
       const miaRosaPlayers = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
       const bestXI = trovaBestXI(miaRosaPlayers);
@@ -1822,9 +1976,12 @@ ${playersData}
                     <p class="text-[10px] text-slate-400">Calcolo esatto sugli slot rimasti: confronta questo acquisto con il miglior completamento della rosa ai prezzi live stimati. Monte Carlo simula l'incertezza dei rilanci avversari; i fantapunti sono una proxy finche' non importiamo proiezioni storiche/calendario.</p>
                   </div>\`)
                 : ''}
+              \${pianoAperto?.id === p.id && !pianoAperto.nonFattibile
+                ? \`<div id="verdetto-live" class="mb-3">\${verdettoHtml(verdettoLive(prezzo, pianoAperto, st, mkt))}</div>\`
+                : ''}
               <div class="flex flex-wrap items-end gap-3">
-                <label class="text-[10px] uppercase font-semibold text-slate-400">Prezzo pagato
-                  <input type="number" id="prezzo-input" min="1" value="\${prezzo}" class="mt-1 block w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-100 tabular-nums focus:outline-none focus:border-indigo-500">
+                <label class="text-[10px] uppercase font-semibold text-slate-400">Prezzo in asta
+                  <input type="number" id="prezzo-input" min="1" value="\${prezzo}" class="mt-1 block w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-lg font-bold text-slate-100 tabular-nums focus:outline-none focus:border-indigo-500">
                 </label>
                 <div class="flex flex-wrap gap-1.5">
                   \${squadre.map((sq, i) => {
@@ -1896,6 +2053,14 @@ ${playersData}
         const pCur = PER_ID.get(apertaRiga);
         input.addEventListener('input', () => {
           const val = Number(input.value) || 0;
+          // Il verdetto si aggiorna a ogni freccia: nessun ricalcolo pesante,
+          // il tetto e la distribuzione dei rilanci sono gia' calcolati.
+          const box = document.getElementById('verdetto-live');
+          if (box && pianoLive && !pianoLive.nonFattibile) {
+            box.innerHTML = verdettoHtml(
+              verdettoLive(val, pianoLive, statoSquadra(squadre[0]), mercatoLive?.get(apertaRiga))
+            );
+          }
           if (pCur) {
             const r = chiPuoRilanciare(pCur.ruolo, val);
             const qEl = document.getElementById('radar-quota');
