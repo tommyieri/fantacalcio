@@ -335,6 +335,44 @@ function check(nome, atteso, ottenuto) {
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
   await page.click('[data-chiudi]');
 
+  console.log('\n— dati Fantalgoritmo —');
+  const fa = await page.evaluate(() => {
+    const asseg = assegnazioni(), and = andamento(asseg);
+    const mkt = prezziMercato(asseg, and);
+    const conPrezzo = PLAYERS.filter(p => p.fanta && p.fanta.mercato > 0);
+    // Il nostro prezzo stimato deve inseguire quello misurato, non inventarne un altro.
+    // Solo i liberi: chi e' gia' stato assegnato non ha piu' un prezzo di mercato.
+    const scarti = conPrezzo
+      .filter(p => mkt.has(p.id))
+      .map(p => Math.abs(mkt.get(p.id).atteso - p.fanta.mercato))
+      .sort((a, b) => a - b);
+    const mediano = scarti[Math.floor(scarti.length / 2)];
+    const conStorico = PLAYERS.filter(p => Array.isArray(p.storico) && p.storico.length);
+    // La media voto di chi ha storico deve venire dallo storico, non dalla curva sull'FVM.
+    const primo = conStorico[0];
+    const attesa = primo.storico.length > 1
+      ? (0.7 * primo.storico[0].mv + 0.3 * primo.storico[1].mv) / 1
+      : primo.storico[0].mv;
+    return {
+      conPrezzo: conPrezzo.length,
+      conStorico: conStorico.length,
+      scartoMediano: mediano,
+      mvDaStorico: Math.abs(VALUTAZIONI_CACHE.get(primo.id).mv - attesa) < 0.02,
+      // I punti sopra il rimpiazzo non premiano piu' i giocatori da un credito.
+      vorTopSopraScarso: (() => {
+        const A = PLAYERS.filter(x => x.ruolo === 'A');
+        const top = A.slice().sort((a, b) => (b.fanta?.mercato ?? 0) - (a.fanta?.mercato ?? 0))[0];
+        const scarso = A.slice().sort((a, b) => (a.fanta?.mercato ?? 99) - (b.fanta?.mercato ?? 99))[0];
+        return VALUTAZIONI_CACHE.get(top.id).puntiVor > VALUTAZIONI_CACHE.get(scarso.id).puntiVor;
+      })()
+    };
+  });
+  check('prezzi d asta agganciati a quasi tutto il listone', true, fa.conPrezzo > 500);
+  check('storico Serie A su almeno 350 giocatori', true, fa.conStorico >= 350);
+  check('il prezzo stimato insegue quello misurato', true, fa.scartoMediano <= 3);
+  check('la media voto viene dallo storico', true, fa.mvDaStorico);
+  check('i punti sopra il rimpiazzo premiano il top, non il giocatore da 1 credito', true, fa.vorTopSopraScarso);
+
   console.log('\n— infortuni e verdetto live —');
   const inf = await page.evaluate(() => {
     const z = PLAYERS.find(x => x.nome === 'Zaniolo');

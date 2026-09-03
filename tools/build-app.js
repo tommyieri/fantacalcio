@@ -708,10 +708,68 @@ ${playersData}
           tit = Math.min(tit, 0.25 + 0.55 * (p.formazione.probabilita / 100));
         }
         if (r === 'P' && p.sos?.gerarchiaPortiere === 'PRIMO') tit = Math.max(tit, 0.95);
-        // Un infortunio non cambia quanto vale il giocatore quando gioca:
-        // cambia quante volte gioca. Quindi agisce sulle presenze, non sulla
-        // media voto — ed e' il motivo per cui uno fermo fino a novembre non
-        // puo' valere il prezzo di uno che c'e' da subito.
+        /*
+         * Media voto e bonus: dallo storico vero quando c'e'.
+         *
+         * Due stagioni di Serie A pesate 70/30 verso la piu' recente. La
+         * fantamedia meno la media voto e' esattamente il bonus netto, quindi
+         * non serve modellarlo: rigori, gol, assist e cartellini sono gia'
+         * dentro il numero, misurati invece che dedotti dall'FVM.
+         *
+         * Chi non compare nello storico non ha giocato in Serie A di recente.
+         * La guida dell'asta e' netta su questo — non pagarli piu' del dovuto —
+         * quindi si ripiega sulle curve derivate dal listone e lo si dichiara.
+         */
+        let mv = 6.00;
+        let bonusNet = 0;
+        let daStorico = false;
+        let presenzeStoriche = null;
+
+        if (Array.isArray(p.storico) && p.storico.length) {
+          const pesi = [0.7, 0.3];
+          let pesoTot = 0, mvSomma = 0, fmSomma = 0, pgSomma = 0;
+          p.storico.forEach((st, i) => {
+            const peso = pesi[i] ?? 0;
+            if (!peso || !(st.mv > 0)) return;
+            pesoTot += peso;
+            mvSomma += peso * st.mv;
+            fmSomma += peso * (st.fm ?? st.mv);
+            pgSomma += peso * (st.pg ?? 0);
+          });
+          if (pesoTot > 0) {
+            mv = mvSomma / pesoTot;
+            bonusNet = (fmSomma / pesoTot) - mv;
+            presenzeStoriche = Math.min(1, (pgSomma / pesoTot) / 38);
+            daStorico = true;
+          }
+        }
+
+        if (!daStorico && r === 'P') {
+          mv = 5.85 + 0.35 * Math.min(1, p.fvm / 60);
+          bonusNet = -(1.60 - 0.70 * Math.min(1, p.fvm / 60)); // malus gol subiti tra -0.90 e -1.60
+        } else if (!daStorico && r === 'D') {
+          mv = 5.80 + 0.50 * Math.min(1, p.fvm / 150);
+          bonusNet = 0.05 + 0.55 * Math.min(1, p.fvm / 200);
+        } else if (!daStorico && r === 'C') {
+          mv = 5.85 + 0.50 * Math.min(1, p.fvm / 150);
+          bonusNet = 0.08 + 0.95 * Math.min(1, p.fvm / 180);
+        } else if (!daStorico && r === 'A') {
+          mv = 5.85 + 0.55 * Math.min(1, p.fvm / 200);
+          bonusNet = 0.15 + 1.85 * Math.min(1, p.fvm / 260);
+        }
+
+        // Piazzati SOS Fanta: primo rigorista e battitori principali aumentano
+        // l'atteso; le priorita' successive pesano meno e non sovrascrivono FVM.
+        // Le presenze vere dell'anno scorso correggono il prior editoriale, con
+        // lo stesso dosaggio di fishertiger: 65% quello che si dice adesso,
+        // 35% quello che ha fatto davvero. Va qui e non prima, perche' prima
+        // presenzeStoriche non e' ancora stato calcolato.
+        if (presenzeStoriche !== null) tit = 0.65 * tit + 0.35 * presenzeStoriche;
+
+        // L'infortunio e' l'ultima parola: viene dopo lo storico, perche' le
+        // presenze dell'anno scorso non sanno che oggi il giocatore e' fermo.
+        // Agisce sulle presenze e non sulla media voto — uno vale quanto vale
+        // quando gioca, il problema e' quante volte gioca.
         const saltate = giornateSaltate(p);
         if (saltate > 0) {
           tit *= Math.max(0, (38 - saltate) / 38);
@@ -722,26 +780,9 @@ ${playersData}
           tit *= 0.70;
         }
 
-        // Media Voto base e Bonus attesi modellati con continuita' monotonicamente dal listone
-        let mv = 6.00;
-        let bonusNet = 0;
-        if (r === 'P') {
-          mv = 5.85 + 0.35 * Math.min(1, p.fvm / 60);
-          bonusNet = -(1.60 - 0.70 * Math.min(1, p.fvm / 60)); // malus gol subiti tra -0.90 e -1.60
-        } else if (r === 'D') {
-          mv = 5.80 + 0.50 * Math.min(1, p.fvm / 150);
-          bonusNet = 0.05 + 0.55 * Math.min(1, p.fvm / 200);
-        } else if (r === 'C') {
-          mv = 5.85 + 0.50 * Math.min(1, p.fvm / 150);
-          bonusNet = 0.08 + 0.95 * Math.min(1, p.fvm / 180);
-        } else if (r === 'A') {
-          mv = 5.85 + 0.55 * Math.min(1, p.fvm / 200);
-          bonusNet = 0.15 + 1.85 * Math.min(1, p.fvm / 260);
-        }
-
-        // Piazzati SOS Fanta: primo rigorista e battitori principali aumentano
-        // l'atteso; le priorita' successive pesano meno e non sovrascrivono FVM.
-        const piazzati = p.sos?.piazzati ?? {};
+        // Se il bonus viene dallo storico i rigori sono gia' dentro la fantamedia:
+        // sommarli di nuovo li conterebbe due volte.
+        const piazzati = daStorico ? {} : (p.sos?.piazzati ?? {});
         if (piazzati.RIGORI === 1) bonusNet += r === 'A' || r === 'C' ? 0.32 : 0.18;
         else if (piazzati.RIGORI === 2) bonusNet += r === 'A' || r === 'C' ? 0.12 : 0.06;
         if (piazzati.PUNIZIONI === 1) bonusNet += 0.08;
@@ -770,9 +811,35 @@ ${playersData}
         const valorePuro = Math.max(1, Math.round(rawVal));
 
         VALUTAZIONI_CACHE.set(p.id, {
-          tit, mv: Number(mv.toFixed(2)), fma, puntiMatch, presenzeAttese, puntiStagione, valorePuro,
+          tit, mv: Number(mv.toFixed(2)), fma, puntiMatch, presenzeAttese, puntiStagione, valorePuro, daStorico,
+          puntiVor: 0,
           probReteInviolata: Number(probReteInviolata.toFixed(2)), puntiReteInviolata: Number(puntiReteInviolata.toFixed(2))
         });
+      }
+
+      /*
+       * Punti sopra il rimpiazzo.
+       *
+       * puntiStagione e' presenze per fantamedia, e la fantamedia parte da 6:
+       * un giocatore da 1 credito che scende in campo produce comunque duecento
+       * punti. Sono punti che prende chiunque, quindi usarli per scegliere fa
+       * sembrare qualsiasi campione un pessimo affare — con quel criterio la
+       * rosa migliore era ventisei giocatori da 1 credito.
+       *
+       * Cio' che distingue una rosa e' quanto sta SOPRA il rimpiazzo, cioe'
+       * sopra il profilo che rimedi comunque. Il rimpiazzo di un ruolo e' il
+       * giocatore che resta appena fuori dagli slot della lega.
+       */
+      for (const r of RUOLI) {
+        const delRuolo = PLAYERS.filter(p => p.ruolo === r)
+          .sort((a, b) => (VALUTAZIONI_CACHE.get(b.id)?.puntiStagione ?? 0) - (VALUTAZIONI_CACHE.get(a.id)?.puntiStagione ?? 0));
+        const rimpiazzo = delRuolo[Math.min(delRuolo.length - 1, roleStats[r].nDrafted)];
+        const fmaRimpiazzo = VALUTAZIONI_CACHE.get(rimpiazzo?.id)?.fma ?? 6.0;
+        for (const p of delRuolo) {
+          const v = VALUTAZIONI_CACHE.get(p.id);
+          v.fmaRimpiazzo = Number(fmaRimpiazzo.toFixed(2));
+          v.puntiVor = Number((v.presenzeAttese * Math.max(0, v.fma - fmaRimpiazzo)).toFixed(1));
+        }
       }
     }
 
@@ -951,6 +1018,40 @@ ${playersData}
       return Math.max(1, p.fvm * Math.max(0, (38 - saltate) / 38));
     }
 
+    /*
+     * Ancora di prezzo: quanto il giocatore viene pagato davvero.
+     *
+     * Fantalgoritmo misura il prezzo medio su molte aste, e la somma dei
+     * giocatori contesi fa il 98% del monte crediti di una lega da dieci
+     * partecipanti e 500 crediti: e' gia' un'economia chiusa, quindi si usa
+     * come peso senza riscalarla. Prima questo peso era l'FVM del listone, che
+     * e' una stima di valore e non un prezzo, ed e' il motivo per cui i numeri
+     * uscivano lontani da quello che l'asta faceva davvero.
+     *
+     * I pochi giocatori senza prezzo misurato ripiegano sull'FVM, convertito
+     * col rapporto mediano prezzo/FVM del loro ruolo: cosi' restano sulla
+     * stessa scala invece di falsare la somma.
+     */
+    const RAPPORTO_PREZZO_FVM = (() => {
+      const per = {};
+      for (const r of RUOLI) {
+        const rapporti = PLAYERS
+          .filter(p => p.ruolo === r && p.fanta?.mercato > 0 && p.fvm > 0)
+          .map(p => p.fanta.mercato / p.fvm)
+          .sort((a, b) => a - b);
+        per[r] = rapporti.length ? rapporti[Math.floor(rapporti.length / 2)] : 1;
+      }
+      return per;
+    })();
+
+    function ancoraPrezzo(p) {
+      const misurato = p.fanta?.mercato;
+      const base = misurato > 0 ? misurato : p.fvm * (RAPPORTO_PREZZO_FVM[p.ruolo] ?? 1);
+      const saltate = giornateSaltate(p);
+      const scala = BUDGET / 500;  // i prezzi misurati sono su lega da 500
+      return Math.max(0.5, base * scala * (saltate > 0 ? Math.max(0, (38 - saltate) / 38) : 1));
+    }
+
     function prezziMercato(asseg, and) {
       const stati = squadre.map(statoSquadra);
       const residuoLega = stati.reduce((s, st) => s + st.residuo, 0);
@@ -969,16 +1070,16 @@ ${playersData}
       const mercato = new Map();
       for (const r of RUOLI) {
         const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id))
-          .sort((a, b) => fvmDisponibile(b) - fvmDisponibile(a));
+          .sort((a, b) => ancoraPrezzo(b) - ancoraPrezzo(a));
         const n = slotRimasti[r];
         const contesi = new Set(liberi.slice(0, n).map(p => p.id));
-        const somma = liberi.slice(0, n).reduce((s, p) => s + fvmDisponibile(p), 0) || 1;
+        const somma = liberi.slice(0, n).reduce((s, p) => s + ancoraPrezzo(p), 0) || 1;
         const monte = Math.max(0, grezzo[r] * scala - n);
         const acquirenti = stati.filter(st => st.mancanti[r] > 0).length;
         const confidenza = and[r].confidenza;
 
         for (const p of liberi) {
-          const atteso = contesi.has(p.id) ? 1 + (fvmDisponibile(p) / somma) * monte : 1;
+          const atteso = contesi.has(p.id) ? 1 + (ancoraPrezzo(p) / somma) * monte : 1;
           const ampiezza = 0.12 + (1 - confidenza) * 0.18 + Math.min(0.08, acquirenti * 0.01);
           mercato.set(p.id, {
             atteso: Math.max(1, Math.round(atteso)),
@@ -1292,6 +1393,37 @@ ${playersData}
         </div>\`;
     }
 
+    /*
+     * I numeri misurati, accanto ai nostri.
+     *
+     * Il prezzo medio d'asta e' quanto un giocatore viene pagato davvero su
+     * molte aste; il consigliato e' quanto Fantalgoritmo dice di pagarlo. Sono
+     * due riferimenti indipendenti dal nostro calcolo: metterli a fianco fa
+     * vedere subito quando il piano rosa e il mercato non sono d'accordo.
+     */
+    function riferimentiFantalgoritmo(p) {
+      const f = p.fanta;
+      if (!f) return '';
+      const voci = [];
+      if (f.mercato) voci.push(['Media aste reali', Math.round(f.mercato) + ' cr', 'text-slate-200']);
+      if (f.consigliato) voci.push(['Consigliato Fantalgoritmo', Math.round(f.consigliato) + ' cr', 'text-sky-300']);
+      if (f.ia) voci.push(['Indice appetibilita', f.ia.toFixed(1), 'text-slate-200']);
+      if (f.fascia) voci.push(['Fascia', f.fascia, 'text-slate-200']);
+      if (!voci.length) return '';
+      const val = VALUTAZIONI_CACHE.get(p.id);
+      const senzaStorico = val && !val.daStorico;
+      return \`
+        <div class="pt-2 border-t border-slate-800">
+          <div class="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
+            \${voci.map(([k, v, c]) => \`<span class="text-slate-500">\${esc(k)}: <strong class="\${c} tabular-nums">\${esc(v)}</strong></span>\`).join('')}
+          </div>
+          \${senzaStorico
+            ? '<p class="text-[10px] text-amber-400 mt-1">Nessuno storico in Serie A: media voto e presenze sono stimate dal listone, non misurate.</p>'
+            : ''}
+          \${f.accoppiata ? \`<p class="text-[10px] text-slate-500 mt-1">Accoppiata consigliata: \${esc(f.accoppiata)}</p>\` : ''}
+        </div>\`;
+    }
+
     function scopoDettaglio(scopo) {
       const pezzi = [];
       if (scopo.codice === 'TITOLARE') {
@@ -1367,7 +1499,7 @@ ${playersData}
       const budget = st.residuo;
       const pool = PLAYERS.filter(p => !asseg.has(p.id));
       const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
-      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiStagione ?? 0;
+      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiVor ?? 0;
 
       const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
       const senzaSlot = {};
@@ -2017,7 +2149,8 @@ ${playersData}
              </td>\`
           : \`<td class="p-2.5 text-center align-top space-y-1">
                \${semaforoBadge}
-               <div class="text-[10px] text-slate-400 tabular-nums">Tetto rapido <strong class="\${mioMax >= mkt.atteso ? 'text-emerald-400' : 'text-rose-400'} font-bold">\${mioMax} cr</strong></div>
+               <div class="text-[10px] text-slate-400 tabular-nums">Il tuo tetto <strong class="\${mioMax >= mkt.atteso ? 'text-emerald-400' : 'text-rose-400'} font-bold">\${mioMax} cr</strong>\${
+                 p.fanta?.consigliato ? \` · Fantalgoritmo <strong class="text-sky-300">\${Math.round(p.fanta.consigliato)}</strong>\` : ''}</div>
                <div class="flex items-center justify-center gap-2 text-[9px] text-slate-500 tabular-nums">
                  <span title="Fantapunti stagionali sopra il rimpiazzo del ruolo">+\${mvar.diffSeason} pt vs rimpiazzo</span>
                  <span>•</span>
@@ -2072,6 +2205,7 @@ ${playersData}
                 ? '<div class="mb-3 text-[11px] text-rose-300 bg-rose-950/40 border border-rose-900/60 rounded-lg px-3 py-2">Piano di completamento non fattibile con le stime di mercato correnti: conserva crediti o cerca alternative low-cost.</div>'
                 : \`<div class="mb-3 bg-indigo-950/35 border border-indigo-900/60 rounded-xl p-2.5 space-y-2.5">
                     \${fasciaPrezzo(pianoAperto, mercato.get(p.id))}
+                    \${riferimentiFantalgoritmo(p)}
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
                       <div><span class="text-slate-500 block">A cosa ti serve</span><strong class="\${ETICHETTA_SCOPO[pianoAperto.scopo.codice].classe}">\${ETICHETTA_SCOPO[pianoAperto.scopo.codice].testo}</strong><span class="block text-[10px] text-slate-400">\${scopoDettaglio(pianoAperto.scopo)}</span></div>
                       <div><span class="text-slate-500 block">Vantaggio al prezzo mercato</span><strong class="\${(pianoAperto.vantaggioAlMercato ?? -1) >= 0 ? 'text-emerald-300' : 'text-rose-300'} text-base tabular-nums">\${pianoAperto.vantaggioAlMercato === null ? 'non fattibile' : (pianoAperto.vantaggioAlMercato >= 0 ? '+' : '') + pianoAperto.vantaggioAlMercato + ' pt'}</strong></div>

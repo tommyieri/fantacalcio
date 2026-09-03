@@ -1,0 +1,531 @@
+nome	squadra	ruolo	qt	ia	fascia	note	valore	sos	prezzoMedioAste	prezzoStat	prezzoGolMax	fv	pg	media	fmedia	gol	assist	amm	golSubiti	accoppiata
+Svilar	Roma	P	19	81.51	0° TOP A	Titolare		Mod.	52.35	47.5		0.85	38	6.26	5.45				31	Lazio Napoli Juventus
+Carnesecchi	Atalanta	P	17	79.9	0° TOP A	Mod.		Titolare	42.25	47.5		0.84	37	6.36	5.58				35	Frosinone Bologna Cagliari
+Martinez Jo.	Inter	P	17	79.9	0° TOP B	Mod.		Imbattibilità	45.7	42.5		0.75	5	6	5.2				4	Milan Sassuolo Juventus
+Vicario	Juventus	P	17	79.9	0° TOP B	titolare		mod.	46.05	42.5										Torino Genoa Roma
+Butez	Como	P	15	78.3	1° Fascia A	Mod.		Titolare	39.5	35		0.83	38	6.07	5.37				29	Fiorentina Frosinone Genoa
+Maignan	Milan	P	15	78.3	1° Fascia A	Titolare		Mod.	44.6	35		0.81	37	6.26	5.42				35	Inter Parma Cagliari
+De Gea	Fiorentina	P	11	74.47	1° Fascia A	Titolare		Mod.	21.05	35		0.77	37	6.24	5				49	Cagliari Como Lazio
+Meret	Napoli	P	11	74.47	1° Fascia B	Mod.			39.3	30		0.76	11	6.23	5.18				12	Roma Bologna Frosinone
+Skorupski	Bologna	P	10	73.3	2° Fascia A	mod.		pararigori	11.6	12.5		0.74	18	6.19	5.28				15	Atalanta Lecce Napoli
+Caprile	Cagliari	P	10	73.3	2° Fascia A	Mod.		Titolare	8.1	12.5		0.75	38	6.29	4.87				53	Atalanta Fiorentina Venezia
+Mandas	Lazio	P	10	73.3	2° Fascia B	Mod.		Titolare	16.35	10		0. N.D.	0	0	0				0	Roma Genoa Torino
+Okoye	Udinese	P	9	72	2° Fascia B	Mod.		Infortuni	13.5	10		0.73	30	6.07	5.08				32	Genoa Lecce Milan
+Perri	Torino	P	9	72	2° Fascia C	Scommessa			2.4	7.5										Juventus Lazio Lecce
+Sanchez Ro.	Como	P	8	70.48	2° Fascia C				2.9	7.5										Fiorentina Frosinone Genoa
+Bijlow	Genoa	P	8	70.48	3° Fascia	Titolare			5.8	5		0.74	16	6.06	4.78				20	Juventus Bologna Como
+Falcone	Lecce	P	8	70.48	3° Fascia	Titolare		Mod.	7.7	5		0.77	38	6.41	5.22				50	Parma Bologna Fiorentina
+Muric	Sassuolo	P	7	68.81	3° Fascia	Scommessa			3.8	5		0.73	32	6.08	4.77				43	Inter Parma Bologna
+Daffara	Parma	P	6	66.78	3° Fascia				1.25	5										Lecce Sassuolo Milan
+Stankovic F.	Venezia	P	6	66.78	3° Fascia	Titolare		Mod.	2.1	5										Cagliari Monza Bologna
+Palmisani	Frosinone	P	5	64.25	3° Fascia	Scommessa			1.2	5										Atalanta Como Napoli
+Milinkovic-Savic V.	Napoli	P	5	64.25	3° Fascia	Imbattibilità		Mod.	5.7	5		0.82	27	6.2	5.65				24	Roma Bologna Frosinone
+Thiam	Monza	P	4	60.96	R	Scommessa			1.15	1										Lecce Venezia Atalanta
+Desplanches	Frosinone	P	2	49.12	R				0.9	1										Atalanta Como Napoli
+Provedel	Inter	P	2	49.12	R	Mod.		Jolly	5.65	1		0.8	27	6.26	5.35				27	Milan Sassuolo Juventus
+Corvi	Parma	P	2	49.12	R	Mod.			2.2	1		0.77	17	6.18	5.09				18	Lecce Sassuolo Milan
+Ghidotti	Parma	P	1	35.69	R				0.85	1										Lecce Sassuolo Milan
+Sportiello	Atalanta	P	1	35.69	R				0.9	1		0.71	1	5.5	4.5				1	Frosinone Bologna Cagliari
+Happonen	Bologna	P	1	35.69	R				0.9	1										Atalanta Lecce Napoli
+Pessina Mas.	Bologna	P	1	35.69	R				0.9	1		0.77	4	6.12	5.62				2	Atalanta Lecce Napoli
+Sherri	Cagliari	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Atalanta Fiorentina Venezia
+Tornqvist	Monza	P	1	35.69	R	Scommessa			0.9	1		0. N.D.	0	0	0				0	Lecce Venezia Atalanta
+Vigorito	Como	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Fiorentina Frosinone Genoa
+Christensen O.	Fiorentina	P	1	35.69	R				0.9	1		0.82	1	7.5	6.5				1	Cagliari Como Lazio
+Lezzerini	Fiorentina	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Cagliari Como Lazio
+Lolic	Frosinone	P	1	35.69	R				0.85	1										Atalanta Como Napoli
+Sommariva	Genoa	P	1	35.69	R				0.9	1		0.69	2	5.75	3.75				4	Juventus Bologna Como
+Stolz	Genoa	P	1	35.69	R				0.9	1										Juventus Bologna Como
+Di Gennaro	Inter	P	1	35.69	R				0.9	1		0.74	1	6	5				1	Milan Sassuolo Juventus
+Pinsoglio	Juventus	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Torino Genoa Roma
+Motta	Lazio	P	1	35.69	R	Jolly		Mod.	1	1		0.75	9	6	5.17				10	Roma Genoa Torino
+Renzetti	Lazio	P	1	35.69	R				0.9	1										Roma Genoa Torino
+Terracciano	Milan	P	1	35.69	R	Mod.			0.9	1		0.78	2	6	6				0	Inter Parma Cagliari
+Torriani	Milan	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Inter Parma Cagliari
+Strajnar	Monza	P	1	35.69	R				0.8	1										Lecce Venezia Atalanta
+Contini	Napoli	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Roma Bologna Frosinone
+De Marzi	Roma	P	1	35.69	R				0.9	1										Lazio Napoli Juventus
+Gollini	Roma	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Lazio Napoli Juventus
+Russo A.	Sassuolo	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Inter Parma Bologna
+Turati	Sassuolo	P	1	35.69	R	Mod.		Infortuni	0.9	1		0.75	6	6.17	5				7	Inter Parma Bologna
+Mascardi	Torino	P	1	35.69	R	Jolly			1.3	1										Juventus Lazio Lecce
+Paleari	Torino	P	1	35.69	R				1.25	1		0.71	29	6.09	4.52				45	Juventus Lazio Lecce
+Siviero	Torino	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Juventus Lazio Lecce
+Padelli	Udinese	P	1	35.69	R				0.9	1		0.75	2	6.25	5.25				2	Genoa Lecce Milan
+Piana	Udinese	P	1	35.69	R				0.9	1										Genoa Lecce Milan
+Grandi	Venezia	P	1	35.69	R				0.85	1										Cagliari Monza Bologna
+Pozzi	Venezia	P	1	35.69	R				0.85	1										Cagliari Monza Bologna
+Satalino	Sassuolo	P	1	35.69	R				0.85	1		0. N.D.	0	0	0				0	Inter Parma Bologna
+Penev	Lecce	P	1	35.69	R				0.85	1										Parma Bologna Fiorentina
+Pisseri	Frosinone	P	1	35.69	R				0.85	1										Atalanta Como Napoli
+Radunovic	Cagliari	P	1	35.69	R				0.9	1		0. N.D.	0	0	0				0	Atalanta Fiorentina Venezia
+Montipò	Venezia	P	1	35.69	R	mod.		jolly	0.95	1		0.74	35	6.2	4.94				54	Cagliari Monza Bologna
+Bleve	Lecce	P	1	35.69	R				0.9	1										Parma Bologna Fiorentina
+Grabara	Juventus	P	1	35.69	R	jolly			1.35	1										Torino Genoa Roma
+Mrozek	Udinese	P	1	35.69	R				0.9	1										Genoa Lecce Milan
+Dimarco	Inter	D	31	89.28		Mod.	Top	Calci Piazzati	67.15	63.7	30.88	0.92	35	6.6	7.64	7	17	3		Milan Sassuolo Juventus
+Wesley	Roma	D	18	80.64		Titolare	Top	Mod.	40.2	24.78	22.06	0.68	30	6.12	6.47	5	0	5		Lazio Napoli Juventus
+Molina N.	Roma	D	18	80.64		Titolare	Top	Bonus	32.55	Prezzo N.D.										Lazio Napoli Juventus
+Bremer	Juventus	D	16	79.2		Titolare	Top	Mod.	31.2	22.41	17.64	0.71	26	6.33	6.81	4	3	5		Torino Genoa Roma
+Mancini	Roma	D	16	79.2		Titolare	Top	Mod.	23.65	23.08	17.64	0.73	36	6.25	6.51	4	2	9		Lazio Napoli Juventus
+Akanji	Inter	D	15	78.3		Mod.	Top	Titolare	24.8	19.54	8.82	0.67	32	6.28	6.41	2	0	4		Milan Sassuolo Juventus
+Rrahmani	Napoli	D	15	78.3		Mod.	Top	Infortuni	20.95	17.97	8.82	0.61	21	6.24	6.45	2	0	3		Roma Bologna Frosinone
+Bastoni	Inter	D	14	77.42		Titolare	Top	Mod.	26.65	16.65	4.41	0.61	28	6.2	6.34	1	4	6		Milan Sassuolo Juventus
+Kalulu	Juventus	D	14	77.42		Mod.	Semi-Top	Titolare	21.25	18.48	8.82	0.68	37	6.14	6.35	2	4	2		Torino Genoa Roma
+Pavlovic	Milan	D	14	77.42		Mod.	Semi-Top	Bonus	20.8	20.76	22.06	0.77	34	6.24	6.62	5	0	4		Inter Parma Cagliari
+Gila	Milan	D	13	76.44		Titolare	Semi-Top	Mod.	18.5	13.99	0	0.56	31	6.03	5.95	0	0	3		Inter Parma Cagliari
+N'Dicka	Roma	D	13	76.44		Cartellini	Semi-Top	Mod.	16.9	16.86	13.23	0.68	31	6.08	6.32	3	1	5		Lazio Napoli Juventus
+Solet	Udinese	D	13	76.44		Mod.	Top	Titolare	23.45	19.08	13.23	0.77	34	6.18	6.4	3	1	1		Genoa Lecce Milan
+Bisseck	Inter	D	12	75.48		Bonus	Semi-Top	Mod.	17.05	15.08	13.23	0.67	23	6.22	6.65	3	2	2		Milan Sassuolo Juventus
+Stones	Inter	D	12	75.48					13.25	Prezzo N.D.										Milan Sassuolo Juventus
+Di Lorenzo	Napoli	D	12	75.48		Mod.	Semi-Top	Bonus	21.35	14.54	8.82	0.64	26	6.08	6.33	2	1	1		Roma Bologna Frosinone
+Ostigard	Genoa	D	11	74.47		Cartellini	Semi-Top	Bonus	16.35	14.86	22.06	0.73	30	6.13	6.52	5	0	7		Juventus Bologna Como
+Hermoso	Roma	D	11	74.47		Cartellini	Terza	Mod.	9.3	13.26	13.23	0.65	27	6.17	6.41	3	2	9		Lazio Napoli Juventus
+Spence	Inter	D	11	74.47		Bonus	Semi-Top	Scommessa	20.65	Prezzo N.D.										Milan Sassuolo Juventus
+Scalvini	Atalanta	D	10	73.3		Cartellini	Semi-Top	Infortuni	9.7	12.06	13.23	0.66	24	6.06	6.44	3	1	2		Frosinone Bologna Cagliari
+Ramon	Como	D	10	73.3		Mod.	Semi-Top	Titolare	16.75	10.96	8.82	0.6	32	6.16	6.14	2	0	11		Fiorentina Frosinone Genoa
+Chalobah T.	Como	D	10	73.3		Scommessa	Semi-Top	Bonus	16.4	Prezzo N.D.										Fiorentina Frosinone Genoa
+Dodò	Fiorentina	D	9	72		Bonus	jolly	Infortuni	4.1	10.23	4.41	0.63	36	5.99	6.03	1	2	7		Cagliari Como Lazio
+Vasquez	Genoa	D	9	72		Titolare	Terza	Cartellini	7.95	10.59	4.41	0.65	36	6.08	6.14	1	0	2		Juventus Bologna Como
+Vojvoda	Udinese	D	9	72		Bonus	Terza	Mod.	12	10.35	8.82	0.64	27	6.02	6.24	2	1	2		Genoa Lecce Milan
+Kamara H.	Udinese	D	9	72		Inaffidabile	Quarta		6.4	8.94	0	0.55	26	5.88	5.87	0	2	5		Genoa Lecce Milan
+Zappacosta	Atalanta	D	8	70.48		Bonus	Semi-Top	Infortuni	9.5	9.98	13.23	0.71	35	6.06	6.3	3	1	3		Frosinone Bologna Cagliari
+Miranda J.	Bologna	D	8	70.48		Bonus	Terza	Mod.	8.55	8.67	4.41	0.61	31	6	6.1	1	3	6		Atalanta Lecce Napoli
+Celik	Juventus	D	8	70.48		Mod.	Terza	Jolly	8.15	8.74	4.41	0.62	32	6.17	6.27	1	2	2		Torino Genoa Roma
+Cambiaso	Juventus	D	8	70.48		Cartellini	jolly	Titolare	11.25	9.6	13.23	0.68	36	5.81	5.99	3	4	3		Torino Genoa Roma
+Doekhi	Lazio	D	8	70.48			Terza		4.1	Prezzo N.D.										Roma Genoa Torino
+Tiago Gabriel	Lecce	D	8	70.48		Scommessa	Quarta	Titolare	5.35	9.22	8.82	0.65	36	6	6.01	2	0	7		Parma Bologna Fiorentina
+Bartesaghi	Milan	D	8	70.48		Mod.	Terza		7.4	9.11	8.82	0.65	31	5.97	6.05	2	0	3		Inter Parma Cagliari
+Spinazzola	Napoli	D	8	70.48		Infortuni	Semi-Top	Mod.	11.4	9.96	13.23	0.71	30	6.17	6.55	3	3	1		Roma Bologna Frosinone
+Delprato	Parma	D	8	70.48		Titolare	Quarta	Bonus	6.25	9.23	8.82	0.66	35	5.91	6.01	2	0	5		Lecce Sassuolo Milan
+Valeri	Parma	D	8	70.48		Bonus	Semi-Top	Mod.	7.85	8.72	0	0.62	34	6.06	6.09	0	2	2		Lecce Sassuolo Milan
+Koulierakis	Roma	D	8	70.48			jolly		4.25	Prezzo N.D.										Lazio Napoli Juventus
+Comuzzo	Torino	D	8	70.48		Cartellini	titolare	Mod.	3.25	8.04	4.41	0.57	24	5.75	5.75	1	0	2		Juventus Lazio Lecce
+Couto	Como	D	8	70.48		Scommessa	Terza	Bonus	13.55	Prezzo N.D.										Fiorentina Frosinone Genoa
+Theate	Bologna	D	8	70.48		Titolare	Quarta	Bonus	3.25	Prezzo N.D.										Atalanta Lecce Napoli
+Diego Carlos	Parma	D	8	70.48		Cartellini	Quarta	Mod.	2.35	Prezzo N.D.										Lecce Sassuolo Milan
+Hien	Atalanta	D	7	68.81		Cartellini	Scommessa	Mod.	1.7	7.05	4.41	0.59	28	5.91	5.86	1	0	5		Frosinone Bologna Cagliari
+Lucumì	Juventus	D	7	68.81		Mod.	jolly	Cartellini	9.35	7.05	4.41	0.59	28	5.88	5.89	1	0	5		Torino Genoa Roma
+Zortea	Bologna	D	7	68.81		Mod.	Quarta	Jolly	3.95	6.94	0	0.58	28	5.86	5.89	0	2	2		Atalanta Lecce Napoli
+Mina	Cagliari	D	7	68.81		Titolare	Quarta	Bonus	4.4	7.24	8.82	0.6	26	6	6.17	2	1	3		Atalanta Fiorentina Venezia
+Obert	Cagliari	D	7	68.81		Cartellini	Quarta	Titolare	2.1	6.71	0	0.56	34	5.88	5.82	0	3	8		Atalanta Fiorentina Venezia
+Dragusin	Fiorentina	D	7	68.81					8.05	Prezzo N.D.										Cagliari Como Lazio
+Jimenez A.	Fiorentina	D	7	68.81			Semi-Top	Cartellini	10.35	4.8	0	0.4	1	5.5	5	0	0	1		Cagliari Como Lazio
+Bracaglia	Frosinone	D	7	68.81		Bonus	Quarta	Titolare	1.8	Prezzo N.D.										Atalanta Como Napoli
+Tavares N.	Lazio	D	7	68.81		Bonus	jolly	Infortuni	5	6.31	0	0.52	22	5.91	5.8	0	0	5		Roma Genoa Torino
+Gabbia	Milan	D	7	68.81		Mod.	jolly	Infortuni	3.1	6.82	0	0.57	29	5.91	5.84	0	0	4		Inter Parma Cagliari
+Mangas	Monza	D	7	68.81			Quarta		3.25	Prezzo N.D.										Lecce Venezia Atalanta
+Idzes	Sassuolo	D	7	68.81		Mod.	Quarta		2.25	7.29	0	0.61	35	5.94	5.9	0	0	3		Inter Parma Bologna
+Coco	Torino	D	7	68.81		Titolare	Quarta	Mod.	2.2	7.63	4.41	0.63	35	5.84	5.91	1	1	3		Juventus Lazio Lecce
+Ismajli	Torino	D	7	68.81		Infortuni	Quarta	Mod.	1.4	6.54	0	0.54	24	5.92	5.9	0	2	5		Juventus Lazio Lecce
+Badiashile	Napoli	D	7	68.81		Scommessa	jolly		3.95	Prezzo N.D.										Roma Bologna Frosinone
+Sutalo J.	Lazio	D	7	68.81		Scommessa	jolly		1.85	Prezzo N.D.										Roma Genoa Torino
+Belghali	Torino	D	7	68.81		Bonus	Quarta	Mod.	2.7	Prezzo N.D.										Juventus Lazio Lecce
+Sugawara	Cagliari	D	6	66.78			Scommessa		0.95	Prezzo N.D.										Atalanta Fiorentina Venezia
+Kolasinac	Atalanta	D	6	66.78		Mod.	Quarta	Infortuni	1.3	5.15	0	0.51	17	6.03	5.94	0	0	3		Frosinone Bologna Cagliari
+Bellanova	Atalanta	D	6	66.78		Bonus	jolly	Mod.	4.95	5.39	0	0.54	22	5.82	5.82	0	1	2		Frosinone Bologna Cagliari
+Bernasconi	Atalanta	D	6	66.78		Scommessa	Terza	Mod.	8.9	5.58	0	0.56	22	6.09	6.16	0	3	3		Frosinone Bologna Cagliari
+Heggem	Bologna	D	6	66.78		Mod.	titolare		2.2	5.36	0	0.54	25	5.84	5.8	0	0	0		Atalanta Lecce Napoli
+Holm	Bologna	D	6	66.78		Bonus	jolly	Infortuni	1.5	5.49	4.41	0.55	16	6.09	6.44	1	4	1		Atalanta Lecce Napoli
+Kaiki	Como	D	6	66.78			jolly		4.75	Prezzo N.D.										Fiorentina Frosinone Genoa
+Valle	Como	D	6	66.78		Bonus	Terza	Jolly	4.95	6.08	4.41	0.61	26	6.06	6.23	1	3	3		Fiorentina Frosinone Genoa
+Viery	Fiorentina	D	6	66.78			jolly		2	Prezzo N.D.										Cagliari Como Lazio
+Monterisi	Frosinone	D	6	66.78			titolare		1.75	Prezzo N.D.										Atalanta Como Napoli
+Oyono A.	Frosinone	D	6	66.78		Bonus	Quarta		1.2	Prezzo N.D.										Atalanta Como Napoli
+Marcandalli	Genoa	D	6	66.78		Scommessa	Quarta	Mod.	2.9	5.8	0	0.58	31	5.87	5.84	0	1	4		Juventus Bologna Como
+Pavard	Inter	D	6	66.78			jolly		1.95	4.73	0	0.47	1	6.5	6.5	0	0	0		Milan Sassuolo Juventus
+Carlos Augusto	Inter	D	6	66.78			jolly	Bonus	4.35	5.99	4.41	0.6	28	6.12	6.16	1	1	6		Milan Sassuolo Juventus
+Romagnoli	Lazio	D	6	66.78		Mod.	jolly	Cartellini	1.65	5.59	0	0.56	32	6.03	5.92	0	0	5		Roma Genoa Torino
+Pedraza	Lazio	D	6	66.78		Scommessa	Quarta	Jolly	2	Prezzo N.D.										Roma Genoa Torino
+Marusic	Lazio	D	6	66.78		Mod.	jolly	Infortuni	1.65	6.13	4.41	0.61	33	5.86	5.97	1	2	1		Roma Genoa Torino
+Veiga D.	Lecce	D	6	66.78		Inaffidabile	titolare		1.45	5.75	0	0.57	36	5.82	5.69	0	0	9		Parma Bologna Fiorentina
+Gallo	Lecce	D	6	66.78		Titolare	Quarta	Bonus	2.25	6.28	0	0.63	37	5.95	5.99	0	3	3		Parma Bologna Fiorentina
+Tomori	Milan	D	6	66.78		Infortuni	Scommessa	Mod.	1.25	5.55	0	0.55	32	5.97	5.88	0	1	6		Inter Parma Cagliari
+Beukema	Napoli	D	6	66.78		Mod.	Scommessa	Jolly	1.65	6.06	8.82	0.6	22	5.93	6.16	2	0	2		Roma Bologna Frosinone
+Buongiorno	Napoli	D	6	66.78		Mod.	jolly	Infortuni	2.2	5.91	0	0.59	32	5.89	5.88	0	1	3		Roma Bologna Frosinone
+Kristensen T.	Atalanta	D	6	66.78		Inaffidabile	Quarta	Cartellini	6.1	6.6	13.23	0.66	28	5.98	6.23	3	0	4		Frosinone Bologna Cagliari
+Obrador	Sassuolo	D	6	66.78		Mod.	jolly	Bonus	2.15	Prezzo N.D.										Inter Parma Bologna
+Fortini	Torino	D	6	66.78		Scommessa	jolly	Mod.	1.7	Prezzo N.D.										Juventus Lazio Lecce
+Leysen F.	Sassuolo	D	6	66.78		Scommessa	titolare		1.1	Prezzo N.D.										Inter Parma Bologna
+Balerdi	Roma	D	6	66.78		Scommessa	jolly		1.35	Prezzo N.D.										Lazio Napoli Juventus
+Caleta-Car	Sassuolo	D	6	66.78					0.95	Prezzo N.D.										Inter Parma Bologna
+Patterson	Torino	D	5	64.25		Scommessa	jolly		1.1	Prezzo N.D.										Juventus Lazio Lecce
+Kofler	Cagliari	D	5	64.25					1.05	Prezzo N.D.										Atalanta Fiorentina Venezia
+Zè Pedro	Cagliari	D	5	64.25		Inaffidabile	titolare		1.35	4.14	0	0.51	22	5.77	5.68	0	1	6		Atalanta Fiorentina Venezia
+Kempf	Como	D	5	64.25		Mod.	jolly		2.8	5.72	17.64	0.71	29	6.12	6.52	4	1	3		Fiorentina Frosinone Genoa
+Valdepenas	Fiorentina	D	5	64.25			Terza		7.65	Prezzo N.D.										Cagliari Como Lazio
+Calvani	Frosinone	D	5	64.25			titolare	Mod.	1.15	Prezzo N.D.										Atalanta Como Napoli
+Kelly L.	Juventus	D	5	64.25		Titolare	Terza	Mod.	2.9	5.13	4.41	0.64	35	6.01	6.07	1	1	4		Torino Genoa Roma
+Gaspar K.	Lecce	D	5	64.25		Mod.	Quarta	Infortuni	1.55	3.88	0	0.48	21	5.83	5.64	0	0	6		Parma Bologna Fiorentina
+De Winter	Milan	D	5	64.25		Cartellini	Quarta	Infortuni	3.1	4.67	4.41	0.58	24	5.75	5.9	1	1	1		Inter Parma Cagliari
+Olivera	Napoli	D	5	64.25		Jolly	Scommessa		1.5	4.22	0	0.53	22	5.75	5.68	0	0	3		Roma Bologna Frosinone
+Ghilardi	Roma	D	5	64.25		Cartellini	Scommessa		1.25	4.36	0	0.54	21	5.98	5.95	0	0	1		Lazio Napoli Juventus
+Doig	Sassuolo	D	5	64.25		Inaffidabile	titolare	Bonus	1.55	4.4	0	0.55	27	5.85	5.76	0	0	5		Inter Parma Bologna
+Bella-Kotchap	Venezia	D	5	64.25			titolare		1.65	4.08	0	0.51	18	5.83	5.75	0	0	3		Cagliari Monza Bologna
+Correia T.	Venezia	D	5	64.25		Scommessa	jolly		1.4	Prezzo N.D.										Cagliari Monza Bologna
+Haps	Venezia	D	5	64.25		Titolare	Quarta	Bonus	1.9	Prezzo N.D.										Cagliari Monza Bologna
+Kossounou	Atalanta	D	4	60.96		Infortuni	jolly	Mod.	1.95	3.34	4.41	0.55	16	5.94	6.09	1	0	1		Frosinone Bologna Cagliari
+Vitik	Bologna	D	4	60.96			Scommessa	Jolly	1.2	3.14	0	0.51	18	5.94	5.86	0	0	3		Atalanta Lecce Napoli
+Rodriguez Ju.	Cagliari	D	4	60.96		Inaffidabile	titolare		1.4	3.16	4.41	0.52	16	5.62	5.72	1	0	3		Atalanta Fiorentina Venezia
+Smolcic I.	Como	D	4	60.96		Cartellini	Scommessa	Inaffidabile	1.2	3.24	0	0.53	25	5.96	5.84	0	1	8		Fiorentina Frosinone Genoa
+Pongracic	Fiorentina	D	4	60.96		Cartellini	Scommessa	Infortuni	1	3.38	0	0.56	35	5.84	5.67	0	0	12		Cagliari Como Lazio
+Parisi	Fiorentina	D	4	60.96		Cartellini	Scommessa	Bonus	1.1	3.44	4.41	0.56	23	6.02	5.98	1	1	6		Cagliari Como Lazio
+Cittadini	Frosinone	D	4	60.96			titolare		1.05	Prezzo N.D.										Atalanta Como Napoli
+Mitaj	Genoa	D	4	60.96			Scommessa	Bonus	1.3	Prezzo N.D.										Juventus Bologna Como
+Gatti	Juventus	D	4	60.96		Cartellini	Scommessa	Bonus	1.35	3.48	8.82	0.57	16	5.94	6.22	2	0	3		Torino Genoa Roma
+Provstgaard	Lazio	D	4	60.96		Scommessa	Quarta		1.35	3.29	0	0.54	23	5.91	5.85	0	0	3		Roma Genoa Torino
+Floriani Mussolini	Lazio	D	4	60.96		Scommessa	jolly		1.75	3.28	0	0.54	23	5.72	5.72	0	1	2		Roma Genoa Torino
+Siebert	Lecce	D	4	60.96		Inaffidabile	titolare		1.1	3.28	4.41	0.54	19	5.68	5.76	1	0	3		Parma Bologna Fiorentina
+Birindelli	Monza	D	4	60.96		Bonus	Quarta	Cartellini	1.85	Prezzo N.D.										Lecce Venezia Atalanta
+Valenti	Parma	D	4	60.96		Titolare	Scommessa	Infortuni	1.25	3.31	0	0.54	27	5.96	5.83	0	0	7		Lecce Sassuolo Milan
+Rensch	Roma	D	4	60.96			jolly	Infortuni	1.55	3.61	4.41	0.59	19	6.16	6.5	1	4	1		Lazio Napoli Juventus
+Walukiewicz	Sassuolo	D	4	60.96		Inaffidabile	Scommessa		1.2	3.51	0	0.58	34	5.81	5.74	0	1	7		Inter Parma Bologna
+Comert	Torino	D	4	60.96			Quarta		1.25	Prezzo N.D.										Juventus Lazio Lecce
+Kabasele	Udinese	D	4	60.96		Bonus	Quarta	Titolare	1.6	3.83	13.23	0.63	28	5.98	6.18	3	0	5		Genoa Lecce Milan
+Bertola	Udinese	D	4	60.96		Inaffidabile	Scommessa		1.3	3.36	0	0.55	25	5.86	5.84	0	1	3		Genoa Lecce Milan
+Zanoli	Udinese	D	4	60.96		Bonus	Scommessa		1.15	3.52	4.41	0.58	19	6.05	6.29	1	2	1		Genoa Lecce Milan
+Arizala	Udinese	D	4	60.96					1.25	2.77	0	0.45	5	5.8	5.8	0	0	0		Genoa Lecce Milan
+Moreno M.	Venezia	D	4	60.96		Infortuni	Scommessa		1	Prezzo N.D.										Cagliari Monza Bologna
+Hainaut	Venezia	D	4	60.96		Bonus	Terza	Scommessa	1.45	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Cagliari Monza Bologna
+Terzic	Frosinone	D	4	60.96			Scommessa	Jolly	1.1	Prezzo N.D.										Atalanta Como Napoli
+Favasuli	Napoli	D	4	60.96		Jolly	Scommessa		1.2	Prezzo N.D.										Roma Bologna Frosinone
+Juan Jesus	Venezia	D	4	60.96		Inaffidabile	titolare		1.1	Prezzo N.D.										Cagliari Monza Bologna
+Drameh	Genoa	D	3	56.34			Quarta		1.05	Prezzo N.D.										Juventus Bologna Como
+Casale	Bologna	D	3	56.34		Jolly		Infortuni	0.95	1.99	0	0.47	10	5.65	5.65	0	0	0		Atalanta Lecce Napoli
+Helland	Bologna	D	3	56.34			titolare		1.2	1.81	0	0.43	6	5.5	5.33	0	0	2		Atalanta Lecce Napoli
+Idrissi R.	Cagliari	D	3	56.34		Bonus	Scommessa	Jolly	1.1	2.4	8.82	0.57	17	5.82	6.09	2	0	3		Atalanta Fiorentina Venezia
+Ranieri L.	Fiorentina	D	3	56.34		Cartellini	Scommessa	Bonus	1.25	2.36	4.41	0.56	31	5.85	5.79	1	0	8		Cagliari Como Lazio
+Joao Mario	Fiorentina	D	3	56.34		Bonus	jolly	Scommessa	1.95	2.23	4.41	0.53	14	5.79	6	1	1	2		Cagliari Como Lazio
+Akpoguma	Frosinone	D	3	56.34			Scommessa	Infortuni	1.1	Prezzo N.D.										Atalanta Como Napoli
+Estupinan	Milan	D	3	56.34		Inaffidabile	Scommessa	Jolly	1.5	2.02	4.41	0.48	14	5.64	5.71	1	1	5		Inter Parma Cagliari
+Lucchesi	Monza	D	3	56.34		Inaffidabile	titolare	Cartellini	1	Prezzo N.D.										Lecce Venezia Atalanta
+Kouadio	Monza	D	3	56.34		Scommessa	titolare		1.2	1.88	0	0.44	1	6	6	0	0	0		Lecce Venezia Atalanta
+Carboni A.	Monza	D	3	56.34		Bonus	titolare	Infortuni	1.2	Prezzo N.D.										Lecce Venezia Atalanta
+Troilo	Parma	D	3	56.34		Inaffidabile	titolare	Cartellini	1.5	2.08	4.41	0.49	21	5.79	5.71	1	0	5		Lecce Sassuolo Milan
+Britschgi	Parma	D	3	56.34			Scommessa	Bonus	1.1	2.24	0	0.53	28	5.75	5.7	0	2	5		Lecce Sassuolo Milan
+Candè	Sassuolo	D	3	56.34		Inaffidabile			1.05	1.91	0	0.45	8	5.69	5.56	0	0	2		Inter Parma Bologna
+Palma	Udinese	D	3	56.34		Infortuni	Scommessa		1.4	1.82	0	0.43	4	5.5	5.5	0	0	0		Genoa Lecce Milan
+Ebosse	Udinese	D	3	56.34		Inaffidabile	Scommessa		1.1	2.08	0	0.49	16	5.75	5.72	0	1	4		Genoa Lecce Milan
+Halhal	Venezia	D	3	56.34			Scommessa		1.1	Prezzo N.D.										Cagliari Monza Bologna
+Schingtienne	Venezia	D	3	56.34			titolare		1.25	Prezzo N.D.										Cagliari Monza Bologna
+Sverko	Venezia	D	3	56.34		Cartellini			0.9	Prezzo N.D.										Cagliari Monza Bologna
+Franjic	Venezia	D	3	56.34			Scommessa		1.05	Prezzo N.D.										Cagliari Monza Bologna
+Odenthal	Sassuolo	D	3	56.34			titolare		1.25	Prezzo N.D.										Inter Parma Bologna
+Tchato	Frosinone	D	3	56.34					1.05	Prezzo N.D.										Atalanta Como Napoli
+Kambwala	Como	D	3	56.34					0.9	Prezzo N.D.										Fiorentina Frosinone Genoa
+Goglichidze	Monza	D	2	49.12			Scommessa		0.5	Prezzo N.D.										Lecce Venezia Atalanta
+Alhassane	Bologna	D	2	49.12					1.25	Prezzo N.D.										Atalanta Lecce Napoli
+Van Der Brempt	Sassuolo	D	2	49.12		Mod.	titolare	Infortuni	1.25	1.24	0	0.5	14	5.96	5.96	0	1	2		Inter Parma Bologna
+Otoa	Genoa	D	2	49.12					1	1.12	0	0.46	10	5.6	5.35	0	0	1		Juventus Bologna Como
+Puczka	Genoa	D	2	49.12			Scommessa		1.15	Prezzo N.D.										Juventus Bologna Como
+Sabelli	Genoa	D	2	49.12		Mod.	Scommessa	Bonus	1.05	1.21	0	0.49	13	5.81	5.65	0	0	0		Juventus Bologna Como
+Lazzari	Lazio	D	2	49.12		Cartellini	Scommessa	Bonus	1.05	1.24	0	0.51	17	5.79	5.74	0	0	2		Roma Genoa Torino
+Pellegrini Lu.	Lazio	D	2	49.12		Cartellini	Scommessa	Infortuni	1	1.35	4.41	0.55	24	5.85	5.81	1	0	8		Roma Genoa Torino
+Jean	Lecce	D	2	49.12		Mod.			1.95	1.1	0	0.45	5	5.8	5.7	0	0	1		Parma Bologna Fiorentina
+Ndaba	Lecce	D	2	49.12			Scommessa		1.1	1.12	0	0.46	9	5.5	5.5	0	0	0		Parma Bologna Fiorentina
+Diawara S.	Milan	D	2	49.12					1	Prezzo N.D.										Inter Parma Cagliari
+Bakoune	Monza	D	2	49.12			Scommessa		1.05	Prezzo N.D.										Lecce Venezia Atalanta
+Marin R.	Napoli	D	2	49.12		Inaffidabile	jolly	Scommessa	1.6	Prezzo N.D.										Roma Bologna Frosinone
+Ndiaye	Parma	D	2	49.12			Scommessa	Cartellini	1.05	1.05	0	0.43	11	5.59	5.36	0	0	3		Lecce Sassuolo Milan
+Biraghi	Torino	D	2	49.12					0.95	1.16	0	0.47	11	5.59	5.59	0	0	0		Juventus Lazio Lecce
+Abankwah	Udinese	D	2	49.12		Mod.	jolly		1.1	Prezzo N.D.										Genoa Lecce Milan
+Sagrado	Venezia	D	2	49.12					1.3	Prezzo N.D.										Cagliari Monza Bologna
+Aurelio	Cagliari	D	2	49.12					1	Prezzo N.D.										Atalanta Fiorentina Venezia
+Cinquegrano	Sassuolo	D	2	49.12		Scommessa	titolare	Inaffidabile	1.2	Prezzo N.D.										Inter Parma Bologna
+Terracciano F.	Milan	D	2	49.12		Mod.	Scommessa		1.5	Prezzo N.D.										Inter Parma Cagliari
+Lulli	Roma	D	2	49.12		Scommessa	jolly	Bonus	2.2	Prezzo N.D.										Lazio Napoli Juventus
+Drobnic	Parma	D	2	49.12		Scommessa	titolare		0.95	Prezzo N.D.										Lecce Sassuolo Milan
+De Silvestri	Bologna	D	1	35.69		Jolly			0.8	0.43	0	0.48	10	6.05	5.95	0	0	2		Atalanta Lecce Napoli
+Goldaniga	Como	D	1	35.69		Inaffidabile		Cartellini	0.9	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Fiorentina Frosinone Genoa
+Amey	Frosinone	D	1	35.69					0.95	Prezzo N.D.										Atalanta Como Napoli
+Rugani	Juventus	D	1	35.69		Affidabile		Scommessa	1	0.4	0	0.45	8	5.69	5.56	0	0	2		Torino Genoa Roma
+Cabal	Juventus	D	1	35.69		Jolly	Scommessa		1	0.49	8.82	0.55	9	5.94	6.56	2	0	1		Torino Genoa Roma
+Patric	Lazio	D	1	35.69					0.85	0.42	0	0.47	10	5.85	5.75	0	0	2		Roma Genoa Torino
+Antov	Monza	D	1	35.69					0.95	Prezzo N.D.										Lecce Venezia Atalanta
+Marianucci	Napoli	D	1	35.69			Scommessa		1	0.42	0	0.48	11	5.73	5.73	0	1	2		Roma Bologna Frosinone
+Mazzocchi	Venezia	D	1	35.69		Infortuni	Scommessa	Jolly	1.25	0.41	0	0.46	9	5.94	5.94	0	1	0		Cagliari Monza Bologna
+Carboni F.	Parma	D	1	35.69					0.95	0.4	0	0.45	2	6	6	0	0	0		Lecce Sassuolo Milan
+Ziolkowski	Monza	D	1	35.69		Mod.	titolare	Jolly	1.05	0.41	0	0.47	9	5.94	5.78	0	0	3		Lecce Venezia Atalanta
+Pieragnolo	Sassuolo	D	1	35.69					0.95	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Inter Parma Bologna
+Gomes	Venezia	D	1	35.69					0.85	Prezzo N.D.										Cagliari Monza Bologna
+Omar Fayed	Frosinone	D	1	35.69					0.85	Prezzo N.D.										Atalanta Como Napoli
+Maye	Monza	D	1	35.69					0.85	Prezzo N.D.										Lecce Venezia Atalanta
+Dembelè A.	Lecce	D	1	35.69			Scommessa		1	Prezzo N.D.										Parma Bologna Fiorentina
+Paz N.	Como	C	29	88.16		Affidabile	Top	Titolare	83.15	59.48	42.79	0.93	35	6.37	7.3	12	5	5		Fiorentina Frosinone Genoa
+Calhanoglu	Inter	C	28	87.36		Titolare	Top	Calci Piazzati	73.9	49.72	32.09	0.81	22	6.52	7.64	9	4	7		Milan Sassuolo Juventus
+McTominay	Napoli	C	27	86.94		Affidabile	Top	Bonus	75.55	51.87	35.66	0.88	33	6.39	7.26	10	2	1		Roma Bologna Frosinone
+Orsolini	Bologna	C	25	85.5		Calci Piazzati	Top	Bonus	61.3	45.79	35.66	0.86	34	6.06	6.76	10	1	2		Atalanta Lecce Napoli
+Pulisic	Milan	C	24	84.96		Titolare	Top	Bonus	59.3	41.87	28.52	0.82	27	6.15	7.07	8	4	0		Inter Parma Cagliari
+Rabiot	Milan	C	23	84.18		Affidabile	Semi-Top	Bonus	44.2	34.49	21.39	0.71	29	6.33	6.98	6	4	4		Inter Parma Cagliari
+Baturina	Como	C	20	82.2		Bonus	Top	Affidabile	51.5	29.94	21.39	0.73	25	6.3	7.14	6	3	0		Fiorentina Frosinone Genoa
+Mora	Roma	C	20	82.2		Affidabile	Semi-Top	Bonus	41.35	Prezzo N.D.										Lazio Napoli Juventus
+Da Cunha	Como	C	18	80.64		Bonus	Semi-Top	Cartellini	33.35	29.67	21.39	0.82	35	6.34	6.91	6	4	4		Fiorentina Frosinone Genoa
+Barella	Inter	C	18	80.64		Titolare	Semi-Top	Affidabile	30.7	26.21	10.7	0.72	34	6.28	6.71	3	9	7		Milan Sassuolo Juventus
+Zaniolo	Udinese	C	18	80.64		Infortuni	Semi-Top	Cartellini	29.55	25.94	17.83	0.71	31	6.26	6.77	5	5	8		Genoa Lecce Milan
+McKennie	Juventus	C	17	79.9		Affidabile	Semi-Top	Bonus	26.85	25.15	17.83	0.74	34	6.13	6.68	5	6	5		Torino Genoa Roma
+De Bruyne	Napoli	C	17	79.9		Affidabile	Semi-Top	Bonus	40.3	24.17	17.83	0.71	17	6.26	7.24	5	2	1		Roma Bologna Frosinone
+Zaccagni	Lazio	C	16	79.2		Titolare	Semi-Top	Calci Piazzati	41.15	19.86	10.7	0.63	26	5.88	5.96	3	0	6		Roma Fiorentina Torino
+Atta	Fiorentina	C	15	78.3		Affidabile	Semi-Top	Titolare	35	21.52	17.83	0.73	32	6.36	6.88	5	3	3		Cagliari Como Lazio
+Samardzic	Atalanta	C	13	76.44		Bonus	Terza	Affidabile	20.65	14.86	7.13	0.6	21	5.93	6.29	2	2	1		Frosinone, Bologna Cagliari
+Conceicao	Juventus	C	13	76.44		Bonus	Semi-Top	Affidabile	34.05	17.22	10.7	0.69	30	6.28	6.7	3	5	3		Torino Genoa Roma
+Taylor K.	Lazio	C	13	76.44		Affidabile	Terza	Titolare	15.85	14.67	10.7	0.59	17	6.06	6.56	3	2	5		Roma Fiorentina Torino
+Vlasic	Torino	C	13	76.44		Bonus	Semi-Top	Rigorista	32.3	20.6	28.52	0.83	37	6.03	6.66	8	3	7		Juventus Lazio Lecce
+Goncalves P.	Fiorentina	C	12	75.48		Scommessa	Semi-Top	Bonus	16	Prezzo N.D.										Cagliari Como Lazio
+Ederson D.S.	Atalanta	C	12	75.48		Affidabile	Terza	Titolare	18.85	15.76	7.13	0.7	30	6.25	6.43	2	1	3		Frosinone, Bologna Cagliari
+Gudmundsson A.	Lazio	C	12	75.48		Bonus	Semi-Top	Affidabile	18.65	16.43	17.83	0.73	32	5.88	6.34	5	3	4		Roma Fiorentina Torino
+Zielinski	Inter	C	12	75.48		Bonus	Semi-Top	Rigorista	26.75	17.62	21.39	0.78	30	6.25	6.8	6	2	3		Milan Sassuolo Juventus
+Modric	Milan	C	12	75.48		Affidabile	Terza	Titolare	12.4	15.44	7.13	0.68	33	6.45	6.67	2	3	4		Inter Parma Cagliari
+Ekkelenkamp	Udinese	C	12	75.48		Affidabile	Semi-Top	Bonus	20.15	16.26	17.83	0.72	31	6.05	6.61	5	3	1		Genoa Lecce Milan
+Jones C.	Inter	C	12	75.48		Scommessa	Scomm.	Bonus	15.85	Prezzo N.D.										Milan Sassuolo Juventus
+Gonzalez N.	Juventus	C	12	75.48		Infortuni	Semi-Top	Subentrante	11.4	Prezzo N.D.										Torino Genoa Roma
+Kessiè	Atalanta	C	12	75.48		Scommessa	Terza	Bonus	16.8	Prezzo N.D.										Frosinone, Bologna Cagliari
+Rodriguez Je.	Como	C	11	74.47		Bonus	Scomm.	Affidabile	8.8	13.42	7.13	0.66	28	6.25	6.66	2	8	3		Fiorentina Frosinone Genoa
+Baldanzi	Genoa	C	11	74.47		Affidabile	Terza	Bonus	10.8	11.59	3.57	0.57	17	6.15	6.38	1	2	2		Juventus Bologna Como
+Alajbegovic	Juventus	C	11	74.47		Bonus	Semi-Top	Scommessa	28.5	Prezzo N.D.										Torino Genoa Roma
+Saelemaekers	Milan	C	11	74.47		Infortuni	Terza	Affidabile	10.75	14.11	10.7	0.69	35	6.14	6.41	3	3	5		Inter Parma Cagliari
+Mastantuono	Fiorentina	C	11	74.47		Bonus	Semi-Top	Scommessa	36.15	Prezzo N.D.										Cagliari Como Lazio
+Moreira	Milan	C	11	74.47		Scommessa	Scomm.	Bonus	19.55	Prezzo N.D.										Inter Parma Cagliari
+Bernardeschi	Bologna	C	10	73.3		Bonus	Terza	Infortuni	10.95	12.83	14.26	0.7	24	6.04	6.56	4	2	3		Atalanta Lecce Napoli
+Rowe	Atalanta	C	10	73.3		Bonus	Semi-Top	Infortuni	23.1	12.27	10.7	0.67	28	6.2	6.59	3	3	2		Frosinone, Bologna Cagliari
+Perrone	Como	C	10	73.3		Cartellini	Quarta	Affidabile	5.5	12.7	10.7	0.69	36	6.22	6.47	3	4	8		Fiorentina Frosinone Genoa
+Frattesi	Lazio	C	10	73.3		Titolare	Semi-Top	Bonus	30.15	9.32	0	0.51	14	5.89	5.89	0	0	0		Roma Fiorentina Torino
+Zambo Anguissa	Napoli	C	10	73.3		Affidabile	Scomm.	Bonus	11.3	11.59	14.26	0.63	18	6.17	6.86	4	1	1		Roma Bologna Frosinone
+Vergara	Napoli	C	10	73.3		Scommessa	Scomm.	Affidabile	8.8	9.41	3.57	0.51	8	6.25	6.5	1	0	2		Roma Bologna Frosinone
+Konè M.	Roma	C	10	73.3		Cartellini	Terza	Affidabile	17.05	12.07	7.13	0.66	29	6.26	6.53	2	3	2		Lazio Napoli Juventus
+Thorstvedt	Sassuolo	C	10	73.3		Bonus	Scomm.	Infortuni	3.9	12.33	14.26	0.67	31	6.15	6.48	4	3	9		Inter Parma Bologna
+Diouf	Inter	C	9	72		Scommessa	Semi-Top	Bonus	15.9	8.48	3.57	0.52	10	6.15	6.45	1	0	1		Milan Sassuolo Juventus
+Sucic P.	Inter	C	9	72		Bonus	Scomm.	Subentrante	5.95	10.11	7.13	0.62	28	6.07	6.27	2	2	5		Milan Sassuolo Juventus
+Locatelli	Juventus	C	9	72		Cartellini	Quarta	Affidabile	4.05	11.16	3.57	0.69	36	6.26	6.19	1	2	9		Torino Genoa Roma
+Thuram K.	Juventus	C	9	72		Affidabile		Cartellini	6.35	11.14	10.7	0.69	34	6.1	6.4	3	2	2		Torino Genoa Roma
+Cancellieri	Lazio	C	9	72		Scommessa	Scomm.	Subentrante	2.45	10.44	14.26	0.64	28	5.93	6.29	4	1	6		Roma Fiorentina Torino
+Isaksen	Lazio	C	9	72		Bonus	Scomm.	Subentrante	6.45	11.18	17.83	0.69	27	6.04	6.63	5	1	0		Roma Fiorentina Torino
+Colpani	Monza	C	9	72		Bonus	Quarta		5.05	Prezzo N.D.										Lecce Venezia Atalanta
+Politano	Napoli	C	9	72		Affidabile	Scomm.	Bonus	15.1	10.92	7.13	0.67	33	6.09	6.36	2	5	4		Roma Bologna Frosinone
+Cristante	Roma	C	9	72		Cartellini	Quarta	Bonus	3.35	10.73	7.13	0.66	37	6.11	6.22	2	1	6		Lazio Napoli Juventus
+Volpato	Sassuolo	C	9	72		Subentrante	Scomm.	Infortuni	3.65	9.9	7.13	0.61	21	6.14	6.52	2	4	4		Inter Parma Bologna
+Casadei	Torino	C	9	72		Inaffidabile	Quarta	Subentrante	6.7	11.38	21.39	0.7	32	5.97	6.45	6	0	5		Juventus Lazio Lecce
+Pellegrini Lo.	Roma	C	9	72		Infortuni		Inaffidabile	1.8	Prezzo N.D.										Lazio Napoli Juventus
+Mbangula	Bologna	C	8	70.48		Scommessa	Terza	Affidabile	1.95	Prezzo N.D.										Atalanta Lecce Napoli
+Pasalic	Atalanta	C	8	70.48		Bonus	Scomm.	Scommessa	3.1	9.38	10.7	0.67	31	5.94	6.27	3	3	3		Frosinone, Bologna Cagliari
+Odgaard	Bologna	C	8	70.48		Bonus	Scomm.	Inaffidabile	2.65	9.24	17.83	0.66	22	5.91	6.61	5	1	1		Atalanta Lecce Napoli
+Cambiaghi	Bologna	C	8	70.48		Subentrante	Scomm.	Infortuni	2.85	8.66	10.7	0.61	24	5.98	6.42	3	4	3		Atalanta Lecce Napoli
+Mandragora	Torino	C	8	70.48		Affidabile	Quarta	Cartellini	2.9	11.14	24.96	0.79	34	6.04	6.62	7	2	7		Juventus Lazio Lecce
+Calò	Frosinone	C	8	70.48		Titolare	Terza	Rigorista	7.35	Prezzo N.D.										Atalanta Como Napoli
+Chukwueze	Milan	C	8	70.48		Bonus	Scomm.	Subentrante	9.3	5.89	0	0.42	1	5.5	5.5	0	0	0		Inter Parma Cagliari
+Lobotka	Napoli	C	8	70.48		Affidabile	Titolare		2.95	8.66	3.57	0.61	31	6.05	6.1	1	0	3		Roma Bologna Frosinone
+Konè I.	Sassuolo	C	8	70.48		Scommessa	Scomm.		1.4	10.04	21.39	0.71	35	6.19	6.63	6	0	3		Inter Parma Bologna
+Schmid	Frosinone	C	8	70.48		Scommessa	Quarta	Bonus	2.1	Prezzo N.D.										Atalanta Como Napoli
+Hutchinson	Milan	C	8	70.48		Scommessa	Scomm.	Bonus	2.8	Prezzo N.D.										Inter Parma Cagliari
+Gaetano	Atalanta	C	7	68.81		Infortuni	Quarta	Affidabile	6.95	7.96	7.13	0.66	32	6.06	6.31	2	4	4		Frosinone, Bologna Cagliari
+Zalewski	Atalanta	C	7	68.81		Subentrante	Scomm.	Bonus	2.75	8.05	7.13	0.67	31	6.1	6.4	2	5	3		Frosinone, Bologna Cagliari
+Ferguson	Bologna	C	7	68.81		Infortuni	Titolare	Affidabile	1.95	6.31	3.57	0.52	23	5.8	5.78	1	0	5		Atalanta Lecce Napoli
+Adopo	Cagliari	C	7	68.81			Titolare		1.3	7.72	3.57	0.64	38	5.83	5.88	1	1	4		Atalanta Fiorentina Venezia
+Romano	Cagliari	C	7	68.81		Titolare	Quarta	Bonus	2.1	Prezzo N.D.										Atalanta Fiorentina Venezia
+Fagioli	Fiorentina	C	7	68.81		Cartellini	Quarta	Bonus	1.85	7.87	7.13	0.65	33	6.03	6.23	2	3	5		Cagliari Como Lazio
+Ndour	Fiorentina	C	7	68.81		Scommessa	Scomm.		3.55	7.68	10.7	0.64	30	5.8	6.07	3	0	2		Cagliari Como Lazio
+Frendrup	Genoa	C	7	68.81			Titolare	Affidabile	1.6	7.55	3.57	0.63	36	5.96	5.97	1	0	5		Juventus Bologna Como
+Koopmeiners	Juventus	C	7	68.81		Inaffidabile			1.7	6.66	0	0.55	29	5.64	5.55	0	0	5		Torino Genoa Roma
+Rovella	Lazio	C	7	68.81		Cartellini		Affidabile	1.35	5.48	0	0.45	11	5.73	5.64	0	1	2		Roma Fiorentina Torino
+Coulibaly L.	Lecce	C	7	68.81		Cartellini	Titolare	Affidabile	1.35	8.01	10.7	0.67	33	6.05	6.29	3	1	4		Parma Bologna Fiorentina
+Akinsanmiro	Monza	C	7	68.81		Affidabile	Titolare		1.1	6.61	0	0.55	23	5.8	5.8	0	1	2		Lecce Venezia Atalanta
+Bernabè	Parma	C	7	68.81		Titolare	Terza	Bonus	6.15	8.22	10.7	0.68	32	6.17	6.48	3	1	0		Lecce Sassuolo Milan
+Pisilli	Roma	C	7	68.81		Scommessa	Scomm.	Subentrante	2.85	7.43	7.13	0.62	22	6.09	6.48	2	4	3		Lazio Napoli Juventus
+Karlstrom	Udinese	C	7	68.81			Titolare	Inaffidabile	1.3	7.51	3.57	0.62	36	5.96	5.96	1	0	6		Genoa Lecce Milan
+Unai Gomez	Udinese	C	7	68.81		Scommessa	Scomm.		1.95	Prezzo N.D.										Genoa Lecce Milan
+Sow	Genoa	C	7	68.81		Scommessa	Quarta		1.35	Prezzo N.D.										Juventus Bologna Como
+Elmas	Atalanta	C	7	68.81		Bonus	Scomm.	Subentrante	2.15	Prezzo N.D.										Frosinone, Bologna Cagliari
+Monteiro J.	Lecce	C	7	68.81					1.3	Prezzo N.D.										Parma Bologna Fiorentina
+Sarr P.	Juventus	C	7	68.81			Quarta		2.65	Prezzo N.D.										Torino Genoa Roma
+Braganca	Torino	C	6	66.78					1	Prezzo N.D.										Juventus Lazio Lecce
+Pobega	Bologna	C	6	66.78		Infortuni	Titolare		1.05	5.86	10.7	0.58	23	5.83	6.17	3	1	2		Atalanta Lecce Napoli
+Winks	Cagliari	C	6	66.78			Titolare		1.05	Prezzo N.D.										Atalanta Fiorentina Venezia
+Fazzini	Cagliari	C	6	66.78		Infortuni	Quarta	Bonus	4.95	4.9	0	0.49	12	5.88	5.83	0	0	2		Atalanta Fiorentina Venezia
+Milla	Como	C	6	66.78			Quarta		2.95	Prezzo N.D.										Fiorentina Frosinone Genoa
+Caqueret	Como	C	6	66.78		Scommessa		Bonus	1.2	6.49	7.13	0.65	28	6.11	6.41	2	4	3		Fiorentina Frosinone Genoa
+Liberali	Como	C	6	66.78		Scommessa	Scomm.	Bonus	3.6	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Fiorentina Frosinone Genoa
+Oulai	Fiorentina	C	6	66.78		Scommessa	Scomm.		1.95	Prezzo N.D.										Cagliari Como Lazio
+Zerbin	Frosinone	C	6	66.78		Scommessa	Scomm.	Bonus	1.2	5.86	0	0.58	29	5.76	5.79	0	2	2		Atalanta Como Napoli
+Ellertsson	Genoa	C	6	66.78		Scommessa	Titolare	Subentrante	1.2	6.13	3.57	0.61	35	5.84	5.91	1	1	1		Juventus Bologna Como
+Zhegrova	Juventus	C	6	66.78		Scommessa	Scomm.	Bonus	1.85	4.99	0	0.5	12	5.96	5.96	0	0	1		Torino Genoa Roma
+Pierotti	Lecce	C	6	66.78		Bonus	Titolare	Inaffidabile	1.4	6.35	3.57	0.63	37	5.8	5.85	1	1	4		Parma Bologna Fiorentina
+Pessina	Monza	C	6	66.78		Rigorista	Scomm.	Cartellini	1.5	Prezzo N.D.										Lecce Venezia Atalanta
+Nicolussi Caviglia	Parma	C	6	66.78		Cartellini			1.25	5.68	0	0.57	23	5.89	6.02	0	4	4		Lecce Sassuolo Milan
+Matic	Sassuolo	C	6	66.78		Cartellini	Titolare		1.3	5.95	3.57	0.59	34	5.96	5.96	1	1	6		Inter Parma Bologna
+Adzic	Sassuolo	C	6	66.78		Scommessa	Scomm.	Subentrante	4.75	5.06	3.57	0.51	4	6.12	6.88	1	0	0		Inter Parma Bologna
+Bakola	Sassuolo	C	6	66.78		Affidabile	Quarta		1.65	4.67	0	0.47	3	6.17	6.17	0	0	0		Inter Parma Bologna
+Cacciamani	Torino	C	6	66.78		Scommessa	Quarta		3.6	Prezzo N.D.										Juventus Lazio Lecce
+Oristanio	Torino	C	6	66.78		Scommessa	Scomm.	Affidabile	1.5	5.41	3.57	0.54	18	5.78	5.92	1	0	1		Juventus Lazio Lecce
+Piotrowski	Udinese	C	6	66.78		Scommessa	Titolare	Bonus	1.35	6.05	3.57	0.6	30	5.88	5.95	1	0	2		Genoa Lecce Milan
+Basic	Venezia	C	6	66.78		Bonus	Quarta	Affidabile	1.45	6.02	7.13	0.6	23	6.09	6.43	2	3	0		Cagliari Monza Bologna
+Tourè I.	Monza	C	6	66.78		Scommessa			1.05	Prezzo N.D.										Lecce Venezia Atalanta
+Amondarain	Bologna	C	5	64.25					1.2	Prezzo N.D.										Atalanta Lecce Napoli
+Felici	Cagliari	C	5	64.25		Scommessa		Bonus	1.1	4.36	7.13	0.54	11	6.05	6.55	2	1	3		Atalanta Fiorentina Venezia
+Meichtry	Genoa	C	5	64.25		Scommessa			1.25	Prezzo N.D.										Juventus Bologna Como
+Luis Henrique	Inter	C	5	64.25		Scommessa	Scomm.	Bonus	1.3	4.86	3.57	0.61	27	5.89	6.06	1	2	1		Milan Sassuolo Juventus
+Dele-Bashiru	Lazio	C	5	64.25		Bonus		Scommessa	1.05	4.45	3.57	0.55	21	5.69	5.83	1	0	0		Roma Fiorentina Torino
+Jashari	Milan	C	5	64.25		Scommessa	Scomm.	Affidabile	1.4	3.98	0	0.5	12	5.71	5.79	0	1	0		Inter Parma Cagliari
+Keita M.	Parma	C	5	64.25		Inaffidabile	Titolare		1.2	5.23	3.57	0.65	36	6.01	6.06	1	1	1		Lecce Sassuolo Milan
+Fitz-Jim	Torino	C	5	64.25		Scommessa	Titolare		1.85	Prezzo N.D.										Juventus Lazio Lecce
+Gineitis	Torino	C	5	64.25		Inaffidabile	Titolare	Subentrante	1.1	4.51	0	0.56	27	5.87	5.81	0	1	5		Juventus Lazio Lecce
+Busio	Venezia	C	5	64.25		Titolare	Quarta	Affidabile	2.8	Prezzo N.D.										Cagliari Monza Bologna
+Sohm	Venezia	C	5	64.25		Bonus		Subentrante	1.15	4.35	0	0.54	24	5.65	5.62	0	1	3		Cagliari Monza Bologna
+Perez K.	Venezia	C	5	64.25		Scommessa	Scomm.	Subentrante	1.2	Prezzo N.D.										Cagliari Monza Bologna
+Cissè A.	Milan	C	5	64.25		Scommessa	Scomm.		8.1	Prezzo N.D.										Inter Parma Cagliari
+De Roon	Roma	C	4	60.96		Cartellini		Affidabile	1.5	3.66	3.57	0.6	34	5.97	6	1	2	6		Lazio Napoli Juventus
+Moro N.	Bologna	C	4	60.96					1.1	3.77	7.13	0.62	28	5.93	6.12	2	0	1		Atalanta Lecce Napoli
+Dominguez B.	Sassuolo	C	4	60.96		Bonus	Scomm.	Subentrante	1.3	3.13	0	0.51	12	5.83	6.04	0	3	1		Inter Parma Bologna
+Addai	Como	C	4	60.96		Bonus		Infortuni	1.15	3.37	10.7	0.55	12	5.96	6.54	3	0	4		Fiorentina Frosinone Genoa
+Fabbian	Parma	C	4	60.96		Affidabile		Subentrante	1.6	3.53	7.13	0.58	22	5.8	6.05	2	0	2		Lecce Sassuolo Milan
+Cichella	Frosinone	C	4	60.96					1.15	Prezzo N.D.										Atalanta Como Napoli
+Koutsoupias	Frosinone	C	4	60.96		Scommessa		Cartellini	1.05	Prezzo N.D.										Atalanta Como Napoli
+Fini	Frosinone	C	4	60.96						Prezzo N.D.										Atalanta Como Napoli
+Amorim	Genoa	C	4	60.96					1.25	2.85	0	0.47	9	5.72	5.67	0	0	1		Juventus Bologna Como
+Messias	Genoa	C	4	60.96		Subentrante	Scomm.	Scommessa	1.2	4.06	10.7	0.67	19	6.18	6.68	3	1	1		Juventus Bologna Como
+Traorè Hj.	Genoa	C	4	60.96		Subentrante		Infortuni	1.25	Prezzo N.D.										Juventus Bologna Como
+Mkhitaryan	Inter	C	4	60.96		Affidabile		Bonus	1.4	4.05	14.26	0.66	28	6.21	6.59	4	1	5		Milan Sassuolo Juventus
+Douglas Luiz	Juventus	C	4	60.96		Scommessa	Scomm.		4.45	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Torino Genoa Roma
+Cataldi	Lazio	C	4	60.96		Cartellini		Infortuni	1.05	4.21	10.7	0.69	27	6.07	6.41	3	3	6		Roma Fiorentina Torino
+Ngom	Lecce	C	4	60.96					1.35	2.97	0	0.49	13	5.69	5.65	0	0	1		Parma Bologna Fiorentina
+Berisha M.	Lecce	C	4	60.96		Infortuni	Scomm.	Affidabile	1.3	3.56	7.13	0.58	12	6.17	6.92	2	3	0		Parma Bologna Fiorentina
+Gandelman	Lecce	C	4	60.96		Scommessa			1.2	3.5	7.13	0.57	16	5.97	6.41	2	1	0		Parma Bologna Fiorentina
+Ricci S.	Como	C	4	60.96		Affidabile		Cartellini	1.25	3.75	3.57	0.62	28	6	6.18	1	3	3		Fiorentina Frosinone Genoa
+Loftus-Cheek	Milan	C	4	60.96		Bonus	Scomm.	Infortuni	2.35	3.76	10.7	0.62	21	6.1	6.52	3	1	2		Inter Parma Cagliari
+Folorunsho	Monza	C	4	60.96		Bonus	Quarta	Infortuni	1.5	3.7	7.13	0.61	26	6.04	6.21	2	0	3		Lecce Venezia Atalanta
+Almqvist	Parma	C	4	60.96		Subentrante			1.15	3.01	0	0.49	9	5.94	6.06	0	1	0		Lecce Sassuolo Milan
+Ilkhan	Torino	C	4	60.96		Inaffidabile			1.1	3.17	3.57	0.52	17	5.82	6	1	2	2		Juventus Lazio Lecce
+Njie	Fiorentina	C	4	60.96		Scommessa	Scomm.	Affidabile	2.55	2.95	0	0.48	9	6	5.94	0	0	1		Cagliari Como Lazio
+Miller L.	Udinese	C	4	60.96		Scommessa		Calci Piazzati	1.05	3.26	0	0.53	19	5.92	5.95	0	2	4		Genoa Lecce Milan
+Grillitsch	Frosinone	C	4	60.96		Cartellini			1	Prezzo N.D.										Atalanta Como Napoli
+Massolin	Cagliari	C	4	60.96					1.5	Prezzo N.D.										Atalanta Fiorentina Venezia
+Fernandez T.	Venezia	C	3	56.34		Scommessa	Scomm.	Affidabile	1.1	Prezzo N.D.										Cagliari Monza Bologna
+Sulemana I.	Sassuolo	C	3	56.34					0.95	2.22	3.57	0.53	18	5.69	5.78	1	0	3		Inter Parma Bologna
+Deiola	Cagliari	C	3	56.34		Cartellini	Titolare	Inaffidabile	1.1	2.28	0	0.54	20	5.98	5.95	0	1	3		Atalanta Fiorentina Venezia
+Brescianini	Fiorentina	C	3	56.34		Subentrante		Affidabile	1.3	2.43	7.13	0.57	18	5.97	6.31	2	1	2		Cagliari Como Lazio
+Gelli F.	Frosinone	C	3	56.34					1.15	Prezzo N.D.										Atalanta Como Napoli
+Masini	Frosinone	C	3	56.34		Scommessa			1.3	2.27	0	0.54	21	5.98	5.9	0	1	5		Atalanta Como Napoli
+Stankovic A.	Inter	C	3	56.34		Scommessa		Subentrante	1.4	Prezzo N.D.										Milan Sassuolo Juventus
+Gorter	Lecce	C	3	56.34			Titolare		1.1	1.77	0	0.42	1	5.5	5.5	0	0	0		Parma Bologna Fiorentina
+Maleh	Lecce	C	3	56.34		Inaffidabile	Titolare	Cartellini	1.3	2.18	3.57	0.52	21	5.69	5.71	1	0	3		Parma Bologna Fiorentina
+Musah	Milan	C	3	56.34		Scommessa	Quarta		1.2	2.28	3.57	0.54	16	5.94	6.09	1	0	1		Inter Parma Cagliari
+Colombo L.	Monza	C	3	56.34		Subentrante			1.3	Prezzo N.D.										Lecce Venezia Atalanta
+Gilmour	Napoli	C	3	56.34		Subentrante		Affidabile	0.9	2.25	3.57	0.53	13	6.08	6.27	1	0	1		Roma Bologna Frosinone
+Ordonez C.	Parma	C	3	56.34		Inaffidabile		Cartellini	1.3	2.2	3.57	0.52	21	5.79	5.81	1	0	3		Lecce Sassuolo Milan
+Diallo O.	Parma	C	3	56.34		Scommessa		Subentrante	1.1	Prezzo N.D.										Lecce Sassuolo Milan
+Aboukhlal	Torino	C	3	56.34		Inaffidabile			1.2	1.98	0	0.47	11	5.77	5.64	0	0	4		Juventus Lazio Lecce
+Helgason	Venezia	C	3	56.34		Scommessa			1.4	1.86	0	0.44	4	5.62	5.62	0	0	0		Cagliari Monza Bologna
+Gagliardini	Cagliari	C	3	56.34		Inaffidabile			0.5	Prezzo N.D.										Atalanta Fiorentina Venezia
+El Azzouzi O.	Bologna	C	2	49.12					1.15	Prezzo N.D.										Atalanta Lecce Napoli
+Fadera	Cagliari	C	2	49.12		Scommessa	Scomm.	Bonus	1.3	1.45	7.13	0.59	24	5.92	6.15	2	1	5		Atalanta Fiorentina Venezia
+Hasa	Frosinone	C	2	49.12					1	Prezzo N.D.										Atalanta Como Napoli
+Venturino	Genoa	C	2	49.12		Subentrante		Bonus	1.15	1.15	0	0.47	7	5.86	5.86	0	0	0		Juventus Bologna Como
+Belahyane	Lazio	C	2	49.12		Affidabile		Cartellini	0.8	1.15	0	0.47	11	5.77	5.82	0	2	1		Roma Fiorentina Torino
+Ciurria	Monza	C	2	49.12		Bonus		Subentrante	1.15	Prezzo N.D.										Lecce Venezia Atalanta
+Cremaschi	Parma	C	2	49.12					0.9	1.1	0	0.45	1	6	6	0	0	0		Lecce Sassuolo Milan
+Boloca	Sassuolo	C	2	49.12		Affidabile			1	1.07	0	0.44	2	5.75	5.75	0	0	0		Inter Parma Bologna
+Lipani	Sassuolo	C	2	49.12					1.15	1.33	0	0.54	21	5.93	5.9	0	1	3		Inter Parma Bologna
+Zarraga	Udinese	C	2	49.12					0.9	1.16	0	0.47	10	5.75	5.7	0	0	2		Genoa Lecce Milan
+Chakvetadze	Udinese	C	2	49.12		Scommessa			1.05	Prezzo N.D.										Genoa Lecce Milan
+Duncan	Venezia	C	2	49.12		Inaffidabile			1.15	Prezzo N.D.										Cagliari Monza Bologna
+Forson O.	Monza	C	2	49.12		Scommessa		Bonus	1.1	Prezzo N.D.										Lecce Venezia Atalanta
+Foe Ondoa	Monza	C	2	49.12		Scommessa			0.9	Prezzo N.D.										Lecce Venezia Atalanta
+Jovanovic	Udinese	C	2	49.12					0.5	Prezzo N.D.										Genoa Lecce Milan
+Liteta	Cagliari	C	1	35.69					1	0.4	0	0.45	4	5.75	5.75	0	0	0		Atalanta Fiorentina Venezia
+Lahdo	Como	C	1	35.69					0.95	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Fiorentina Frosinone Genoa
+El Azzouzi A.	Frosinone	C	1	35.69		Cartellini			0.9	Prezzo N.D.										Atalanta Como Napoli
+Kone B.	Frosinone	C	1	35.69					0.95	Prezzo N.D.										Atalanta Como Napoli
+Przyborek	Lazio	C	1	35.69			Top		0.9	Prezzo N.D.	0	0. N.D.	0	0	0	0	0	0		Roma Fiorentina Torino
+Kaba	Lecce	C	1	35.69		Inaffidabile			0.9	0.43	0	0.48	11	5.77	5.73	0	0	1		Parma Bologna Fiorentina
+Fofana Sa.	Lecce	C	1	35.69					0.85	0.38	0	0.42	2	5.5	5.5	0	0	0		Parma Bologna Fiorentina
+Ilic	Lecce	C	1	35.69		Affidabile	Titolare	Infortuni	1.15	0.42	0	0.47	8	6	5.88	0	0	2		Parma Bologna Fiorentina
+Anjorin	Torino	C	1	35.69					0.85	0.42	0	0.47	9	5.78	5.72	0	0	1		Juventus Lazio Lecce
+Dagasso	Venezia	C	1	35.69					0.9	Prezzo N.D.										Cagliari Monza Bologna
+Laerke	Lecce	C	1	35.69		Scommessa			0.95	Prezzo N.D.										Parma Bologna Fiorentina
+Comotto	Milan	C	1	35.69					1.65	Prezzo N.D.										Inter Parma Cagliari
+Mout	Monza	C	1	35.69		Inaffidabile	Titolare		1.05	Prezzo N.D.										Lecce Venezia Atalanta
+Ciervo	Cagliari	C	1	35.69					1.1	Prezzo N.D.										Atalanta Fiorentina Venezia
+Malen	Roma	A	38	93.48		Bonus	Top	Affidabile	204.85	145.98	97.78	0.82	18	6.72	8.97	14	2	1		Lazio Napoli Juventus
+Martinez L.	Inter	A	33	90.42		Titolare	Top	Bonus	187	126.56	118.73	0.85	30	6.42	8.25	17	6	4		Milan Sassuolo Juventus
+Thuram	Inter	A	28	87.36		Affidabile	Top	Titolare	129.15	98.08	90.79	0.8	29	6.43	7.95	13	6	2		Milan Sassuolo Juventus
+Hojlund	Napoli	A	28	87.36		Titolare	Semi-Top	Affidabile	143.45	103.18	83.81	0.84	33	6.21	7.44	12	5	1		Roma Bologna Frosinone
+Ramos G.	Milan	A	27	86.94		Titolare	Top	Bonus	158.1											Inter Parma Cagliari
+Kolo Muani	Juventus	A	25	85.5		Affidabile	Top	Bonus	128.55											Torino Genoa Roma
+Kean	Como	A	24	84.96		Bonus	Scomm.	Infortuni	100	70.7	55.87	0.69	26	5.88	6.77	8	1	4		Fiorentina Frosinone Genoa
+Woltemade	Juventus	A	23	84.18		Scommessa	Scomm.	Bonus	67.65											Torino Genoa Roma
+Douvikas	Como	A	22	83.6		Scommessa	Semi-Top	Bonus	77.6	79.52	97.78	0.86	36	6.18	7.38	14	1	0		Fiorentina Frosinone Genoa
+Yildiz	Juventus	A	22	83.6		Affidabile	Scomm.	Titolare	44.7	76.52	69.84	0.83	35	6.39	7.3	10	6	2		Torino Genoa Roma
+Scamacca	Atalanta	A	19	81.51		Infortuni	Terza	Bonus	73.35	56.94	69.84	0.74	22	6.18	7.55	10	1	2		Frosinone, Bologna Cagliari
+Berardi	Sassuolo	A	19	81.51		Titolare	Terza	Infortuni	50.2	55.77	55.87	0.72	26	6.31	7.19	8	4	2		Inter Parma Bologna
+Davis K.	Udinese	A	19	81.51		Infortuni	Semi-Top	Bonus	69	60.05	69.84	0.78	30	6.32	7.37	10	4	5		Genoa Lecce Milan
+Krstovic	Atalanta	A	18	80.64		Bonus	Scomm.	Subentrante	52.15	53.62	69.84	0.74	32	6.16	7.19	10	5	4		Frosinone, Bologna Cagliari
+De Ketelaere	Atalanta	A	17	79.9		Bonus	Terza	Affidabile	41.25	43.41	20.95	0.64	31	6.21	6.6	3	5	4		Frosinone, Bologna Cagliari
+Esposito F.P.	Inter	A	17	79.9		Subentrante	Scomm.	Scommessa	68.6	47.88	48.89	0.71	31	6.26	7.02	7	3	1		Milan Sassuolo Juventus
+Dybala	Roma	A	16	79.2		Calci Piazzati	Semi-Top	Infortuni	69	42.17	13.97	0.67	21	6.26	6.74	2	7	0		Lazio Napoli Juventus
+Dovbyk	Bologna	A	15	78.3		Bonus	Scomm.	Infortuni	34.75	31.99	20.95	0.54	13	6	6.77	3	1	0		Atalanta Lecce Napoli
+Laurientè	Sassuolo	A	15	78.3		Bonus	Terza	Titolare	33.2	44.02	48.89	0.75	37	6.23	6.99	7	9	4		Inter Parma Bologna
+Beto	Fiorentina	A	14	77.42		Scommessa	Terza	Bonus	38.5											Cagliari Como Lazio
+Raspadori	Atalanta	A	14	77.42		Affidabile	Terza	Bonus	35	29.86	20.95	0.55	13	6.12	6.88	3	1	0		Frosinone, Bologna Cagliari
+Santos A.	Napoli	A	14	77.42		Bonus	Terza	Affidabile	32	30.67	27.94	0.57	13	6.35	7.23	4	0	1		Roma Bologna Frosinone
+Pellegrino M.	Fiorentina	A	14	77.42		Bonus	Scomm.		32.1	40.75	62.86	0.75	37	5.99	6.65	9	0	5		Cagliari Como Lazio
+Castro S.	Roma	A	14	77.42		Subentrante	Scomm.	Bonus	24.65	36.9	48.89	0.68	35	5.93	6.51	7	1	3		Lazio Napoli Juventus
+Simeone	Torino	A	14	77.42		Bonus	Semi-Top	Titolare	56.7	39.93	76.83	0.74	32	6.08	7.09	11	0	1		Juventus Lazio Lecce
+Soulè	Roma	A	13	76.44		Affidabile	Scomm.	Bonus	17.9	34.83	41.9	0.7	32	6.12	6.83	6	5	1		Lazio Napoli Juventus
+Esposito Se.	Sassuolo	A	12	75.48		Affidabile	Scomm.	Scommessa	20.35	34.08	48.89	0.75	36	6.26	6.88	7	4	6		Inter Parma Bologna
+Diao	Como	A	12	75.48		Infortuni	Terza	Bonus	23.15	23.89	13.97	0.53	16	6	6.38	2	1	2		Fiorentina Frosinone Genoa
+Pinamonti	Lazio	A	12	75.48		Inaffidabile	Terza	Bonus	52.1	33.63	62.86	0.74	34	5.88	6.62	9	3	2		Roma Fiorentina Torino
+Kevin Carlos	Cagliari	A	12	75.48		Scommessa	Scomm.		5.9											Atalanta Fiorentina Venezia
+Colombo	Genoa	A	11	74.47		Rigorista	Terza	Titolare	29.65	30.52	48.89	0.75	37	5.92	6.41	7	1	2		Juventus Bologna Como
+Adams A.	Venezia	A	11	74.47		Scommessa	Quarta		16.15											Cagliari Monza Bologna
+Adams C.	Torino	A	10	73.3		Bonus	Quarta	Scommessa	7.5	25.2	41.9	0.69	32	5.98	6.64	6	3	0		Juventus Lazio Lecce
+Tourè E.	Parma	A	10	73.3		Scommessa	Quarta	Infortuni	11.9											Lecce Sassuolo Milan
+Romero D.	Parma	A	10	73.3		Scommessa	Quarta		7.65											Lecce Sassuolo Milan
+Raimondo	Frosinone	A	9	72		Scommessa	Quarta		7.25	13.71	0	0.42	1	6	6	0	0	0		Atalanta Como Napoli
+Cutrone	Monza	A	9	72		Scommessa	Scomm.	Affidabile	4.4	15.97	6.98	0.49	14	5.71	5.93	1	0	0		Lecce Venezia Atalanta
+Bowie	Sassuolo	A	9	72		Scommessa	Terza	Bonus	10.25	17.8	27.94	0.55	14	5.96	6.79	4	0	1		Inter Parma Bologna
+Yeboah J.	Venezia	A	9	72		Affidabile	Quarta	Bonus	8.3											Cagliari Monza Bologna
+Bobcek	Frosinone	A	9	72		Scommessa	Scomm.		1.95											Atalanta Como Napoli
+Piccoli	Bologna	A	8	70.48		Scommessa	Quarta	Subentrante	13.7	17.06	27.94	0.61	27	5.78	6.24	4	1	1		Atalanta Lecce Napoli
+Ghedjemis	Frosinone	A	8	70.48		Bonus	Quarta		2.95											Atalanta Como Napoli
+Vitinha O.	Genoa	A	8	70.48		Titolare	Scomm.		7.2	17.52	34.92	0.62	31	5.95	6.39	5	1	5		Juventus Bologna Como
+Geubbels	Lecce	A	8	70.48		Scommessa	Quarta	Rigorista	6.1											Parma Bologna Fiorentina
+Osmajic	Genoa	A	8	70.48		Subentrante		Scommessa	1.45											Juventus Bologna Como
+Bonny	Inter	A	7	68.81		Affidabile	Scomm.	Bonus	10.45	15.86	34.92	0.66	27	6.15	6.83	5	4	1		Milan Sassuolo Juventus
+Boga	Juventus	A	7	68.81		Scommessa	Scomm.	Subentrante	8.5	13.6	27.94	0.56	13	6.19	7.15	4	1	1		Torino Genoa Roma
+Varela G.	Monza	A	7	68.81		Scommessa	Quarta	Bonus	11.45											Lecce Venezia Atalanta
+Rrahmani Al.	Venezia	A	7	68.81		Scommessa	Scomm.		1.15											Cagliari Monza Bologna
+Gnonto	Fiorentina	A	7						2.05											Cagliari Como Lazio
+Sulemana K.	Atalanta	A	6	66.78		Scommessa		Subentrante	1.15	10.78	13.97	0.54	21	6	6.24	2	1	4		Frosinone, Bologna Cagliari
+Kvernadze	Frosinone	A	6	66.78		Scommessa	Quarta	Bonus	3.95											Atalanta Como Napoli
+Noslin	Lazio	A	6	66.78		Subentrante	Scomm.		1.3	11.2	27.94	0.56	23	6.02	6.5	4	2	4		Roma Fiorentina Torino
+Stulic	Lecce	A	6	66.78		Inaffidabile			1.4	13.25	27.94	0.66	30	5.73	6.12	4	0	1		Parma Bologna Fiorentina
+Neres	Napoli	A	6	66.78		Bonus	Scomm.	Affidabile	5.45	11.22	20.95	0.56	16	6.19	6.84	3	3	3		Roma Bologna Frosinone
+Zapata D.	Torino	A	6	66.78		Affidabile	Scomm.	Infortuni	1.7	12.57	20.95	0.63	23	5.83	6.13	3	1	0		Juventus Lazio Lecce
+Zeballos	Monza	A	6						1.9											Lecce Venezia Atalanta
+Maldini	Cagliari	A	5	64.25		Bonus	Quarta	Infortuni	7.85	8.69	13.97	0.54	18	5.94	6.31	2	1	1		Atalanta Fiorentina Venezia
+Birligea	Frosinone	A	5						1.05											Atalanta Como Napoli
+Ngonge	Monza	A	5						1.6											Lecce Venezia Atalanta
+Borrelli	Cagliari	A	4	60.96		Subentrante			1.1	7.34	34.92	0.6	26	5.92	6.46	5	1	4		Atalanta Fiorentina Venezia
+Mendy P.	Cagliari	A	4	60.96		Affidabile	Scomm.		2	5.97	13.97	0.49	8	5.94	6.62	2	0	1		Atalanta Fiorentina Venezia
+Havel	Genoa	A	4	60.96		Scommessa		Subentrante	1.05											Juventus Bologna Como
+N'Dri	Lecce	A	4	60.96		Scommessa	Scomm.		1.35	6.2	13.97	0.51	17	5.82	6.09	2	0	3		Parma Bologna Fiorentina
+Camarda	Milan	A	4	60.96		Subentrante			1.85	6.71	6.98	0.55	18	5.67	5.64	1	0	1		Inter Parma Cagliari
+Mota	Monza	A	4	60.96		Affidabile	Scomm.		1.65											Lecce Venezia Atalanta
+Giovane	Napoli	A	4	60.96		Scommessa		Affidabile	1.15	7.89	20.95	0.65	31	6	6.45	3	6	2		Roma Bologna Frosinone
+Lang	Napoli	A	4	60.96		Scommessa	Scomm.		1.95	6.22	6.98	0.51	14	6.04	6.32	1	2	2		Roma Bologna Frosinone
+Lucca	Napoli	A	4	60.96		Scommessa		Subentrante	2.6	5.64	6.98	0.46	9	5.72	6	1	0	1		Roma Bologna Frosinone
+Frigan	Parma	A	4	60.96		Infortuni			1.1		0	0. N.D.	0	0	0	0	0	0		Lecce Sassuolo Milan
+Kulenovic	Torino	A	4	60.96		Scommessa		Subentrante	1	5.29	0	0.43	7	5.71	5.79	0	1	2		Juventus Lazio Lecce
+Gueye	Udinese	A	4	60.96					1.1	5.81	6.98	0.48	13	5.77	5.92	1	0	2		Genoa Lecce Milan
+Adorante	Venezia	A	4	60.96		Scommessa		Subentrante	1.15											Cagliari Monza Bologna
+Robinson J.	Monza	A	4	60.96		Subentrante			1.15											Lecce Venezia Atalanta
+Milik	Juventus	A	4	60.96		Infortuni			1.15											Torino Genoa Roma
+Fatah	Lecce	A	4						1.05											Parma Bologna Fiorentina
+Nzola	Cagliari	A	4						1.95											Atalanta Fiorentina Venezia
+Ekhator	Juventus	A	3	56.34		Subentrante		Scommessa	1.2	4.83	20.95	0.57	25	5.96	6.28	3	0	3		Torino Genoa Roma
+Elphege	Parma	A	3	56.34		Subentrante			1.5	4.3	13.97	0.51	8	6	6.88	2	1	0		Lecce Sassuolo Milan
+Lontani	Parma	A	3						1.5											Lecce Sassuolo Milan
+Trepy	Cagliari	A	1	35.69		Scommessa			0.95	0.74	0	0.42	3	5.67	5.67	0	0	0		Atalanta Fiorentina Venezia
+Bayo V.	Udinese	A	1	35.69		Scommessa		Subentrante	0.95	0.85	0	0.48	12	5.75	5.83	0	1	0		Genoa Lecce Milan
+Lisman	Venezia	A	1	35.69					0.9											Cagliari Monza Bologna
+Lauberbach	Venezia	A	1	35.69					0.9											Cagliari Monza Bologna
+De Martis	Parma	A	1						0.9											Lecce Sassuolo Milan
+Robinho Junior	Genoa	A	1						0											Juventus Bologna Como
