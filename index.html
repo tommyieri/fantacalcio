@@ -692,8 +692,28 @@ var MOTORE = (function () {
     return combinata;
   }
 
+  /*
+   * Prezzo di indifferenza: la massima offerta oltre la quale la rosa migliore
+   * che riesci ancora a chiudere vale meno di quella che chiuderesti senza di
+   * lui. `frontieraSenzaSlot` e' la frontiera calcolata con uno slot in meno
+   * nel ruolo del candidato; `valoreBaseline` e' la frontiera intatta.
+   *
+   * Restituisce 0 quando nemmeno 1 credito e' giustificato.
+   */
+  function tettoDaFrontiera(valoreCandidato, frontieraSenzaSlot, valoreBaseline, budget, capienza) {
+    var massimo = Math.min(capienza, budget);
+    var tetto = 0;
+    for (var offerta = 1; offerta <= massimo; offerta++) {
+      var completamento = frontieraSenzaSlot[budget - offerta];
+      if (completamento === undefined || completamento <= IMPOSSIBILE / 2) continue;
+      if (valoreCandidato + completamento >= valoreBaseline - 1e-7) tetto = offerta;
+    }
+    return tetto;
+  }
+
   return {
     erf: erf,
+    tettoDaFrontiera: tettoDaFrontiera,
     normalCdf: normalCdf,
     quantile: quantile,
     generatoreCasuale: generatoreCasuale,
@@ -786,10 +806,10 @@ const PLAYERS = [
   {"id":73,"nome":"Kalulu","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dd","Dc"],"fvm":47,"fvmM":49,"quot":14,"quotM":14,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Definito una garanzia sicura per il modificatore di difesa.","fonti":["SOS Fanta"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":9,"rankTot":185},
   {"id":74,"nome":"Solet","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dc"],"fvm":46,"fvmM":46,"quot":13,"quotM":13,"tag":["RIGORISTA","MODIFICATORE","TITOLARE","TOP"],"nota":"Seconda opzione dal dischetto, caso raro di difensore nelle gerarchie dei rigori.","fonti":["SNAI","MAM-e"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":10,"rankTot":185},
   {"id":75,"nome":"Bastoni","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":43,"fvmM":43,"quot":14,"quotM":14,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Titolare fisso nella difesa a tre campione d'Italia.","fonti":["DAZN"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":11,"rankTot":185},
-  {"id":76,"nome":"N'Dicka","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":42,"fvmM":42,"quot":13,"quotM":13,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Centrale titolare della difesa a tre.","fonti":["MAM-e"],"sos":{"status":"TITOLARE"},"fascia":3,"rank":12,"rankTot":185},
+  {"id":76,"nome":"N'Dicka","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":42,"fvmM":42,"quot":13,"quotM":13,"tag":["MODIFICATORE","TITOLARE","RISCHIO","TOP"],"nota":"Centrale titolare della difesa a tre. Infortunio, out nelle prime giornate","fonti":["MAM-e","Sky Sport","FantaMaster"],"sos":{"status":"TITOLARE"},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"fascia":3,"rank":12,"rankTot":185},
   {"id":77,"nome":"Ostigard","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dc"],"fvm":41,"fvmM":41,"quot":11,"quotM":11,"tag":["TOP"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":13,"rankTot":185},
   {"id":78,"nome":"Di Lorenzo","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dd","E"],"fvm":39,"fvmM":39,"quot":12,"quotM":12,"tag":["MODIFICATORE","TITOLARE","TOP"],"nota":"Terzino destro inamovibile nel 4-3-3 di Allegri.","fonti":["Sky"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":14,"rankTot":185},
-  {"id":79,"nome":"Spence","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["E"],"fvm":37,"fvmM":35,"quot":11,"quotM":10,"tag":["TOP"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":15,"rankTot":185},
+  {"id":79,"nome":"Spence","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["E"],"fvm":37,"fvmM":35,"quot":11,"quotM":10,"tag":["RISCHIO","TOP"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"nota":"Infortunio, out nelle prime giornate","fonti":["Sky Sport","FantaMaster"],"fascia":3,"rank":15,"rankTot":185},
   {"id":80,"nome":"Bisseck","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dc"],"fvm":36,"fvmM":36,"quot":12,"quotM":12,"tag":["TOP"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":16,"rankTot":185},
   {"id":81,"nome":"Chalobah T.","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dd","Dc"],"fvm":32,"fvmM":34,"quot":10,"quotM":11,"tag":[],"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":17,"rankTot":185},
   {"id":82,"nome":"Gila","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":31,"fvmM":31,"quot":13,"quotM":13,"tag":["MODIFICATORE","TITOLARE"],"nota":"Ottimo impatto nelle amichevoli: consigliato come secondo o terzo slot per le garanzie sul modificatore.","fonti":["SOS Fanta"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":18,"rankTot":185},
@@ -813,8 +833,8 @@ const PLAYERS = [
   {"id":100,"nome":"Dodò","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dd","E"],"fvm":20,"fvmM":20,"quot":9,"quotM":9,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":36,"rankTot":185},
   {"id":101,"nome":"Dragusin","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":7,"quotM":7,"tag":["NUOVO","TITOLARE"],"nota":"Dal Tottenham, centrale titolare della difesa a quattro.","fonti":["MAM-e"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":37,"rankTot":185},
   {"id":102,"nome":"Kristensen T.","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dd","Dc"],"fvm":20,"fvmM":22,"quot":6,"quotM":7,"tag":[],"fascia":3,"rank":38,"rankTot":185},
-  {"id":103,"nome":"Marusic","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":20,"fvmM":23,"quot":6,"quotM":6,"tag":["MODIFICATORE","TITOLARE"],"nota":"Terzino destro titolare di Gattuso, atteso a una spinta piu' continua e quindi a un contributo assist.","fonti":["SOS Fanta"],"sos":{"status":"TITOLARE"},"fascia":3,"rank":39,"rankTot":185},
-  {"id":104,"nome":"Mina","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":7,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":2}},"fascia":3,"rank":40,"rankTot":185},
+  {"id":103,"nome":"Marusic","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":20,"fvmM":23,"quot":6,"quotM":6,"tag":["MODIFICATORE","TITOLARE","RISCHIO"],"nota":"Terzino destro titolare di Gattuso, atteso a una spinta piu' continua e quindi a un contributo assist. Problema alla coscia in attesa di accertamenti","fonti":["SOS Fanta","Sky Sport"],"sos":{"status":"TITOLARE"},"indisponibile":{"rientro":"2026-09-19","giornateSaltate":4,"problema":"Problema alla coscia in attesa di accertamenti"},"fascia":3,"rank":39,"rankTot":185},
+  {"id":104,"nome":"Mina","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":7,"quotM":7,"tag":["RISCHIO"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":2}},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"nota":"Infortunio, out nelle prime giornate","fonti":["FantaMaster"],"fascia":3,"rank":40,"rankTot":185},
   {"id":105,"nome":"Romagnoli","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"fascia":3,"rank":41,"rankTot":185},
   {"id":106,"nome":"Theate","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Ds","Dc"],"fvm":20,"fvmM":22,"quot":8,"quotM":9,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":55,"gruppo":"XI"},"fascia":3,"rank":42,"rankTot":185},
   {"id":107,"nome":"Tiago Gabriel","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Dc"],"fvm":20,"fvmM":20,"quot":8,"quotM":8,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":43,"rankTot":185},
@@ -824,7 +844,7 @@ const PLAYERS = [
   {"id":111,"nome":"Zortea","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dd","E"],"fvm":19,"fvmM":19,"quot":7,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"XI"},"fascia":3,"rank":47,"rankTot":185},
   {"id":112,"nome":"Badiashile","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":18,"fvmM":18,"quot":7,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":48,"rankTot":185},
   {"id":113,"nome":"Bernasconi","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Ds","E"],"fvm":18,"fvmM":18,"quot":6,"quotM":6,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":85,"gruppo":"XI"},"fascia":3,"rank":49,"rankTot":185},
-  {"id":114,"nome":"Cambiaso","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":18,"fvmM":21,"quot":8,"quotM":9,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2,"CORNER":2}},"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":50,"rankTot":185},
+  {"id":114,"nome":"Cambiaso","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":18,"fvmM":21,"quot":8,"quotM":9,"tag":["RISCHIO"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2,"CORNER":2}},"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"nota":"Infortunio, out nelle prime giornate","fonti":["FantaMaster"],"fascia":3,"rank":50,"rankTot":185},
   {"id":115,"nome":"Jimenez A.","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":18,"fvmM":21,"quot":7,"quotM":8,"tag":["NUOVO","TITOLARE"],"nota":"Dal Bournemouth, titolare sulla corsia mancina.","fonti":["MAM-e"],"formazione":{"probabilita":55,"gruppo":"XI"},"fascia":3,"rank":51,"rankTot":185},
   {"id":116,"nome":"Bellanova","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dd","E"],"fvm":17,"fvmM":17,"quot":6,"quotM":6,"tag":["TITOLARE"],"nota":"Confermato titolare anche nella difesa a quattro di Sarri, sulla corsia destra.","fonti":["Sky"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"XI"},"fascia":3,"rank":52,"rankTot":185},
   {"id":117,"nome":"Lucumì","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dc"],"fvm":17,"fvmM":17,"quot":7,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"XI"},"fascia":3,"rank":53,"rankTot":185},
@@ -832,7 +852,7 @@ const PLAYERS = [
   {"id":119,"nome":"Doekhi","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dc"],"fvm":16,"fvmM":16,"quot":8,"quotM":8,"tag":["NUOVO","SCOMMESSA","MODIFICATORE"],"nota":"Centrale dall'Union Berlino: fisicita' e fiuto del gol, fra 6 e 8 reti nell'ultima stagione, a prezzo basso. Sostituisce Gila.","fonti":["Goal","Fantacalcio.it"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":55,"rankTot":185},
   {"id":120,"nome":"Valdepenas","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":16,"fvmM":18,"quot":5,"quotM":6,"tag":["NUOVO","SCOMMESSA"],"nota":"Terzino sinistro dal Real Madrid, gia' titolare in Coppa Italia a due crediti.","fonti":["Sisal"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":4,"rank":56,"rankTot":185},
   {"id":121,"nome":"Bracaglia","squadra":"Frosinone","cod":"FRO","ruolo":"D","mantra":["Ds","Dc"],"fvm":15,"fvmM":17,"quot":7,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":85,"gruppo":"XI"},"fascia":3,"rank":57,"rankTot":185},
-  {"id":122,"nome":"Buongiorno","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":15,"fvmM":15,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Operato al menisco: rientro previsto a fine novembre.","fonti":["Goal"],"sos":{"status":"RISERVA"},"fascia":3,"rank":58,"rankTot":185},
+  {"id":122,"nome":"Buongiorno","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":15,"fvmM":15,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Operato al menisco: rientro previsto a fine novembre. Infortunio muscolare","fonti":["Goal","Sky Sport","FantaMaster"],"sos":{"status":"RISERVA"},"indisponibile":{"rientro":"2026-09-30","giornateSaltate":6,"problema":"Infortunio muscolare"},"fascia":3,"rank":58,"rankTot":185},
   {"id":123,"nome":"Caleta-Car","squadra":"Sassuolo","cod":"SAS","ruolo":"D","mantra":["Dc"],"fvm":15,"fvmM":15,"quot":6,"quotM":6,"tag":[],"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":59,"rankTot":185},
   {"id":124,"nome":"Gabbia","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["Dc"],"fvm":15,"fvmM":15,"quot":7,"quotM":7,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":60,"rankTot":185},
   {"id":125,"nome":"Heggem","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Ds","Dc"],"fvm":15,"fvmM":17,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":61,"rankTot":185},
@@ -845,7 +865,7 @@ const PLAYERS = [
   {"id":132,"nome":"Marcandalli","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dc"],"fvm":14,"fvmM":14,"quot":6,"quotM":6,"tag":["TITOLARE"],"nota":"Fra i nuovi su cui punta De Rossi nella difesa a tre.","fonti":["MAM-e"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":68,"rankTot":185},
   {"id":133,"nome":"Pavard","squadra":"Inter","cod":"INT","ruolo":"D","mantra":["Dd","Dc"],"fvm":14,"fvmM":16,"quot":6,"quotM":7,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":69,"rankTot":185},
   {"id":134,"nome":"Pedraza","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Ds","E"],"fvm":14,"fvmM":14,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":70,"rankTot":185},
-  {"id":135,"nome":"Rensch","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["B","Dd","E"],"fvm":14,"fvmM":16,"quot":4,"quotM":6,"tag":[],"sos":{"status":"RISERVA"},"fascia":4,"rank":71,"rankTot":185},
+  {"id":135,"nome":"Rensch","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["B","Dd","E"],"fvm":14,"fvmM":16,"quot":4,"quotM":6,"tag":["RISCHIO"],"sos":{"status":"RISERVA"},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Risentimento al flessore"},"nota":"Risentimento al flessore","fonti":["Sky Sport","FantaMaster"],"fascia":4,"rank":71,"rankTot":185},
   {"id":136,"nome":"Rodriguez Ju.","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Ds","Dc"],"fvm":14,"fvmM":17,"quot":4,"quotM":5,"tag":[],"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":72,"rankTot":185},
   {"id":137,"nome":"Troilo","squadra":"Parma","cod":"PAR","ruolo":"D","mantra":["Dc"],"fvm":14,"fvmM":14,"quot":3,"quotM":3,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":73,"rankTot":185},
   {"id":138,"nome":"Bella-Kotchap","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Dc"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":74,"rankTot":185},
@@ -866,7 +886,7 @@ const PLAYERS = [
   {"id":153,"nome":"Comert","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["Dc"],"fvm":12,"fvmM":12,"quot":4,"quotM":4,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":89,"rankTot":185},
   {"id":154,"nome":"Correia T.","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":12,"fvmM":12,"quot":5,"quotM":5,"tag":[],"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":90,"rankTot":185},
   {"id":155,"nome":"Fortini","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["E"],"fvm":12,"fvmM":12,"quot":6,"quotM":5,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":91,"rankTot":185},
-  {"id":156,"nome":"Gallo","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Ds","E"],"fvm":12,"fvmM":12,"quot":6,"quotM":6,"tag":[],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":92,"rankTot":185},
+  {"id":156,"nome":"Gallo","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Ds","E"],"fvm":12,"fvmM":12,"quot":6,"quotM":6,"tag":["RISCHIO"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":80,"gruppo":"XI"},"indisponibile":{"rientro":"2026-09-12","giornateSaltate":3,"problema":"Ferita da taglio allo zigomo, in dubbio"},"nota":"Ferita da taglio allo zigomo, in dubbio","fonti":["Sky Sport"],"fascia":3,"rank":92,"rankTot":185},
   {"id":157,"nome":"Gaspar K.","squadra":"Lecce","cod":"LEC","ruolo":"D","mantra":["Dc"],"fvm":12,"fvmM":12,"quot":5,"quotM":5,"tag":[],"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":93,"rankTot":185},
   {"id":158,"nome":"Helland","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dd","Dc"],"fvm":12,"fvmM":12,"quot":3,"quotM":3,"tag":[],"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":94,"rankTot":185},
   {"id":159,"nome":"Joao Mario","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Dd","E"],"fvm":12,"fvmM":12,"quot":3,"quotM":3,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":95,"rankTot":185},
@@ -880,7 +900,7 @@ const PLAYERS = [
   {"id":167,"nome":"Viery","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":12,"fvmM":14,"quot":6,"quotM":7,"tag":["NUOVO","TITOLARE"],"nota":"Dal Gremio, coppia centrale con Dragusin.","fonti":["MAM-e"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":55,"gruppo":"XI"},"fascia":3,"rank":103,"rankTot":185},
   {"id":168,"nome":"Balerdi","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":11,"fvmM":11,"quot":6,"quotM":6,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":104,"rankTot":185},
   {"id":169,"nome":"Favasuli","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":11,"fvmM":13,"quot":4,"quotM":4,"tag":[],"fascia":4,"rank":105,"rankTot":185},
-  {"id":170,"nome":"Hien","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dc"],"fvm":11,"fvmM":11,"quot":7,"quotM":7,"tag":["RISCHIO"],"nota":"Infortunio muscolare, rientro atteso a ottobre: salta le prime giornate.","fonti":["Goal","SOS Fanta"],"sos":{"status":"RISERVA"},"fascia":3,"rank":106,"rankTot":185},
+  {"id":170,"nome":"Hien","squadra":"Atalanta","cod":"ATA","ruolo":"D","mantra":["Dc"],"fvm":11,"fvmM":11,"quot":7,"quotM":7,"tag":["RISCHIO"],"nota":"Infortunio muscolare, rientro atteso a ottobre: salta le prime giornate. Lesione del tendine del semimembranoso della gamba sinistra","fonti":["Goal","SOS Fanta","Sky Sport"],"sos":{"status":"RISERVA"},"indisponibile":{"rientro":"2026-10-11","giornateSaltate":7,"problema":"Lesione del tendine del semimembranoso della gamba sinistra"},"fascia":3,"rank":106,"rankTot":185},
   {"id":171,"nome":"Lucchesi","squadra":"Monza","cod":"MON","ruolo":"D","mantra":["Dc"],"fvm":11,"fvmM":11,"quot":3,"quotM":3,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":85,"gruppo":"XI"},"fascia":4,"rank":107,"rankTot":185},
   {"id":172,"nome":"Palma","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Dc"],"fvm":11,"fvmM":11,"quot":3,"quotM":3,"tag":["SCOMMESSA"],"nota":"Un credito, scommessa a costo minimo con potenziale di crescita negli spazi.","fonti":["Sisal"],"sos":{"status":"BALLOTTAGGIO"},"fascia":4,"rank":108,"rankTot":185},
   {"id":173,"nome":"Van Der Brempt","squadra":"Sassuolo","cod":"SAS","ruolo":"D","mantra":["Dd","E"],"fvm":11,"fvmM":11,"quot":2,"quotM":2,"tag":["LOWCOST"],"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":4,"rank":109,"rankTot":185},
@@ -890,7 +910,7 @@ const PLAYERS = [
   {"id":177,"nome":"Doig","squadra":"Sassuolo","cod":"SAS","ruolo":"D","mantra":["Ds","E"],"fvm":10,"fvmM":10,"quot":5,"quotM":5,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"XI"},"fascia":4,"rank":113,"rankTot":185},
   {"id":178,"nome":"Drameh","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":10,"fvmM":12,"quot":3,"quotM":4,"tag":[],"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":114,"rankTot":185},
   {"id":179,"nome":"Floriani Mussolini","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","E"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":115,"rankTot":185},
-  {"id":180,"nome":"Gatti","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dc"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":116,"rankTot":185},
+  {"id":180,"nome":"Gatti","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dc"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":["RISCHIO"],"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"indisponibile":{"rientro":"2026-09-12","giornateSaltate":3,"problema":"Risentimento muscolare, in forte dubbio"},"nota":"Risentimento muscolare, in forte dubbio","fonti":["Sky Sport"],"fascia":4,"rank":116,"rankTot":185},
   {"id":181,"nome":"Ghilardi","squadra":"Roma","cod":"ROM","ruolo":"D","mantra":["Dc"],"fvm":10,"fvmM":10,"quot":5,"quotM":5,"tag":[],"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":4,"rank":117,"rankTot":185},
   {"id":182,"nome":"Halhal","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Dc"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":4,"rank":118,"rankTot":185},
   {"id":183,"nome":"Haps","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Ds","E"],"fvm":10,"fvmM":10,"quot":5,"quotM":5,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":60,"gruppo":"XI"},"fascia":4,"rank":119,"rankTot":185},
@@ -899,7 +919,7 @@ const PLAYERS = [
   {"id":186,"nome":"Mazzocchi","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Dd","Ds","E"],"fvm":10,"fvmM":12,"quot":1,"quotM":1,"tag":["LOWCOST"],"formazione":{"probabilita":55,"gruppo":"XI"},"fascia":4,"rank":122,"rankTot":185},
   {"id":187,"nome":"Mitaj","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Ds","E"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"CORNER":1}},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":4,"rank":123,"rankTot":185},
   {"id":188,"nome":"Oyono A.","squadra":"Frosinone","cod":"FRO","ruolo":"D","mantra":["Dd","E"],"fvm":10,"fvmM":10,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":124,"rankTot":185},
-  {"id":189,"nome":"Parisi","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","E"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"fascia":4,"rank":125,"rankTot":185},
+  {"id":189,"nome":"Parisi","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","E"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":["RISCHIO"],"indisponibile":{"rientro":"2026-11-01","giornateSaltate":10,"problema":"Ricostruzione del legamento crociato anteriore del ginocchio destro"},"nota":"Ricostruzione del legamento crociato anteriore del ginocchio destro","fonti":["Sky Sport","SOS Fanta"],"fascia":4,"rank":125,"rankTot":185},
   {"id":190,"nome":"Ranieri L.","squadra":"Fiorentina","cod":"FIO","ruolo":"D","mantra":["Ds","Dc"],"fvm":10,"fvmM":12,"quot":3,"quotM":3,"tag":[],"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":126,"rankTot":185},
   {"id":191,"nome":"Schingtienne","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Dc"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":127,"rankTot":185},
   {"id":192,"nome":"Smolcic I.","squadra":"Como","cod":"COM","ruolo":"D","mantra":["Dd","E"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":128,"rankTot":185},
@@ -929,7 +949,7 @@ const PLAYERS = [
   {"id":216,"nome":"Alhassane","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Ds","E"],"fvm":6,"fvmM":6,"quot":2,"quotM":2,"tag":["LOWCOST"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":152,"rankTot":185},
   {"id":217,"nome":"Aurelio","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Ds","E"],"fvm":5,"fvmM":5,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":153,"rankTot":185},
   {"id":218,"nome":"Biraghi","squadra":"Torino","cod":"TOR","ruolo":"D","mantra":["B","Ds","E"],"fvm":5,"fvmM":6,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":154,"rankTot":185},
-  {"id":219,"nome":"Casale","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dc"],"fvm":5,"fvmM":5,"quot":3,"quotM":3,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":155,"rankTot":185},
+  {"id":219,"nome":"Casale","squadra":"Bologna","cod":"BOL","ruolo":"D","mantra":["Dc"],"fvm":5,"fvmM":5,"quot":3,"quotM":3,"tag":["RISCHIO"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"nota":"Infortunio, out nelle prime giornate","fonti":["FantaMaster"],"fascia":4,"rank":155,"rankTot":185},
   {"id":220,"nome":"Ebosse","squadra":"Udinese","cod":"UDI","ruolo":"D","mantra":["Ds","Dc"],"fvm":5,"fvmM":5,"quot":3,"quotM":3,"tag":[],"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":156,"rankTot":185},
   {"id":221,"nome":"Goglichidze","squadra":"Monza","cod":"MON","ruolo":"D","mantra":["Dd","Dc"],"fvm":5,"fvmM":7,"quot":2,"quotM":3,"tag":["LOWCOST"],"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":157,"rankTot":185},
   {"id":222,"nome":"Lazzari","squadra":"Lazio","cod":"LAZ","ruolo":"D","mantra":["Dd","E"],"fvm":5,"fvmM":5,"quot":2,"quotM":2,"tag":["LOWCOST"],"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":158,"rankTot":185},
@@ -945,8 +965,8 @@ const PLAYERS = [
   {"id":232,"nome":"Sagrado","squadra":"Venezia","cod":"VEN","ruolo":"D","mantra":["Dd","E"],"fvm":4,"fvmM":4,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":168,"rankTot":185},
   {"id":233,"nome":"Terracciano F.","squadra":"Milan","cod":"MIL","ruolo":"D","mantra":["B","Dd","Ds"],"fvm":4,"fvmM":7,"quot":2,"quotM":3,"tag":["LOWCOST"],"fascia":4,"rank":169,"rankTot":185},
   {"id":234,"nome":"Carboni F.","squadra":"Parma","cod":"PAR","ruolo":"D","mantra":["Ds","E"],"fvm":3,"fvmM":3,"quot":1,"quotM":1,"tag":["LOWCOST"],"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":170,"rankTot":185},
-  {"id":235,"nome":"Idrissi R.","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Ds","E"],"fvm":3,"fvmM":3,"quot":3,"quotM":3,"tag":[],"fascia":4,"rank":171,"rankTot":185},
-  {"id":236,"nome":"Marianucci","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":3,"fvmM":3,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":172,"rankTot":185},
+  {"id":235,"nome":"Idrissi R.","squadra":"Cagliari","cod":"CAG","ruolo":"D","mantra":["Ds","E"],"fvm":3,"fvmM":3,"quot":3,"quotM":3,"tag":["RISCHIO"],"indisponibile":{"rientro":"2027-03-01","giornateSaltate":28,"problema":"Ricostruzione del legamento crociato anteriore del ginocchio sinistro: stagione di fatto compromessa"},"nota":"Ricostruzione del legamento crociato anteriore del ginocchio sinistro: stagione di fatto compromessa","fonti":["Sky Sport","SOS Fanta"],"fascia":4,"rank":171,"rankTot":185},
+  {"id":236,"nome":"Marianucci","squadra":"Napoli","cod":"NAP","ruolo":"D","mantra":["Dc"],"fvm":3,"fvmM":3,"quot":1,"quotM":1,"tag":["RISCHIO","LOWCOST"],"indisponibile":{"rientro":"2026-10-11","giornateSaltate":7,"problema":"Infortunio, rientro dopo la sosta"},"nota":"Infortunio, rientro dopo la sosta","fonti":["FantaMaster"],"fascia":4,"rank":172,"rankTot":185},
   {"id":237,"nome":"Puczka","squadra":"Genoa","cod":"GEN","ruolo":"D","mantra":["Ds","E"],"fvm":3,"fvmM":3,"quot":2,"quotM":2,"tag":["LOWCOST"],"formazione":{"probabilita":50,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":173,"rankTot":185},
   {"id":238,"nome":"Rugani","squadra":"Juventus","cod":"JUV","ruolo":"D","mantra":["Dc"],"fvm":3,"fvmM":3,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":174,"rankTot":185},
   {"id":239,"nome":"Antov","squadra":"Monza","cod":"MON","ruolo":"D","mantra":["Dc"],"fvm":2,"fvmM":2,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":175,"rankTot":185},
@@ -962,8 +982,8 @@ const PLAYERS = [
   {"id":249,"nome":"Pieragnolo","squadra":"Sassuolo","cod":"SAS","ruolo":"D","mantra":["Ds","E"],"fvm":1,"fvmM":1,"quot":1,"quotM":1,"tag":["LOWCOST"],"fascia":4,"rank":185,"rankTot":185},
   {"id":250,"nome":"Paz N.","squadra":"Como","cod":"COM","ruolo":"C","mantra":["T","A"],"fvm":245,"fvmM":245,"quot":29,"quotM":27,"tag":["TITOLARE","TOP"],"nota":"Uno dei tre primi slot veri di centrocampo insieme a McTominay e Orsolini: nessuna criticita' fantacalcistica secondo Sky.","fonti":["Sky","FantaMaster"],"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":1,"rankTot":190},
   {"id":251,"nome":"Calhanoglu","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["M","C"],"fvm":243,"fvmM":273,"quot":28,"quotM":29,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista senza discussioni davanti a Lautaro e Zielinski: tiro da fuori, punizioni e rigori.","fonti":["SNAI","Sky","FantaMaster"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":2,"rankTot":190},
-  {"id":252,"nome":"Mctominay","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["C","T"],"fvm":220,"fvmM":220,"quot":27,"quotM":27,"tag":["TITOLARE","TOP"],"nota":"Secondo nome consigliato da Sky in assoluto: Allegri predilige il suo profilo, potrebbe essere il nuovo Rabiot. In doppia cifra la scorsa stagione.","fonti":["Sky","FantaMaster"],"sos":{"status":"TITOLARE"},"fascia":2,"rank":3,"rankTot":190},
-  {"id":253,"nome":"Orsolini","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","A"],"fvm":177,"fvmM":177,"quot":25,"quotM":24,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista e ala offensiva pura: in doppia cifra la scorsa stagione, e' uno dei veri primi slot di centrocampo.","fonti":["SNAI","FantaMaster","Goal"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"fascia":2,"rank":4,"rankTot":190},
+  {"id":252,"nome":"Mctominay","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["C","T"],"fvm":220,"fvmM":220,"quot":27,"quotM":27,"tag":["TITOLARE","RISCHIO","TOP"],"nota":"Secondo nome consigliato da Sky in assoluto: Allegri predilige il suo profilo, potrebbe essere il nuovo Rabiot. In doppia cifra la scorsa stagione. Infortunio muscolare, rientro dopo la sosta","fonti":["Sky","FantaMaster","Sky Sport"],"sos":{"status":"TITOLARE"},"indisponibile":{"rientro":"2026-10-11","giornateSaltate":7,"problema":"Infortunio muscolare, rientro dopo la sosta"},"fascia":2,"rank":3,"rankTot":190},
+  {"id":253,"nome":"Orsolini","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["W","A"],"fvm":177,"fvmM":177,"quot":25,"quotM":24,"tag":["RIGORISTA","TITOLARE","RISCHIO","TOP"],"nota":"Primo rigorista e ala offensiva pura: in doppia cifra la scorsa stagione, e' uno dei veri primi slot di centrocampo. Problema muscolare, salta le prossime giornate","fonti":["SNAI","FantaMaster","Goal","Sky Sport"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Problema muscolare, salta le prossime giornate"},"fascia":2,"rank":4,"rankTot":190},
   {"id":254,"nome":"Pulisic","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["T","A"],"fvm":150,"fvmM":150,"quot":24,"quotM":22,"tag":["RIGORISTA","RISCHIO","TITOLARE","TOP"],"nota":"Trequartista titolare e secondo rigorista, ma microfrattura tibia-perone con edema osseo: convocazione molto difficile per la prima.","fonti":["SNAI","SOS Fanta","CalcioD'Angolo"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":2,"PUNIZIONI":2,"CORNER":2}},"formazione":{"probabilita":50,"gruppo":"ALTERNATIVA"},"fascia":2,"rank":5,"rankTot":190},
   {"id":255,"nome":"Rabiot","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["C","T"],"fvm":145,"fvmM":145,"quot":23,"quotM":23,"tag":["TITOLARE","TOP"],"nota":"Titolare in mediana nel nuovo Milan.","fonti":["Sky"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":85,"gruppo":"XI"},"fascia":2,"rank":6,"rankTot":190},
   {"id":256,"nome":"De Bruyne","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["T"],"fvm":108,"fvmM":108,"quot":17,"quotM":16,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Rigorista designato quando in campo, con Hojlund alternativa.","fonti":["SNAI","Sky"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":2,"rank":7,"rankTot":190},
@@ -972,11 +992,11 @@ const PLAYERS = [
   {"id":259,"nome":"Da Cunha","squadra":"Como","cod":"COM","ruolo":"C","mantra":["C","T"],"fvm":87,"fvmM":87,"quot":18,"quotM":18,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Ha scavalcato Nico Paz nelle gerarchie dal dischetto: rigori a un centrocampista gia' da bonus.","fonti":["SNAI","SOS Fanta"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":1}},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":2,"rank":10,"rankTot":190},
   {"id":260,"nome":"Zaccagni","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["W","A"],"fvm":87,"fvmM":84,"quot":16,"quotM":15,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Primo rigorista e capitano, con Cataldi come alternativa piu' che credibile.","fonti":["SNAI","Sky"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":11,"rankTot":190},
   {"id":261,"nome":"Barella","squadra":"Inter","cod":"INT","ruolo":"C","mantra":["C"],"fvm":81,"fvmM":81,"quot":18,"quotM":18,"tag":["TITOLARE","TOP"],"nota":"Inamovibile nel 3-5-2 di Chivu.","fonti":["DAZN"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":12,"rankTot":190},
-  {"id":262,"nome":"Zaniolo","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["T","A"],"fvm":80,"fvmM":80,"quot":18,"quotM":17,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Perno offensivo dell'Udinese e terza opzione dal dischetto.","fonti":["SNAI","MAM-e"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":1,"CORNER":1}},"fascia":2,"rank":13,"rankTot":190},
+  {"id":262,"nome":"Zaniolo","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["T","A"],"fvm":80,"fvmM":80,"quot":18,"quotM":17,"tag":["RIGORISTA","TITOLARE","RISCHIO","TOP"],"nota":"Perno offensivo dell'Udinese e terza opzione dal dischetto. Lesione al bicipite femorale destro rimediata col Como il 22 agosto: salta tutto settembre","fonti":["SNAI","MAM-e","Goal","TuttoMercatoWeb","SOS Fanta"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":1,"CORNER":1}},"indisponibile":{"rientro":"2026-10-10","giornateSaltate":7,"problema":"Lesione al bicipite femorale destro rimediata col Como il 22 agosto: salta tutto settembre"},"fascia":2,"rank":13,"rankTot":190},
   {"id":263,"nome":"Atta","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["C","T"],"fvm":78,"fvmM":78,"quot":15,"quotM":15,"tag":["TITOLARE","TOP"],"nota":"Titolare nel tridente di Grosso dopo l'arrivo dall'Udinese.","fonti":["MAM-e"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":14,"rankTot":190},
   {"id":264,"nome":"Frattesi","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["C","T"],"fvm":75,"fvmM":75,"quot":10,"quotM":10,"tag":["TOP"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":15,"rankTot":190},
   {"id":265,"nome":"Vlasic","squadra":"Torino","cod":"TOR","ruolo":"C","mantra":["T"],"fvm":73,"fvmM":73,"quot":13,"quotM":12,"tag":["RIGORISTA","TITOLARE","TOP"],"nota":"Rigorista ormai stabile davanti a Zapata e Simeone, trequartista titolare del 3-4-2-1 di Abate.","fonti":["SNAI","MAM-e"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":16,"rankTot":190},
-  {"id":266,"nome":"Mckennie","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C","T"],"fvm":70,"fvmM":70,"quot":17,"quotM":17,"tag":[],"sos":{"status":"TITOLARE"},"fascia":2,"rank":17,"rankTot":190},
+  {"id":266,"nome":"Mckennie","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["C","T"],"fvm":70,"fvmM":70,"quot":17,"quotM":17,"tag":["RISCHIO"],"sos":{"status":"TITOLARE"},"indisponibile":{"rientro":"2026-09-04","giornateSaltate":2,"problema":"Affaticamento muscolare, rientro imminente"},"nota":"Affaticamento muscolare, rientro imminente","fonti":["FantaMaster"],"fascia":2,"rank":17,"rankTot":190},
   {"id":267,"nome":"Conceicao","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["W","A"],"fvm":68,"fvmM":68,"quot":13,"quotM":12,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":18,"rankTot":190},
   {"id":268,"nome":"Ekkelenkamp","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["C","T"],"fvm":57,"fvmM":57,"quot":12,"quotM":12,"tag":["TITOLARE"],"nota":"Titolare in mediana nel centrocampo a cinque.","fonti":["MAM-e"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":19,"rankTot":190},
   {"id":269,"nome":"Taylor K.","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["C","T"],"fvm":53,"fvmM":53,"quot":13,"quotM":13,"tag":["TITOLARE"],"nota":"Titolare in mediana accanto a Rovella.","fonti":["FantaMaster"],"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":20,"rankTot":190},
@@ -1000,7 +1020,7 @@ const PLAYERS = [
   {"id":286,"nome":"Politano","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["W"],"fvm":37,"fvmM":37,"quot":9,"quotM":8,"tag":["TITOLARE"],"nota":"Titolare nel tridente offensivo.","fonti":["Sky"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2,"CORNER":2}},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":38,"rankTot":190},
   {"id":287,"nome":"Saelemaekers","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["E","W"],"fvm":35,"fvmM":35,"quot":11,"quotM":12,"tag":["TITOLARE"],"nota":"Trequartista titolare accanto a Pulisic nel 3-4-2-1.","fonti":["Sky","MAM-e"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":39,"rankTot":190},
   {"id":288,"nome":"Vergara","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["W","T"],"fvm":35,"fvmM":35,"quot":10,"quotM":10,"tag":["SCOMMESSA"],"nota":"Parte dietro De Bruyne ma puo' avere parecchio spazio ed essere decisivo anche dalla panchina.","fonti":["Fantacalcio.it"],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":40,"rankTot":190},
-  {"id":289,"nome":"Bernabè","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["C"],"fvm":34,"fvmM":34,"quot":7,"quotM":7,"tag":["TITOLARE"],"nota":"Faro tecnico del centrocampo ducale.","fonti":["MAM-e"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":41,"rankTot":190},
+  {"id":289,"nome":"Bernabè","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["C"],"fvm":34,"fvmM":34,"quot":7,"quotM":7,"tag":["TITOLARE","RISCHIO"],"nota":"Faro tecnico del centrocampo ducale. Infortunio, out nelle prime giornate","fonti":["MAM-e","FantaMaster"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":90,"gruppo":"XI"},"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"fascia":3,"rank":41,"rankTot":190},
   {"id":290,"nome":"Perrone","squadra":"Como","cod":"COM","ruolo":"C","mantra":["M","C"],"fvm":34,"fvmM":39,"quot":10,"quotM":11,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":42,"rankTot":190},
   {"id":291,"nome":"Locatelli","squadra":"Juventus","cod":"JUV","ruolo":"C","mantra":["M","C"],"fvm":33,"fvmM":38,"quot":9,"quotM":10,"tag":["RIGORISTA","TITOLARE"],"nota":"Contende i rigori a Yildiz, titolare in mediana.","fonti":["SNAI"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":43,"rankTot":190},
   {"id":292,"nome":"Rodriguez Je.","squadra":"Como","cod":"COM","ruolo":"C","mantra":["W","A"],"fvm":31,"fvmM":31,"quot":11,"quotM":10,"tag":[],"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":44,"rankTot":190},
@@ -1039,7 +1059,7 @@ const PLAYERS = [
   {"id":325,"nome":"Fagioli","squadra":"Fiorentina","cod":"FIO","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":25,"quot":7,"quotM":8,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":77,"rankTot":190},
   {"id":326,"nome":"Karlstrom","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["M","C"],"fvm":20,"fvmM":23,"quot":7,"quotM":8,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":78,"rankTot":190},
   {"id":327,"nome":"Konè I.","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["C"],"fvm":20,"fvmM":20,"quot":8,"quotM":8,"tag":["RISCHIO"],"nota":"Frattura di tibia e perone con intervento di riduzione: rientro previsto a gennaio 2027.","fonti":["Goal","CalcioD'Angolo"],"sos":{"status":"RISERVA"},"fascia":3,"rank":79,"rankTot":190},
-  {"id":328,"nome":"Pellegrini Lo.","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["C","T"],"fvm":20,"fvmM":20,"quot":9,"quotM":9,"tag":[],"fascia":3,"rank":80,"rankTot":190},
+  {"id":328,"nome":"Pellegrini Lo.","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["C","T"],"fvm":20,"fvmM":20,"quot":9,"quotM":9,"tag":["RISCHIO"],"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Infortunio, out nelle prime giornate"},"nota":"Infortunio, out nelle prime giornate","fonti":["Sky Sport"],"fascia":3,"rank":80,"rankTot":190},
   {"id":329,"nome":"Basic","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["M","C"],"fvm":19,"fvmM":20,"quot":6,"quotM":7,"tag":[],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":81,"rankTot":190},
   {"id":330,"nome":"Frendrup","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["M","C"],"fvm":19,"fvmM":24,"quot":7,"quotM":8,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":82,"rankTot":190},
   {"id":331,"nome":"Pierotti","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["W"],"fvm":19,"fvmM":17,"quot":6,"quotM":5,"tag":["TITOLARE"],"nota":"Titolare nel tridente, terza opzione dal dischetto.","fonti":["MAM-e","SOS Fanta"],"sos":{"status":"TITOLARE","piazzati":{"PUNIZIONI":2,"CORNER":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":83,"rankTot":190},
@@ -1055,7 +1075,7 @@ const PLAYERS = [
   {"id":341,"nome":"Adzic","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["C","T"],"fvm":16,"fvmM":16,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":93,"rankTot":190},
   {"id":342,"nome":"Ellertsson","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["E","C"],"fvm":16,"fvmM":19,"quot":6,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":94,"rankTot":190},
   {"id":343,"nome":"Loftus-Cheek","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["C","T"],"fvm":16,"fvmM":16,"quot":4,"quotM":4,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":95,"rankTot":190},
-  {"id":344,"nome":"Nicolussi Caviglia","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["M","C"],"fvm":16,"fvmM":21,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2,"CORNER":2}},"fascia":3,"rank":96,"rankTot":190},
+  {"id":344,"nome":"Nicolussi Caviglia","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["M","C"],"fvm":16,"fvmM":21,"quot":6,"quotM":6,"tag":["RISCHIO"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2,"CORNER":2}},"indisponibile":{"rientro":"2026-10-24","giornateSaltate":9,"problema":"Sindrome pubalgica, data di rientro da definire"},"nota":"Sindrome pubalgica, data di rientro da definire","fonti":["Sky Sport"],"fascia":3,"rank":96,"rankTot":190},
   {"id":345,"nome":"Rovella","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["M","C"],"fvm":16,"fvmM":19,"quot":7,"quotM":8,"tag":["TITOLARE"],"nota":"Play titolare nel 4-2-3-1 di Gattuso.","fonti":["FantaMaster"],"sos":{"status":"BALLOTTAGGIO"},"fascia":3,"rank":97,"rankTot":190},
   {"id":346,"nome":"Unai Gomez","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["T"],"fvm":16,"fvmM":14,"quot":7,"quotM":6,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":98,"rankTot":190},
   {"id":347,"nome":"Colpani","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["T"],"fvm":15,"fvmM":13,"quot":9,"quotM":8,"tag":["TITOLARE"],"nota":"Trequartista titolare nel 3-4-2-1 di Juric.","fonti":["MAM-e"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":1,"CORNER":2}},"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":3,"rank":99,"rankTot":190},
@@ -1065,7 +1085,7 @@ const PLAYERS = [
   {"id":351,"nome":"Matic","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["M","C"],"fvm":15,"fvmM":17,"quot":6,"quotM":6,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":103,"rankTot":190},
   {"id":352,"nome":"Musah","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["C","W"],"fvm":15,"fvmM":15,"quot":3,"quotM":3,"tag":[],"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":4,"rank":104,"rankTot":190},
   {"id":353,"nome":"Perez K.","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["C","T"],"fvm":15,"fvmM":15,"quot":5,"quotM":5,"tag":[],"formazione":{"probabilita":80,"gruppo":"XI"},"fascia":4,"rank":105,"rankTot":190},
-  {"id":354,"nome":"Pessina","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["M","C"],"fvm":15,"fvmM":20,"quot":6,"quotM":7,"tag":["RIGORISTA","RISCHIO"],"nota":"Primo rigorista e capitano, ma operato per lussazione rotulea: in dubbio addirittura per la nona giornata.","fonti":["Goal","SOS Fanta","CalcioD'Angolo"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":2,"CORNER":1}},"fascia":3,"rank":106,"rankTot":190},
+  {"id":354,"nome":"Pessina","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["M","C"],"fvm":15,"fvmM":20,"quot":6,"quotM":7,"tag":["RIGORISTA","RISCHIO"],"nota":"Primo rigorista e capitano, ma operato per lussazione rotulea: in dubbio addirittura per la nona giornata. Operato per lussazione rotulea, rientro previsto a novembre","fonti":["Goal","SOS Fanta","CalcioD'Angolo"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":2,"CORNER":1}},"indisponibile":{"rientro":"2026-11-07","giornateSaltate":11,"problema":"Operato per lussazione rotulea, rientro previsto a novembre"},"fascia":3,"rank":106,"rankTot":190},
   {"id":355,"nome":"Piotrowski","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["M","C"],"fvm":15,"fvmM":17,"quot":6,"quotM":7,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":85,"gruppo":"XI"},"fascia":3,"rank":107,"rankTot":190},
   {"id":356,"nome":"Sow","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["M","C"],"fvm":15,"fvmM":20,"quot":7,"quotM":8,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":108,"rankTot":190},
   {"id":357,"nome":"Winks","squadra":"Cagliari","cod":"CAG","ruolo":"C","mantra":["M","C"],"fvm":15,"fvmM":20,"quot":6,"quotM":7,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":109,"rankTot":190},
@@ -1074,10 +1094,10 @@ const PLAYERS = [
   {"id":360,"nome":"Moro N","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["M","C"],"fvm":14,"fvmM":17,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":112,"rankTot":190},
   {"id":361,"nome":"Tourè I.","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["E","M"],"fvm":14,"fvmM":17,"quot":6,"quotM":7,"tag":[],"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":113,"rankTot":190},
   {"id":362,"nome":"Adopo","squadra":"Cagliari","cod":"CAG","ruolo":"C","mantra":["M","C"],"fvm":13,"fvmM":16,"quot":7,"quotM":8,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":114,"rankTot":190},
-  {"id":363,"nome":"Dele-Bashiru","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["C","T"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"fascia":4,"rank":115,"rankTot":190},
+  {"id":363,"nome":"Dele-Bashiru","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["C","T"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":["RISCHIO"],"sos":{"status":"BALLOTTAGGIO"},"indisponibile":{"rientro":"2026-09-19","giornateSaltate":4,"problema":"Problema muscolare, in dubbio"},"nota":"Problema muscolare, in dubbio","fonti":["Sky Sport"],"fascia":4,"rank":115,"rankTot":190},
   {"id":364,"nome":"Jashari","squadra":"Milan","cod":"MIL","ruolo":"C","mantra":["M","C"],"fvm":13,"fvmM":13,"quot":5,"quotM":5,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":116,"rankTot":190},
   {"id":365,"nome":"Berisha M.","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["C","T"],"fvm":12,"fvmM":12,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":117,"rankTot":190},
-  {"id":366,"nome":"Cataldi","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["M","C"],"fvm":12,"fvmM":15,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2}},"fascia":4,"rank":118,"rankTot":190},
+  {"id":366,"nome":"Cataldi","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["M","C"],"fvm":12,"fvmM":15,"quot":4,"quotM":4,"tag":["RISCHIO"],"sos":{"status":"BALLOTTAGGIO","piazzati":{"PUNIZIONI":2}},"indisponibile":{"rientro":"2026-09-12","giornateSaltate":3,"problema":"In fase di recupero atletico, in dubbio"},"nota":"In fase di recupero atletico, in dubbio","fonti":["Sky Sport"],"fascia":4,"rank":118,"rankTot":190},
   {"id":367,"nome":"Cichella","squadra":"Frosinone","cod":"FRO","ruolo":"C","mantra":["M","C"],"fvm":12,"fvmM":15,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":119,"rankTot":190},
   {"id":368,"nome":"Diallo O.","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["W","A"],"fvm":12,"fvmM":10,"quot":3,"quotM":2,"tag":[],"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":120,"rankTot":190},
   {"id":369,"nome":"Dominguez B.","squadra":"Sassuolo","cod":"SAS","ruolo":"C","mantra":["W","A"],"fvm":12,"fvmM":12,"quot":4,"quotM":3,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":121,"rankTot":190},
@@ -1100,10 +1120,10 @@ const PLAYERS = [
   {"id":386,"nome":"Meichtry","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["W","T"],"fvm":11,"fvmM":13,"quot":5,"quotM":5,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":138,"rankTot":190},
   {"id":387,"nome":"Sohm","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["C"],"fvm":11,"fvmM":11,"quot":5,"quotM":5,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":139,"rankTot":190},
   {"id":388,"nome":"Traorè Hj.","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["W","T"],"fvm":11,"fvmM":11,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":140,"rankTot":190},
-  {"id":389,"nome":"Addai","squadra":"Como","cod":"COM","ruolo":"C","mantra":["W","A"],"fvm":10,"fvmM":8,"quot":4,"quotM":4,"tag":["RISCHIO"],"nota":"Rottura del tendine d'Achille sinistro, gia' operato: salta tutta la prima parte di stagione.","fonti":["Goal","SOS Fanta"],"sos":{"status":"RISERVA"},"fascia":4,"rank":141,"rankTot":190},
+  {"id":389,"nome":"Addai","squadra":"Como","cod":"COM","ruolo":"C","mantra":["W","A"],"fvm":10,"fvmM":8,"quot":4,"quotM":4,"tag":["RISCHIO"],"nota":"Rottura del tendine d'Achille sinistro, gia' operato: salta tutta la prima parte di stagione. Operato per la rottura del tendine d'Achille della gamba sinistra","fonti":["Goal","SOS Fanta","Sky Sport"],"sos":{"status":"RISERVA"},"indisponibile":{"rientro":"2027-02-01","giornateSaltate":24,"problema":"Operato per la rottura del tendine d'Achille della gamba sinistra"},"fascia":4,"rank":141,"rankTot":190},
   {"id":390,"nome":"Amondarain","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":13,"quot":5,"quotM":6,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":142,"rankTot":190},
   {"id":391,"nome":"De Roon","squadra":"Roma","cod":"ROM","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":13,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":143,"rankTot":190},
-  {"id":392,"nome":"El Azzouzi O.","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":12,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":144,"rankTot":190},
+  {"id":392,"nome":"El Azzouzi O.","squadra":"Bologna","cod":"BOL","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":12,"quot":2,"quotM":2,"tag":["RISCHIO","LOWCOST"],"indisponibile":{"rientro":"2026-09-24","giornateSaltate":5,"problema":"Lesione del bicipite femorale della coscia sinistra"},"nota":"Lesione del bicipite femorale della coscia sinistra","fonti":["Sky Sport"],"fascia":4,"rank":144,"rankTot":190},
   {"id":393,"nome":"Gandelman","squadra":"Lecce","cod":"LEC","ruolo":"C","mantra":["C","T"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":145,"rankTot":190},
   {"id":394,"nome":"Gilmour","squadra":"Napoli","cod":"NAP","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":146,"rankTot":190},
   {"id":395,"nome":"Grillitsch","squadra":"Frosinone","cod":"FRO","ruolo":"C","mantra":["M","C"],"fvm":10,"fvmM":13,"quot":4,"quotM":4,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":147,"rankTot":190},
@@ -1134,7 +1154,7 @@ const PLAYERS = [
   {"id":420,"nome":"Colombo L.","squadra":"Monza","cod":"MON","ruolo":"C","mantra":["M","C"],"fvm":4,"fvmM":5,"quot":3,"quotM":3,"tag":[],"fascia":4,"rank":172,"rankTot":190},
   {"id":421,"nome":"Duncan","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["C"],"fvm":4,"fvmM":4,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":173,"rankTot":190},
   {"id":422,"nome":"Larraga","squadra":"Udinese","cod":"UDI","ruolo":"C","mantra":["M","C"],"fvm":4,"fvmM":4,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":174,"rankTot":190},
-  {"id":423,"nome":"Venturino","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["W"],"fvm":4,"fvmM":4,"quot":2,"quotM":2,"tag":["LOWCOST"],"fascia":4,"rank":175,"rankTot":190},
+  {"id":423,"nome":"Venturino","squadra":"Genoa","cod":"GEN","ruolo":"C","mantra":["W"],"fvm":4,"fvmM":4,"quot":2,"quotM":2,"tag":["RISCHIO","LOWCOST"],"indisponibile":{"rientro":"2026-09-04","giornateSaltate":2,"problema":"Operato al ginocchio, rientro imminente"},"nota":"Operato al ginocchio, rientro imminente","fonti":["Sky Sport"],"fascia":4,"rank":175,"rankTot":190},
   {"id":424,"nome":"Belahyane","squadra":"Lazio","cod":"LAZ","ruolo":"C","mantra":["M","C"],"fvm":3,"fvmM":3,"quot":2,"quotM":2,"tag":["LOWCOST"],"formazione":{"probabilita":85,"gruppo":"XI"},"fascia":4,"rank":176,"rankTot":190},
   {"id":425,"nome":"Cremaschi","squadra":"Parma","cod":"PAR","ruolo":"C","mantra":["E","C"],"fvm":3,"fvmM":3,"quot":2,"quotM":2,"tag":["LOWCOST"],"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":177,"rankTot":190},
   {"id":426,"nome":"Helgason","squadra":"Venezia","cod":"VEN","ruolo":"C","mantra":["C","T"],"fvm":3,"fvmM":3,"quot":3,"quotM":3,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":178,"rankTot":190},
@@ -1164,7 +1184,7 @@ const PLAYERS = [
   {"id":450,"nome":"Berardi","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["A"],"fvm":106,"fvmM":106,"quot":19,"quotM":20,"tag":["RIGORISTA","RISCHIO","TITOLARE","TOP"],"nota":"Rigorista inamovibile con Pinamonti vice, ma ancora fuori: ha saltato la Coppa Italia col Cesena.","fonti":["SNAI","SOS Fanta"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":55,"gruppo":"XI"},"fascia":2,"rank":12,"rankTot":86},
   {"id":451,"nome":"Esposito F.P.","squadra":"Inter","cod":"INT","ruolo":"A","mantra":["Pc"],"fvm":105,"fvmM":105,"quot":17,"quotM":17,"tag":[],"formazione":{"probabilita":55,"gruppo":"XI"},"fascia":2,"rank":13,"rankTot":86},
   {"id":452,"nome":"Dybala","squadra":"Roma","cod":"ROM","ruolo":"A","mantra":["A"],"fvm":100,"fvmM":100,"quot":16,"quotM":17,"tag":["RIGORISTA","TITOLARE"],"nota":"Storico rigorista giallorosso, ora insidiato da Malen: la gerarchia dal dischetto non e' piu' garantita.","fonti":["SNAI","Sky"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":1,"PUNIZIONI":1,"CORNER":1}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":14,"rankTot":86},
-  {"id":453,"nome":"Yildiz","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":100,"fvmM":100,"quot":22,"quotM":23,"tag":["RIGORISTA","TITOLARE"],"nota":"In ballottaggio con Locatelli per i rigori, con Kolo Muani outsider: numero 10 titolare del 4-2-3-1.","fonti":["SNAI","Sky"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":3,"PUNIZIONI":1,"CORNER":1}},"fascia":2,"rank":15,"rankTot":86},
+  {"id":453,"nome":"Yildiz","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":100,"fvmM":100,"quot":22,"quotM":23,"tag":["RIGORISTA","TITOLARE","RISCHIO"],"nota":"In ballottaggio con Locatelli per i rigori, con Kolo Muani outsider: numero 10 titolare del 4-2-3-1. Sospetta frattura al piede, out per tutto settembre","fonti":["SNAI","Sky","Sky Sport","SOS Fanta"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":3,"PUNIZIONI":1,"CORNER":1}},"indisponibile":{"rientro":"2026-10-10","giornateSaltate":7,"problema":"Sospetta frattura al piede, out per tutto settembre"},"fascia":2,"rank":15,"rankTot":86},
   {"id":454,"nome":"Krstovic","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["Pc"],"fvm":98,"fvmM":98,"quot":18,"quotM":17,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":2,"rank":16,"rankTot":86},
   {"id":455,"nome":"De Ketelaere","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":95,"fvmM":95,"quot":17,"quotM":18,"tag":["RIGORISTA","RISCHIO"],"nota":"Secondo rigorista, ma stiramento agli adduttori: rientro previsto nella seconda meta' di ottobre.","fonti":["Goal","SNAI"],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":17,"rankTot":86},
   {"id":456,"nome":"Laurientè","squadra":"Sassuolo","cod":"SAS","ruolo":"A","mantra":["A"],"fvm":83,"fvmM":83,"quot":15,"quotM":16,"tag":["TITOLARE"],"nota":"Titolare nel reparto offensivo neroverde.","fonti":["MAM-e"],"sos":{"status":"TITOLARE","piazzati":{"RIGORI":2,"PUNIZIONI":2,"CORNER":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":2,"rank":18,"rankTot":86},
@@ -1216,7 +1236,7 @@ const PLAYERS = [
   {"id":502,"nome":"Elphege","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["Pc"],"fvm":11,"fvmM":10,"quot":3,"quotM":3,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":2}},"formazione":{"probabilita":55,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":64,"rankTot":86},
   {"id":503,"nome":"Lontani","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["A"],"fvm":11,"fvmM":11,"quot":3,"quotM":3,"tag":[],"sos":{"status":"TITOLARE"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":65,"rankTot":86},
   {"id":504,"nome":"Stulic","squadra":"Lecce","cod":"LEC","ruolo":"A","mantra":["Pc"],"fvm":11,"fvmM":10,"quot":6,"quotM":6,"tag":[],"sos":{"status":"BALLOTTAGGIO","piazzati":{"RIGORI":2}},"formazione":{"probabilita":90,"gruppo":"XI"},"fascia":3,"rank":66,"rankTot":86},
-  {"id":505,"nome":"Ekhator","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":["SCOMMESSA","RISCHIO"],"nota":"Sei crediti per un attaccante di prospettiva, ma lesione al bicipite femorale con rientro a fine agosto.","fonti":["Sisal","FantaMaster"],"fascia":4,"rank":67,"rankTot":86},
+  {"id":505,"nome":"Ekhator","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["A"],"fvm":10,"fvmM":10,"quot":3,"quotM":3,"tag":["SCOMMESSA","RISCHIO"],"nota":"Sei crediti per un attaccante di prospettiva, ma lesione al bicipite femorale con rientro a fine agosto. Lesione al bicipite femorale","fonti":["Sisal","FantaMaster","Sky Sport"],"indisponibile":{"rientro":"2026-09-19","giornateSaltate":4,"problema":"Lesione al bicipite femorale"},"fascia":4,"rank":67,"rankTot":86},
   {"id":506,"nome":"Milik","squadra":"Juventus","cod":"JUV","ruolo":"A","mantra":["Pc"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":30,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":68,"rankTot":86},
   {"id":507,"nome":"Nzola","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":10,"fvmM":10,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":69,"rankTot":86},
   {"id":508,"nome":"Borrelli","squadra":"Cagliari","cod":"CAG","ruolo":"A","mantra":["Pc"],"fvm":9,"fvmM":7,"quot":4,"quotM":3,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":70,"rankTot":86},
@@ -1224,7 +1244,7 @@ const PLAYERS = [
   {"id":510,"nome":"Adorante","squadra":"Venezia","cod":"VEN","ruolo":"A","mantra":["Pc"],"fvm":8,"fvmM":8,"quot":4,"quotM":4,"tag":[],"sos":{"status":"RISERVA"},"fascia":4,"rank":72,"rankTot":86},
   {"id":511,"nome":"Mota","squadra":"Monza","cod":"MON","ruolo":"A","mantra":["A"],"fvm":8,"fvmM":8,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":73,"rankTot":86},
   {"id":512,"nome":"Noslin","squadra":"Lazio","cod":"LAZ","ruolo":"A","mantra":["A"],"fvm":8,"fvmM":8,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Antiscommessa: duttile ma dietro quasi tutti gli attaccanti in rosa nelle gerarchie.","fonti":["Fantacalcio.it"],"sos":{"status":"RISERVA"},"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":3,"rank":74,"rankTot":86},
-  {"id":513,"nome":"Sulemana K.","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":8,"fvmM":8,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Le fonti segnalano un Sulemana dell'Atalanta fuori per lesione al collaterale fino a meta' ottobre, senza distinguere fra i due omonimi: verifica prima di puntarci.","fonti":["Goal","SOS Fanta"],"fascia":3,"rank":75,"rankTot":86},
+  {"id":513,"nome":"Sulemana K.","squadra":"Atalanta","cod":"ATA","ruolo":"A","mantra":["A"],"fvm":8,"fvmM":8,"quot":6,"quotM":6,"tag":["RISCHIO"],"nota":"Le fonti segnalano un Sulemana dell'Atalanta fuori per lesione al collaterale fino a meta' ottobre, senza distinguere fra i due omonimi: verifica prima di puntarci. Lesione di secondo grado del collaterale mediale del ginocchio sinistro","fonti":["Goal","SOS Fanta","Sky Sport"],"indisponibile":{"rientro":"2026-10-24","giornateSaltate":9,"problema":"Lesione di secondo grado del collaterale mediale del ginocchio sinistro"},"fascia":3,"rank":75,"rankTot":86},
   {"id":514,"nome":"Giovane","squadra":"Napoli","cod":"NAP","ruolo":"A","mantra":["A"],"fvm":7,"fvmM":7,"quot":4,"quotM":4,"tag":[],"sos":{"status":"RISERVA"},"formazione":{"probabilita":35,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":76,"rankTot":86},
   {"id":515,"nome":"Gueye","squadra":"Udinese","cod":"UDI","ruolo":"A","mantra":["Pc"],"fvm":7,"fvmM":6,"quot":4,"quotM":4,"tag":[],"formazione":{"probabilita":60,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":77,"rankTot":86},
   {"id":516,"nome":"Frigan","squadra":"Parma","cod":"PAR","ruolo":"A","mantra":["A"],"fvm":6,"fvmM":6,"quot":4,"quotM":4,"tag":[],"sos":{"status":"BALLOTTAGGIO"},"formazione":{"probabilita":40,"gruppo":"ALTERNATIVA"},"fascia":4,"rank":78,"rankTot":86},
@@ -1371,7 +1391,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     const {
       normalCdf, quantile, generatoreCasuale,
       modificatoreDifesaAtteso, IMPOSSIBILE,
-      frontieraRuolo, frontieraCompletamento
+      frontieraRuolo, frontieraCompletamento, tettoDaFrontiera
     } = MOTORE;
 
     /* ====================== COSTANTI & MAPPE ====================== */
@@ -1481,6 +1501,32 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     })();
 
     const CHIAVE = 'fantastrategy.asta.2026';
+    const CHIAVE_INFORTUNI = 'fantastrategy.infortuni.2026';
+
+    /*
+     * Infortuni segnati a mano durante l'asta.
+     *
+     * data/indisponibili.tsv e' una fotografia del giorno in cui e' stato
+     * generato: nessun elenco sara' mai completo la sera dell'asta. Questo e'
+     * lo sfogo manuale — un colpo e il giocatore vale quello che vale davvero,
+     * senza aspettare una rigenerazione dei dati.
+     */
+    function caricaInfortuni() {
+      try {
+        const grezzo = JSON.parse(store.getItem(CHIAVE_INFORTUNI) || '[]');
+        return new Set(Array.isArray(grezzo) ? grezzo.filter(n => Number.isFinite(n)) : []);
+      } catch { return new Set(); }
+    }
+    let infortuniManuali = caricaInfortuni();
+    function salvaInfortuni() {
+      store.setItem(CHIAVE_INFORTUNI, JSON.stringify([...infortuniManuali]));
+    }
+    function segnaInfortunio(id, fermo) {
+      if (fermo) infortuniManuali.add(id); else infortuniManuali.delete(id);
+      salvaInfortuni();
+      inizializzaValutazioni();
+      render();
+    }
 
     function nuoveSquadre(n) {
       return Array.from({ length: n }, (_, i) => ({
@@ -1515,6 +1561,9 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     let apertaSquadra = null;
     let apertaRiga = null;
     let moduloScelto = '3-4-3';
+    // Riferimenti all'ultimo render, usati dal verdetto live sul campo prezzo.
+    let pianoLive = null;
+    let mercatoLive = null;
 
     function salva() {
       store.setItem(CHIAVE, JSON.stringify({ squadre, regole }));
@@ -1523,9 +1572,14 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     /* ====================== MOTORE MATEMATICO DEL VALORE ====================== */
 
     const VALUTAZIONI_CACHE = new Map();
+    let VALUTAZIONI_VERSIONE = 0;
+    // Segnare a mano vuol dire "adesso e' fuori e non so per quanto": due mesi
+    // e' la stima prudente che serve a togliere il giocatore dai primi prezzi.
+    const SALTATE_SEGNATE_A_MANO = 9;
 
     function inizializzaValutazioni() {
       VALUTAZIONI_CACHE.clear();
+      VALUTAZIONI_VERSIONE++;
 
       // Raggruppamento per ruolo per determinare la baseline di rimpiazzo e il monte crediti chiuso (Nessun double counting)
       const perRuolo = { P: [], D: [], C: [], A: [] };
@@ -1570,7 +1624,19 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
           tit = Math.min(tit, 0.25 + 0.55 * (p.formazione.probabilita / 100));
         }
         if (r === 'P' && p.sos?.gerarchiaPortiere === 'PRIMO') tit = Math.max(tit, 0.95);
-        if (p.tag.includes('RISCHIO')) tit *= 0.70;
+        // Un infortunio non cambia quanto vale il giocatore quando gioca:
+        // cambia quante volte gioca. Quindi agisce sulle presenze, non sulla
+        // media voto — ed e' il motivo per cui uno fermo fino a novembre non
+        // puo' valere il prezzo di uno che c'e' da subito.
+        const saltate = giornateSaltate(p);
+        if (saltate > 0) {
+          tit *= Math.max(0, (38 - saltate) / 38);
+        } else if (p.tag.includes('RISCHIO')) {
+          // Lo sconto generico vale solo quando non sappiamo per quanto sta
+          // fuori: se lo sappiamo, le giornate saltate sono la stessa cosa
+          // detta meglio, e applicarli entrambi conterebbe l'infortunio due volte.
+          tit *= 0.70;
+        }
 
         // Media Voto base e Bonus attesi modellati con continuita' monotonicamente dal listone
         let mv = 6.00;
@@ -1616,7 +1682,7 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         if (excess > 0) {
           rawVal = 1 + (excess / stRole.excessSum) * stRole.excessPool;
         }
-        if (p.tag.includes('RISCHIO')) rawVal *= 0.80;
+        if (p.tag.includes('RISCHIO') && giornateSaltate(p) <= 0) rawVal *= 0.80;
         const valorePuro = Math.max(1, Math.round(rawVal));
 
         VALUTAZIONI_CACHE.set(p.id, {
@@ -1778,6 +1844,29 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       return migliore;
     }
 
+    // Quante giornate salta un giocatore, fra quelle note dai dati e quelle
+    // segnate a mano durante l'asta.
+    function giornateSaltate(p) {
+      if (infortuniManuali.has(p.id)) return SALTATE_SEGNATE_A_MANO;
+      return p.indisponibile?.giornateSaltate ?? 0;
+    }
+
+    /*
+     * FVM corretto per disponibilita'. Il listone quota un giocatore come se
+     * facesse la stagione intera: chi rientra a novembre no. Il monte crediti
+     * di un ruolo non sparisce, si sposta su chi c'e', ed e' proprio quello che
+     * succede in asta quando tutti sanno dell'infortunio.
+     *
+     * La correzione e' proporzionale alle presenze, senza sconti extra: se nella
+     * tua lega l'infortunio non lo sa nessuno, il prezzo vero sara' piu' alto di
+     * cosi', e sta a te leggerlo dal radar dei rivali.
+     */
+    function fvmDisponibile(p) {
+      const saltate = giornateSaltate(p);
+      if (saltate <= 0) return p.fvm;
+      return Math.max(1, p.fvm * Math.max(0, (38 - saltate) / 38));
+    }
+
     function prezziMercato(asseg, and) {
       const stati = squadre.map(statoSquadra);
       const residuoLega = stati.reduce((s, st) => s + st.residuo, 0);
@@ -1795,16 +1884,17 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
 
       const mercato = new Map();
       for (const r of RUOLI) {
-        const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id)).sort((a, b) => b.fvm - a.fvm);
+        const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id))
+          .sort((a, b) => fvmDisponibile(b) - fvmDisponibile(a));
         const n = slotRimasti[r];
         const contesi = new Set(liberi.slice(0, n).map(p => p.id));
-        const somma = liberi.slice(0, n).reduce((s, p) => s + p.fvm, 0) || 1;
+        const somma = liberi.slice(0, n).reduce((s, p) => s + fvmDisponibile(p), 0) || 1;
         const monte = Math.max(0, grezzo[r] * scala - n);
         const acquirenti = stati.filter(st => st.mancanti[r] > 0).length;
         const confidenza = and[r].confidenza;
 
         for (const p of liberi) {
-          const atteso = contesi.has(p.id) ? 1 + (p.fvm / somma) * monte : 1;
+          const atteso = contesi.has(p.id) ? 1 + (fvmDisponibile(p) / somma) * monte : 1;
           const ampiezza = 0.12 + (1 - confidenza) * 0.18 + Math.min(0.08, acquirenti * 0.01);
           mercato.set(p.id, {
             atteso: Math.max(1, Math.round(atteso)),
@@ -1876,31 +1966,65 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
     function simulaConcorrenza(candidato, st, asseg, mercato, and, tierInfo, maxBid) {
       const mkt = mercato.get(candidato.id) ?? { atteso: 1, min: 1, max: 1, confidenza: 0.35 };
       const concorrenti = squadre.slice(1).map(sq => statoSquadra(sq)).filter(stato => stato.mancanti[candidato.ruolo] > 0);
-      const random = generatoreCasuale(candidato.id * 1009 + asseg.size * 7919 + st.residuo);
-      const chiusure = [];
-      let vittorie = 0;
       const scenari = 800;
       const volatilita = 0.10 + (1 - (mkt.confidenza ?? 0.35)) * 0.18;
       const pressioneTier = (tierInfo?.score ?? 50) / 100 * 0.12;
+      const seme = candidato.id * 1009 + asseg.size * 7919 + st.residuo;
 
-      for (let s = 0; s < scenari; s++) {
-        let chiusura = Math.max(1, mkt.min);
-        for (const avversario of concorrenti) {
-          // Box-Muller: propensione al rilancio differente ma riproducibile per ogni scenario.
-          const u1 = Math.max(1e-9, random());
-          const u2 = random();
-          const rumore = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-          const necessita = 0.04 + 0.10 * (avversario.mancanti[candidato.ruolo] / TARGET[candidato.ruolo]);
-          const propensione = mkt.atteso * (1 + pressioneTier + necessita + rumore * volatilita);
-          const cap = Math.min(avversario.capienza, quantoPosso(avversario, candidato.ruolo, and).tetto);
-          chiusura = Math.max(chiusura, Math.max(1, Math.min(cap, Math.round(propensione))));
+      // Un giro di scenari con una data propensione media. Il prezzo di
+      // chiusura e' il massimo fra i rilanci dei rivali che possono ancora
+      // permetterselo: ognuno e' limitato dalla propria capienza reale.
+      function giro(media) {
+        const random = generatoreCasuale(seme);
+        const chiusure = [];
+        for (let s = 0; s < scenari; s++) {
+          let chiusura = 1;
+          for (const avversario of concorrenti) {
+            // Box-Muller: propensione diversa per rivale ma riproducibile.
+            const u1 = Math.max(1e-9, random());
+            const u2 = random();
+            const rumore = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            const necessita = 0.04 + 0.10 * (avversario.mancanti[candidato.ruolo] / TARGET[candidato.ruolo]);
+            const propensione = media * (1 + pressioneTier + necessita + rumore * volatilita);
+            const cap = Math.min(avversario.capienza, quantoPosso(avversario, candidato.ruolo, and).tetto);
+            chiusura = Math.max(chiusura, Math.max(1, Math.min(cap, Math.round(propensione))));
+          }
+          chiusure.push(chiusura);
         }
-        chiusure.push(chiusura);
-        if (maxBid >= chiusura) vittorie++;
+        chiusure.sort((a, b) => a - b);
+        return chiusure;
       }
-      chiusure.sort((a, b) => a - b);
+
+      /*
+       * Calibrazione. Il prezzo di mercato e' gia' la stima di quanto va il giocatore
+       * adesso: e' ricavata dai crediti ancora in circolazione e dagli slot
+       * ancora da riempire. Far partire ogni rivale da quella cifra e poi
+       * prendere il massimo fra nove rivali la gonfia di parecchio — il massimo
+       * di nove estrazioni sta molto sopra la loro media — ed e' il motivo per
+       * cui i prezzi simulati uscivano sistematicamente troppo alti.
+       *
+       * Quindi il primo giro serve solo a misurare quel fattore, e il secondo
+       * gira con la propensione corretta perche' la mediana di chiusura torni
+       * sul prezzo di mercato. La simulazione cosi' non ridecide il livello:
+       * dice la dispersione e chi puo' ancora permetterselo.
+       */
+      let chiusure;
+      if (!concorrenti.length) {
+        chiusure = new Array(scenari).fill(1);
+      } else {
+        const prova = giro(mkt.atteso);
+        const medianaProva = quantile(prova, 0.50);
+        const fattore = medianaProva > 0 ? mkt.atteso / medianaProva : 1;
+        // Se la correzione e' trascurabile evitiamo il secondo giro.
+        chiusure = Math.abs(fattore - 1) < 0.02 ? prova : giro(mkt.atteso * fattore);
+      }
+
+      let vittorie = 0;
+      for (let i = 0; i < chiusure.length; i++) if (maxBid >= chiusure[i]) vittorie++;
+
       return {
         scenari,
+        chiusure,
         p50: quantile(chiusure, 0.50),
         p75: quantile(chiusure, 0.75),
         probabilitaVittoria: Math.round(100 * vittorie / scenari)
@@ -1909,23 +2033,17 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
 
     function calcolaPianoCompletamento(st, candidato, asseg, mercato, and, tierMap) {
       if (!candidato || st.mancanti[candidato.ruolo] <= 0) return null;
-      const budget = st.residuo;
-      const pool = PLAYERS.filter(p => !asseg.has(p.id) && p.id !== candidato.id);
-      const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
-      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiStagione ?? 0;
-      const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
-      const valoreBaseline = baseline[budget];
+      // Stesse frontiere della tabella: il numero nella riga e quello nel
+      // pannello sono lo stesso calcolo, non due stime che possono divergere.
+      const fr = frontiere(st, mercato, asseg);
+      const budget = fr.budget;
+      const valoreBaseline = fr.valoreBaseline;
       if (valoreBaseline <= IMPOSSIBILE / 2) return { nonFattibile: true };
 
-      const bisogniConCandidato = { ...st.mancanti, [candidato.ruolo]: st.mancanti[candidato.ruolo] - 1 };
-      const conCandidato = frontieraCompletamento(pool, bisogniConCandidato, budget, costoPer, valorePer);
-      const valoreCandidato = valorePer(candidato);
-      const massimoLegale = st.capienza;
-      let maxBid = 0;
-      for (let offerta = 1; offerta <= massimoLegale; offerta++) {
-        const completamento = conCandidato[budget - offerta];
-        if (completamento > IMPOSSIBILE / 2 && valoreCandidato + completamento >= valoreBaseline - 1e-7) maxBid = offerta;
-      }
+      const conCandidato = fr.senzaSlot[candidato.ruolo];
+      if (!conCandidato) return { nonFattibile: true };
+      const valoreCandidato = fr.valorePer(candidato);
+      const maxBid = tettoDaFrontiera(valoreCandidato, conCandidato, valoreBaseline, budget, st.capienza);
 
       const stimaMercato = mercato.get(candidato.id)?.atteso ?? 1;
       const completamentoAlMercato = stimaMercato <= budget ? conCandidato[budget - stimaMercato] : IMPOSSIBILE;
@@ -1972,6 +2090,122 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         moduloDopo: dopo.modulo,
         slotRimasti: st.mancanti[candidato.ruolo]
       };
+    }
+
+    /*
+     * Verdetto a un prezzo preciso. Gira a ogni battuta di freccia mentre segui
+     * il rilancio, quindi non ricalcola niente di pesante: usa il tetto gia'
+     * calcolato per la riga aperta e la distribuzione di chiusura del Monte
+     * Carlo, che e' un semplice conteggio.
+     */
+    function verdettoLive(prezzo, piano, st, mkt) {
+      const tetto = piano?.maxBid ?? 0;
+      const chiusure = piano?.monteCarlo?.chiusure ?? [];
+      // Quota di scenari in cui questa offerta basta a portarlo a casa.
+      let vinti = 0;
+      for (let i = 0; i < chiusure.length; i++) if (prezzo >= chiusure[i]) vinti++;
+      const vittoria = chiusure.length ? Math.round(100 * vinti / chiusure.length) : null;
+
+      const residuoDopo = st.residuo - prezzo;
+      const slotDopo = st.mancantiTot - 1;
+      const perSlot = slotDopo > 0 ? (residuoDopo / slotDopo) : 0;
+
+      let stato, testo, nota;
+      if (prezzo < 1) {
+        stato = 'neutro'; testo = 'Imposta un prezzo'; nota = '';
+      } else if (prezzo > st.capienza) {
+        stato = 'stop';
+        testo = 'Non puoi arrivarci';
+        nota = `sforerebbe la capienza di ${st.capienza} cr: non resterebbe 1 credito per ognuno degli altri ${slotDopo} slot`;
+      } else if (tetto < 1) {
+        stato = 'stop';
+        testo = 'Lascialo andare';
+        nota = 'nemmeno 1 credito e giustificato: i crediti rendono di piu sul resto della rosa';
+      } else if (prezzo <= tetto) {
+        stato = 'ok';
+        testo = `Puoi salire, ancora ${tetto - prezzo} cr`;
+        nota = `resti sotto il prezzo di indifferenza (${tetto} cr)`;
+      } else {
+        stato = 'oltre';
+        testo = `Sopra il tetto di ${prezzo - tetto} cr`;
+        nota = `prezzo di indifferenza ${tetto} cr: da qui in su stai scegliendo di risparmiare altrove`;
+      }
+
+      return {
+        stato, testo, nota, vittoria, tetto,
+        residuoDopo, slotDopo,
+        perSlot: Number(perSlot.toFixed(1)),
+        mercato: mkt?.atteso ?? null
+      };
+    }
+
+    const STILE_VERDETTO = {
+      ok:     { barra: 'bg-emerald-500', testo: 'text-emerald-300', bordo: 'border-emerald-700/60 bg-emerald-950/30' },
+      oltre:  { barra: 'bg-amber-500',   testo: 'text-amber-300',   bordo: 'border-amber-700/60 bg-amber-950/30' },
+      stop:   { barra: 'bg-rose-500',    testo: 'text-rose-300',    bordo: 'border-rose-800/60 bg-rose-950/30' },
+      neutro: { barra: 'bg-slate-600',   testo: 'text-slate-300',   bordo: 'border-slate-700 bg-slate-900/40' }
+    };
+
+    function verdettoHtml(v) {
+      const st = STILE_VERDETTO[v.stato];
+      const scala = Math.max(v.tetto, v.mercato ?? 0, 1) * 1.6;
+      const pct = x => Math.max(0, Math.min(100, (x / scala) * 100));
+      const prezzo = v.residuoDopo === null ? 0 : 0;
+      return `
+        <div class="rounded-xl border ${st.bordo} px-3 py-2 space-y-1.5">
+          <div class="flex items-baseline justify-between gap-3 flex-wrap">
+            <strong class="${st.testo} text-base leading-tight">${esc(v.testo)}</strong>
+            ${v.vittoria === null ? '' : `<span class="text-[11px] text-slate-400">lo vinci nel <strong class="text-white tabular-nums">${v.vittoria}%</strong> degli scenari</span>`}
+          </div>
+          <p class="text-[10px] text-slate-400">${esc(v.nota)}</p>
+          <div class="relative h-2 rounded-full bg-slate-900 border border-slate-800 overflow-hidden">
+            <span class="absolute inset-y-0 left-0 ${st.barra} opacity-30" style="width:${pct(v.tetto)}%"></span>
+            <span class="absolute inset-y-0 w-0.5 bg-indigo-300" style="left:${pct(v.tetto)}%" title="prezzo di indifferenza"></span>
+            ${v.mercato === null ? '' : `<span class="absolute inset-y-0 w-0.5 bg-amber-300" style="left:${pct(v.mercato)}%" title="prezzo di mercato"></span>`}
+          </div>
+          <p class="text-[10px] text-slate-500 tabular-nums">
+            Se lo prendi: ${v.residuoDopo} cr per ${v.slotDopo} slot = <strong class="text-slate-300">${v.perSlot} cr/slot</strong>
+          </p>
+        </div>`;
+    }
+
+    /*
+     * Le alternative allo stesso prezzo.
+     *
+     * Dire "lascialo" senza dire cosa prendere al suo posto e' meta' consiglio,
+     * e in asta la meta' che manca e' quella che serve: hai cinque secondi e
+     * devi sapere se rinunciare ti lascia davvero qualcosa in mano. Qui
+     * cerchiamo nello stesso ruolo chi ha il margine migliore fra tetto e
+     * prezzo di mercato, cioe' chi ti da' piu' rosa per gli stessi crediti.
+     */
+    function alternativeA(candidato, mioMaxMap, mercato, asseg) {
+      const out = [];
+      for (const q of PLAYERS) {
+        if (q.ruolo !== candidato.ruolo || q.id === candidato.id || asseg.has(q.id)) continue;
+        const tetto = mioMaxMap.get(q.id) ?? 0;
+        if (tetto < 1) continue;
+        const mkt = mercato.get(q.id);
+        if (!mkt) continue;
+        out.push({ p: q, tetto, mercato: mkt.atteso, margine: tetto - mkt.atteso });
+      }
+      out.sort((a, b) => b.margine - a.margine || b.tetto - a.tetto);
+      return out.slice(0, 3);
+    }
+
+    function alternativeHtml(alt) {
+      if (!alt.length) return '';
+      return `
+        <div class="pt-2 border-t border-slate-800">
+          <p class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Se lo lasci, al suo posto</p>
+          <div class="flex flex-wrap gap-1.5">
+            ${alt.map(a => `<span class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[11px]">
+              <strong class="text-white">${esc(a.p.nome)}</strong>
+              <span class="text-slate-500">${esc(a.p.squadra)}</span>
+              <span class="text-slate-400 tabular-nums"> mercato ${a.mercato}</span>
+              <span class="${a.margine >= 0 ? 'text-emerald-400' : 'text-amber-400'} font-bold tabular-nums"> tetto ${a.tetto}</span>
+            </span>`).join('')}
+          </div>
+        </div>`;
     }
 
     function scopoDettaglio(scopo) {
@@ -2024,11 +2258,54 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       PROFONDITA: { testo: 'Solo profondita', classe: 'text-slate-300' }
     };
 
+    /*
+     * Tetto esatto per ogni giocatore libero, non piu' un'euristica.
+     *
+     * La frontiera dipende solo dallo stato della rosa e dai prezzi stimati,
+     * non dai filtri: basta ricalcolarla quando cambia qualcosa. Servono cinque
+     * DP (la baseline piu' una per ruolo, con uno slot in meno), non una per
+     * giocatore, quindi il costo e' quello di una manciata di millisecondi per
+     * assegnazione invece che per riga.
+     */
+    const FRONTIERE_CACHE = { firma: null, dati: null };
+
+    function frontiere(st, mercato, asseg) {
+      // La firma deve contenere tutto cio' da cui la frontiera dipende: i costi
+      // stimati cambiano col numero di partecipanti, e i valori cambiano ogni
+      // volta che le regole vengono ritarate. Senza, cambiare lega dava un
+      // colpo di cache con i numeri della lega precedente.
+      const firma = [
+        VALUTAZIONI_VERSIONE, squadre.length, st.residuo,
+        RUOLI.map(r => st.mancanti[r]).join('-'), asseg.size
+      ].join('|');
+      if (FRONTIERE_CACHE.firma === firma) return FRONTIERE_CACHE.dati;
+
+      const budget = st.residuo;
+      const pool = PLAYERS.filter(p => !asseg.has(p.id));
+      const costoPer = p => mercato.get(p.id)?.atteso ?? 1;
+      const valorePer = p => VALUTAZIONI_CACHE.get(p.id)?.puntiStagione ?? 0;
+
+      const baseline = frontieraCompletamento(pool, st.mancanti, budget, costoPer, valorePer);
+      const senzaSlot = {};
+      for (const r of RUOLI) {
+        if (st.mancanti[r] <= 0) continue;
+        senzaSlot[r] = frontieraCompletamento(
+          pool, { ...st.mancanti, [r]: st.mancanti[r] - 1 }, budget, costoPer, valorePer
+        );
+      }
+
+      const dati = { budget, baseline, valoreBaseline: baseline[budget], senzaSlot, valorePer };
+      FRONTIERE_CACHE.firma = firma;
+      FRONTIERE_CACHE.dati = dati;
+      return dati;
+    }
+
     function calcolaPrezziEMioMax(st, mercato, asseg, and, scarsita, mvarMap, tierMap) {
       const prezzi = new Map();
       const mioMaxMap = new Map();
       const marginiMap = new Map();
       const semaforiMap = new Map();
+      const fr = frontiere(st, mercato, asseg);
 
       for (const p of PLAYERS) {
         if (asseg.has(p.id)) continue;
@@ -2048,30 +2325,28 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
         const prezzoConsigliato = Math.max(1, Math.min(mkt.atteso, st.capienza));
         prezzi.set(p.id, prezzoConsigliato);
 
-        // Integrazione rigorosa di Scarsita' e MVAR nel MAX BID
-        const scScore = scarsita?.[r]?.score ?? 50;
-        const tier = tierMap?.get(p.id) ?? { score: 50, premioSalto: 0 };
-        const scarcityMultiplier = 1 + (scScore / 100) * 0.07 + (tier.score / 100) * 0.15 + tier.premioSalto;
-
-        const mvar = mvarMap?.get(p.id);
-        const diffSeason = mvar?.diffSeason ?? 0;
-        const mvarBoost = 1 + Math.min(0.20, Math.max(-0.10, (diffSeason - 20) / 150));
-
-        const budgetRatio = (st.residuo / BUDGET) * (SLOT_TOT / Math.max(1, st.mancantiTot));
-        const roleNeedBoost = 0.85 + 0.30 * (st.mancanti[r] / TARGET[r]);
-        const rawMax = trueVal * Math.min(1.4, Math.max(0.65, budgetRatio)) * roleNeedBoost * scarcityMultiplier * mvarBoost;
-        const mioMax = Math.max(1, Math.min(st.capienza, Math.round(rawMax)));
+        // Prezzo di indifferenza esatto: la soglia oltre la quale gli stessi
+        // crediti rendono di piu' sul resto della rosa. Sostituisce il vecchio
+        // "tetto rapido", che moltiplicava cinque fattori tarati a mano e
+        // consigliava COMPRA a 56 crediti su un portiere da 30-40.
+        const mioMax = fr.senzaSlot[r]
+          ? tettoDaFrontiera(fr.valorePer(p), fr.senzaSlot[r], fr.valoreBaseline, fr.budget, st.capienza)
+          : 0;
         mioMaxMap.set(p.id, mioMax);
 
-        const margine = trueVal - mkt.atteso;
+        const margine = mioMax - mkt.atteso;
         marginiMap.set(p.id, margine);
 
         let sem = 'ATTENDI';
-        if (mkt.atteso > st.capienza || (p.tag.includes('RISCHIO') && margine < 0)) {
+        if (mioMax < 1 || mkt.atteso > st.capienza) {
           sem = 'LASCIA';
-        } else if (margine >= 3 && mioMax >= mkt.atteso) {
+        } else if (mkt.atteso <= mioMax) {
+          // Il mercato sta sotto il tuo tetto: e' un affare vero.
           sem = 'COMPRA';
-        } else if (margine <= -5) {
+        } else if (mkt.min <= mioMax) {
+          // Ci arrivi solo se l'asta resta nella parte bassa della forbice.
+          sem = 'ATTENDI';
+        } else {
           sem = 'LASCIA';
         }
         semaforiMap.set(p.id, sem);
@@ -2293,6 +2568,9 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
       const pianoAperto = candidatoAperto && !asseg.has(candidatoAperto.id)
         ? calcolaPianoCompletamento(st, candidatoAperto, asseg, mercato, and, tierMap)
         : null;
+
+      pianoLive = pianoAperto;
+      mercatoLive = mercato;
 
       const miaRosaPlayers = squadre[0].rosa.map(a => PER_ID.get(a.id)).filter(Boolean);
       const bestXI = trovaBestXI(miaRosaPlayers);
@@ -2715,12 +2993,16 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
                       <div><span class="text-slate-500 block">Vantaggio al prezzo mercato</span><strong class="${(pianoAperto.vantaggioAlMercato ?? -1) >= 0 ? 'text-emerald-300' : 'text-rose-300'} text-base tabular-nums">${pianoAperto.vantaggioAlMercato === null ? 'non fattibile' : (pianoAperto.vantaggioAlMercato >= 0 ? '+' : '') + pianoAperto.vantaggioAlMercato + ' pt'}</strong></div>
                       <div><span class="text-slate-500 block">Monte Carlo (${pianoAperto.monteCarlo.scenari})</span><strong class="text-amber-300 tabular-nums">P50 ${pianoAperto.monteCarlo.p50} · P75 ${pianoAperto.monteCarlo.p75}</strong><span class="block text-[10px] text-slate-400">${pianoAperto.monteCarlo.probabilitaVittoria}% entro il tuo max</span></div>
                     </div>
+                    ${alternativeHtml(alternativeA(p, mioMaxMap, mercato, asseg))}
                     <p class="text-[10px] text-slate-400">Calcolo esatto sugli slot rimasti: confronta questo acquisto con il miglior completamento della rosa ai prezzi live stimati. Monte Carlo simula l'incertezza dei rilanci avversari; i fantapunti sono una proxy finche' non importiamo proiezioni storiche/calendario.</p>
                   </div>`)
                 : ''}
+              ${pianoAperto?.id === p.id && !pianoAperto.nonFattibile
+                ? `<div id="verdetto-live" class="mb-3">${verdettoHtml(verdettoLive(prezzo, pianoAperto, st, mkt))}</div>`
+                : ''}
               <div class="flex flex-wrap items-end gap-3">
-                <label class="text-[10px] uppercase font-semibold text-slate-400">Prezzo pagato
-                  <input type="number" id="prezzo-input" min="1" value="${prezzo}" class="mt-1 block w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-slate-100 tabular-nums focus:outline-none focus:border-indigo-500">
+                <label class="text-[10px] uppercase font-semibold text-slate-400">Prezzo in asta
+                  <input type="number" id="prezzo-input" min="1" value="${prezzo}" class="mt-1 block w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-lg font-bold text-slate-100 tabular-nums focus:outline-none focus:border-indigo-500">
                 </label>
                 <div class="flex flex-wrap gap-1.5">
                   ${squadre.map((sq, i) => {
@@ -2734,7 +3016,14 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
                       title="${puo ? `capienza ${s.capienza} cr` : `ha gia tutti gli slot ${p.ruolo}`}">${esc(sq.nome)}</button>`;
                   }).join('')}
                 </div>
-                <button type="button" data-chiudi="1" class="text-[11px] text-slate-500 hover:text-slate-300 pb-2 ml-auto">Annulla</button>
+                <button type="button" data-infortunio="${p.id}" class="text-[11px] px-2.5 py-1.5 rounded-lg font-semibold transition ml-auto ${
+                  infortuniManuali.has(p.id)
+                    ? 'bg-rose-900/70 text-rose-200 border border-rose-700'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'}"
+                  title="Segna che adesso e fuori: abbassa le presenze attese e quindi il tetto">
+                  ${infortuniManuali.has(p.id) ? 'Fuori: segnato' : 'Segna infortunato'}
+                </button>
+                <button type="button" data-chiudi="1" class="text-[11px] text-slate-500 hover:text-slate-300 pb-2">Annulla</button>
               </div>
               ${radarHtml}
             </td>
@@ -2751,6 +3040,11 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
                     ? 'Non presente nel listone in mio possesso: aggiunto a mano'
                     : 'Trasferimento non ancora recepito dal listone in mio possesso'
                 }">fuori listone</span>` : ''}
+                ${infortuniManuali.has(p.id)
+                  ? '<span class="text-[9px] px-1.5 py-px rounded bg-rose-950 text-rose-300 border border-rose-800/60" title="Segnato fuori da te durante l asta">FUORI</span>'
+                  : p.indisponibile
+                    ? `<span class="text-[9px] px-1.5 py-px rounded bg-rose-950 text-rose-300 border border-rose-800/60" title="${esc(p.indisponibile.problema)}">out ${p.indisponibile.giornateSaltate}g, rientro ${esc(p.indisponibile.rientro)}</span>`
+                    : ''}
               </div>
               <p class="mt-1 flex flex-wrap gap-1">${mantra}</p>
             </td>
@@ -2786,12 +3080,26 @@ const GRIGLIA = {"ATA":{"ATA":0,"BOL":6,"CAG":6,"COM":10,"FIO":8,"FRO":5,"GEN":8
           assegna(id, i);
         });
       }
+      for (const b of document.querySelectorAll('[data-infortunio]')) {
+        b.addEventListener('click', () => {
+          const id = Number(b.dataset.infortunio);
+          segnaInfortunio(id, !infortuniManuali.has(id));
+        });
+      }
 
       const input = document.getElementById('prezzo-input');
       if (input && apertaRiga) {
         const pCur = PER_ID.get(apertaRiga);
         input.addEventListener('input', () => {
           const val = Number(input.value) || 0;
+          // Il verdetto si aggiorna a ogni freccia: nessun ricalcolo pesante,
+          // il tetto e la distribuzione dei rilanci sono gia' calcolati.
+          const box = document.getElementById('verdetto-live');
+          if (box && pianoLive && !pianoLive.nonFattibile) {
+            box.innerHTML = verdettoHtml(
+              verdettoLive(val, pianoLive, statoSquadra(squadre[0]), mercatoLive?.get(apertaRiga))
+            );
+          }
           if (pCur) {
             const r = chiPuoRilanciare(pCur.ruolo, val);
             const qEl = document.getElementById('radar-quota');

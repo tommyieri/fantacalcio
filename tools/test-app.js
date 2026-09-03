@@ -309,10 +309,81 @@ function check(nome, atteso, ottenuto) {
   check('simulazione Monte Carlo avversari visibile', true, piano.monteCarlo);
   check('max bid del piano entro la capienza', true, piano.max >= 0 && piano.max <= (await mie()).capienza);
   check('fascia di prezzo con intervallo di mercato', true, piano.fascia);
+  const alt = await page.evaluate(() => {
+    const td = document.getElementById('prezzo-input').closest('td');
+    const t = td.textContent.replace(/\s+/g, ' ');
+    const m = t.match(/Se lo lasci, al suo posto(.*?)Calcolo esatto/);
+    if (!m) return { presenti: false };
+    // Le alternative devono essere dello stesso ruolo e comprabili davvero.
+    const nomi = [...td.querySelectorAll('span strong')].map(e => e.textContent.trim());
+    const aperto = PER_ID.get(apertaRiga);
+    const asseg = assegnazioni();
+    const trovati = nomi.map(n => PLAYERS.find(x => x.nome === n)).filter(Boolean);
+    return {
+      presenti: m[1].trim().length > 0,
+      stessoRuolo: trovati.every(x => x.ruolo === aperto.ruolo),
+      nessunoGiaPreso: trovati.every(x => !asseg.has(x.id)),
+      nessunoEIlCandidato: trovati.every(x => x.id !== aperto.id)
+    };
+  });
+  check('alternative proposte quando lasci il giocatore', true, alt.presenti);
+  check('le alternative sono dello stesso ruolo', true, alt.stessoRuolo);
+  check('le alternative non sono gia assegnate', true, alt.nessunoGiaPreso);
+  check('le alternative escludono il candidato', true, alt.nessunoEIlCandidato);
   check('un solo scopo dichiarato per il candidato', 1, piano.scopo);
   await page.fill('#prezzo-input', '50');
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
   await page.click('[data-chiudi]');
+
+  console.log('\n— infortuni e verdetto live —');
+  const inf = await page.evaluate(() => {
+    const z = PLAYERS.find(x => x.nome === 'Zaniolo');
+    const sano = PLAYERS.find(x => x.nome === 'Calhanoglu');
+    const asseg = assegnazioni(), st = statoSquadra(squadre[0]), and = andamento(asseg);
+    const mkt = prezziMercato(asseg, and);
+    const tit = x => VALUTAZIONI_CACHE.get(x.id).tit;
+    return {
+      zaniolloDaiDati: !!z.indisponibile,
+      // Un infortunio noto deve abbassare le presenze attese, non la media voto.
+      titInfortunato: tit(z) < tit(sano),
+      // e deve abbassare anche il prezzo che l'asta gli fara'
+      mercatoInfortunato: mkt.get(z.id).atteso < z.fvm / 2,
+      mvIntatta: VALUTAZIONI_CACHE.get(z.id).mv > 5.8
+    };
+  });
+  check('Zaniolo marcato indisponibile dai dati', true, inf.zaniolloDaiDati);
+  check('l infortunio abbassa le presenze attese', true, inf.titInfortunato);
+  check('l infortunio abbassa il prezzo di mercato', true, inf.mercatoInfortunato);
+  check('l infortunio non tocca la media voto', true, inf.mvIntatta);
+
+  const manuale = await page.evaluate(() => {
+    const c = PLAYERS.find(x => x.nome === 'Calhanoglu');
+    const prima = VALUTAZIONI_CACHE.get(c.id).tit;
+    segnaInfortunio(c.id, true);
+    const dopo = VALUTAZIONI_CACHE.get(c.id).tit;
+    segnaInfortunio(c.id, false);
+    const tornato = VALUTAZIONI_CACHE.get(c.id).tit;
+    return { scende: dopo < prima, reversibile: Math.abs(tornato - prima) < 1e-9 };
+  });
+  check('segnare infortunato abbassa le presenze', true, manuale.scende);
+  check('togliere il segno ripristina il valore', true, manuale.reversibile);
+
+  const live = await page.evaluate(() => {
+    const st = statoSquadra(squadre[0]);
+    const piano = { maxBid: 40, monteCarlo: { chiusure: Array.from({ length: 100 }, (_, i) => i + 1) } };
+    const a = verdettoLive(20, piano, st, { atteso: 30 });
+    const b = verdettoLive(41, piano, st, { atteso: 30 });
+    const c = verdettoLive(st.capienza + 1, piano, st, { atteso: 30 });
+    return {
+      sotto: a.stato, sopra: b.stato, fuori: c.stato,
+      // la probabilita' di vittoria deve crescere col prezzo
+      vittoriaCresce: verdettoLive(60, piano, st, {}).vittoria > a.vittoria
+    };
+  });
+  check('sotto il tetto il verdetto e verde', 'ok', live.sotto);
+  check('sopra il tetto il verdetto avvisa', 'oltre', live.sopra);
+  check('oltre la capienza il verdetto blocca', 'stop', live.fuori);
+  check('la probabilita di vittoria cresce col prezzo', true, live.vittoriaCresce);
 
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');

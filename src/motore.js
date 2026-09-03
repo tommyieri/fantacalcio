@@ -240,8 +240,28 @@ var MOTORE = (function () {
     return combinata;
   }
 
+  /*
+   * Prezzo di indifferenza: la massima offerta oltre la quale la rosa migliore
+   * che riesci ancora a chiudere vale meno di quella che chiuderesti senza di
+   * lui. `frontieraSenzaSlot` e' la frontiera calcolata con uno slot in meno
+   * nel ruolo del candidato; `valoreBaseline` e' la frontiera intatta.
+   *
+   * Restituisce 0 quando nemmeno 1 credito e' giustificato.
+   */
+  function tettoDaFrontiera(valoreCandidato, frontieraSenzaSlot, valoreBaseline, budget, capienza) {
+    var massimo = Math.min(capienza, budget);
+    var tetto = 0;
+    for (var offerta = 1; offerta <= massimo; offerta++) {
+      var completamento = frontieraSenzaSlot[budget - offerta];
+      if (completamento === undefined || completamento <= IMPOSSIBILE / 2) continue;
+      if (valoreCandidato + completamento >= valoreBaseline - 1e-7) tetto = offerta;
+    }
+    return tetto;
+  }
+
   return {
     erf: erf,
+    tettoDaFrontiera: tettoDaFrontiera,
     normalCdf: normalCdf,
     quantile: quantile,
     generatoreCasuale: generatoreCasuale,
