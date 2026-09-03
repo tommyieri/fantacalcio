@@ -373,6 +373,30 @@ function check(nome, atteso, ottenuto) {
   check('la media voto viene dallo storico', true, fa.mvDaStorico);
   check('i punti sopra il rimpiazzo premiano il top, non il giocatore da 1 credito', true, fa.vorTopSopraScarso);
 
+  console.log('\n— completezza del listone —');
+  const listone = await page.evaluate(() => {
+    const latino = /^[A-Za-z\u00C0-\u024F' .-]+$/;
+    return {
+      totale: PLAYERS.length,
+      // Il caso segnalato in asta: mancava dal listone.
+      zappacosta: PLAYERS.some(p => p.nome === 'Zappacosta' && p.squadra === 'Atalanta'),
+      // I tre nomi che erano storpiati in trascrizione.
+      ilic: PLAYERS.some(p => p.nome === 'Ilic'),
+      zarraga: PLAYERS.some(p => p.nome === 'Zarraga'),
+      boga: PLAYERS.some(p => p.nome === 'Boga'),
+      // Nessun nome fuori dall'alfabeto latino: e' cosi' che "Boga" era sparito.
+      nomiStrani: PLAYERS.filter(p => !latino.test(p.nome)).map(p => p.nome),
+      // Quasi tutti devono avere il prezzo d'asta misurato.
+      senzaPrezzo: PLAYERS.filter(p => !(p.fanta && p.fanta.mercato > 0)).length
+    };
+  });
+  check('Zappacosta presente nel listone', true, listone.zappacosta);
+  check('Ilic non e piu storpiato in llic', true, listone.ilic);
+  check('Zarraga non e piu storpiato in Larraga', true, listone.zarraga);
+  check('Boga non e piu scritto in cirillico', true, listone.boga);
+  check('nessun nome fuori dall alfabeto latino', [], listone.nomiStrani);
+  check('almeno 528 giocatori col prezzo d asta misurato', true, listone.totale - listone.senzaPrezzo >= 528);
+
   console.log('\n— aggressivita del tavolo e rimpiazzo live —');
   const aggr = await page.evaluate(() => {
     // Questo blocco riscrive squadre e rose per costruire gli scenari: va
@@ -485,8 +509,17 @@ function check(nome, atteso, ottenuto) {
 
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
-  const nD = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
-  check('solo difensori, senza gli otto gia\' assegnati', 177, nD);
+  // Il numero atteso si ricava dai dati, non si scrive a mano: il listone
+  // cresce quando si correggono le trascrizioni, e un conteggio fisso
+  // fallirebbe per il motivo sbagliato.
+  const nD = await page.evaluate(() => {
+    const asseg = assegnazioni();
+    return {
+      righe: document.querySelectorAll('#tabella tr').length,
+      liberi: PLAYERS.filter(p => p.ruolo === 'D' && !asseg.has(p.id)).length
+    };
+  });
+  check('solo difensori, senza quelli gia\' assegnati', nD.liberi, nD.righe);
   
   await page.click('[data-ruolo="ALL"]');
   await page.click('[data-tag="RIGORISTA"]');

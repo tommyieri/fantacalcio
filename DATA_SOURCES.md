@@ -64,6 +64,29 @@ fosse privato. Se non e' quello che si vuole, le strade sono tre:
 Finche' la scelta non e' fatta, il valore di questi due file resta quello di un
 uso personale in preparazione della propria asta.
 
+## Controlli automatici sul listone
+
+`data/listone.tsv` e' una trascrizione a mano, e le trascrizioni sbagliano. Il
+build ora si ferma su due classi di errore che erano gia' passate inosservate:
+
+1. **Giocatori mancanti.** Ogni nome presente nel Fantalgoritmo deve esistere
+   anche nel nostro listone. Erano spariti in sei — fra cui Zappacosta
+   dell'Atalanta, notato solo perche' e' stato chiamato in asta. Il messaggio di
+   errore li elenca per nome.
+2. **Nomi fuori dall'alfabeto latino.** «Boga» era finito nel listone come
+   «Вода», quattro lettere cirilliche che a schermo somigliano a quelle latine:
+   nessun confronto lo agganciava e il giocatore restava muto. Ora passano solo
+   lettere latine (accentate comprese), apostrofi, punti e trattini.
+
+Il controllo opposto — qualcuno nel nostro listone che il Fantalgoritmo non ha —
+stampa un avviso ma non blocca, perche' puo' essere legittimo. Oggi riguarda un
+nome solo, Corrado del Frosinone.
+
+I sei giocatori reintegrati hanno ruolo e quotazione presi dal Fantalgoritmo, che
+e' la fonte completa. L'FVM li' non c'e': e' stimato con la mediana degli FVM dei
+giocatori di stesso ruolo e stessa quotazione. La stima pesa poco, perche' il
+loro prezzo viene ormai dal prezzo d'asta misurato e non dall'FVM.
+
 ## Cosa questo repository non fa
 
 - **Non fa scraping continuo.** `npm run fonti` e' l'unico strumento che tocca

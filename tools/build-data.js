@@ -296,8 +296,67 @@ for (const riga of leggiTsv(STORICO)) {
   storicoAgganciati++;
 }
 
-if (prezziMancanti.length) {
-  console.log(`fantalgoritmo non nel listone: ${prezziMancanti.join(', ')}`);
+/*
+ * Un nome scritto con l'alfabeto sbagliato non aggancia niente e non si vede.
+ *
+ * "Boga" era finito nel listone come "\u0412\u043e\u0434\u0430", quattro lettere cirilliche che a
+ * schermo somigliano a caratteri latini. Nessun confronto lo trovava, nessuna
+ * annotazione lo raggiungeva, e il giocatore restava muto in asta. Qui passano
+ * solo lettere latine (accentate comprese), apostrofi, punti e trattini.
+ */
+const NOME_AMMESSO = /^[A-Za-z\u00C0-\u024F' .-]+$/;
+const nomiSospetti = giocatori
+  .filter(g => !NOME_AMMESSO.test(g.nome))
+  .map(g => `${g.nome} (${g.squadra}) [${[...g.nome].map(c => c.codePointAt(0).toString(16)).join(' ')}]`);
+if (nomiSospetti.length) {
+  throw new Error(
+    `listone.tsv: ${nomiSospetti.length} nomi contengono caratteri fuori dall'alfabeto latino:\n`
+    + `  ${nomiSospetti.join('\n  ')}\n`
+    + 'Quasi sempre e\' una lettera copiata da un altro alfabeto che somiglia a quella giusta.'
+  );
+}
+
+/*
+ * Controllo incrociato fra il nostro listone e quello del Fantalgoritmo.
+ *
+ * Il nostro listone e' una trascrizione a mano, e le trascrizioni perdono
+ * righe e storpiano nomi: una volta ci sono finiti dentro "llic" al posto di
+ * "Ilic", "Larraga" al posto di "Zarraga" e "Boga" scritto in cirillico, e
+ * cinque giocatori erano semplicemente spariti. In asta un nome che manca non
+ * e' un dettaglio: e' un giocatore che non puoi valutare quando lo chiamano.
+ *
+ * Il Fantalgoritmo copre lo stesso campionato ed e' una fonte indipendente,
+ * quindi il confronto fra i due elenchi trova esattamente questa classe di
+ * errore. Qui il build si ferma invece di proseguire con un buco.
+ */
+const nomiListone = new Map();
+for (const g of giocatori) {
+  const k = chiaveIdentita(g.nome, '');
+  nomiListone.set(k, (nomiListone.get(k) ?? []).concat(g));
+}
+const nomiFanta = new Set(
+  leggiTsv(FANTALGORITMO).map(riga => chiaveIdentita(riga.nome, ''))
+);
+const soloNelFantalgoritmo = prezziMancanti.filter(voce => {
+  const nome = voce.replace(/ \(.*\)$/, '');
+  return !nomiListone.has(chiaveIdentita(nome, ''));
+});
+const soloNelNostro = giocatori
+  .filter(g => !nomiFanta.has(chiaveIdentita(g.nome, '')))
+  .map(g => `${g.nome} (${g.squadra})`);
+
+if (soloNelFantalgoritmo.length) {
+  throw new Error(
+    `listone.tsv: ${soloNelFantalgoritmo.length} giocatori presenti nel Fantalgoritmo e assenti dal nostro listone:\n`
+    + `  ${soloNelFantalgoritmo.join('\n  ')}\n`
+    + 'Aggiungili a data/listone.tsv: in asta un nome mancante e\' un giocatore che non puoi valutare.'
+  );
+}
+// L'elenco opposto non blocca il build: il nostro listone puo' legittimamente
+// contenere qualcuno che il Fantalgoritmo non ha (un tardivo, una scelta
+// editoriale diversa). Ma va visto, perche' un nome storpiato compare qui.
+if (soloNelNostro.length) {
+  console.log(`solo nel nostro listone (verifica che non siano nomi storpiati): ${soloNelNostro.join(', ')}`);
 }
 
 /* --- Indisponibili: infortuni e squalifiche note al momento dell'asta ------ */
