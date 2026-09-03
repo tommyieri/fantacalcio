@@ -394,7 +394,7 @@ Bologna	23	C	M;C	El Azzouzi O.	10	12	2	2
 Lecce	18	C	C;T	Gandelman	10	10	4	4
 Napoli	20	C	M;C	Gilmour	10	10	3	3
 Frosinone	21	C	M;C	Grillitsch	10	13	4	4
-Lecce	19	C	M;C	llic	10	13	1	1
+Lecce	19	C	M;C	Ilic	10	13	1	1
 Parma	18	C	M;C	Ordonez C.	10	13	3	3
 Inter	19	C	C	Mkhitaryan	9	9	4	4
 Cagliari	18	C	M;C	Deiola	8	8	3	3
@@ -420,7 +420,7 @@ Lazio	24	C	W;T	Przyborek	5	5	1	1
 Torino	23	C	C;T	Anjorin	4	4	1	1
 Monza	21	C	M;C	Colombo L.	4	5	3	3
 Venezia	21	C	C	Duncan	4	4	2	2
-Udinese	22	C	M;C	Larraga	4	4	2	2
+Udinese	22	C	M;C	Zarraga	4	4	2	2
 Genoa	19	C	W	Venturino	4	4	2	2
 Lazio	25	C	M;C	Belahyane	3	3	2	2
 Parma	20	C	E;C	Cremaschi	3	3	2	2
@@ -479,7 +479,7 @@ Bologna	25	A	Pc	Piccoli	29	26	8	7
 Genoa	21	A	Pc	Osmajic	28	25	8	7
 Frosinone	28	A	Pc	Raimondo	27	24	9	8
 Venezia	25	A	A	Yeboah J.	27	27	9	9
-Juventus	25	A	W;A	Вода	27	30	7	7
+Juventus	25	A	W;A	Boga	27	30	7	7
 Fiorentina	23	A	W;A	Gnonto	25	27	7	8
 Frosinone	29	A	W;A	Kvernadze	24	24	6	7
 Monza	25	A	Pc	Cutrone	23	20	9	8
@@ -524,3 +524,9 @@ Parma	26	A	Pc	De Martis	1	1	1	1
 Venezia	28	A	Pc	Lauberbach	1	1	1	1
 Venezia	29	A	W;A	Lisman	1	1	1	1
 Juventus	28	C	W;T	Alajbegovic	42	42	11	11
+Udinese	26	D	Dc	Kamara H.	20	20	9	9
+Atalanta	23	D	Dd;E	Zappacosta	21	21	8	8
+Venezia	30	D	Dc	Moreno M.	10	10	4	4
+Venezia	31	D	Dd;E	Hainaut	10	10	4	4
+Frosinone	32	C	M;C	Fini	12	12	4	4
+Genoa	25	C	M;C	Amorim	12	12	4	4
