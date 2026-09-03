@@ -1253,6 +1253,45 @@ ${playersData}
         </div>\`;
     }
 
+    /*
+     * Le alternative allo stesso prezzo.
+     *
+     * Dire "lascialo" senza dire cosa prendere al suo posto e' meta' consiglio,
+     * e in asta la meta' che manca e' quella che serve: hai cinque secondi e
+     * devi sapere se rinunciare ti lascia davvero qualcosa in mano. Qui
+     * cerchiamo nello stesso ruolo chi ha il margine migliore fra tetto e
+     * prezzo di mercato, cioe' chi ti da' piu' rosa per gli stessi crediti.
+     */
+    function alternativeA(candidato, mioMaxMap, mercato, asseg) {
+      const out = [];
+      for (const q of PLAYERS) {
+        if (q.ruolo !== candidato.ruolo || q.id === candidato.id || asseg.has(q.id)) continue;
+        const tetto = mioMaxMap.get(q.id) ?? 0;
+        if (tetto < 1) continue;
+        const mkt = mercato.get(q.id);
+        if (!mkt) continue;
+        out.push({ p: q, tetto, mercato: mkt.atteso, margine: tetto - mkt.atteso });
+      }
+      out.sort((a, b) => b.margine - a.margine || b.tetto - a.tetto);
+      return out.slice(0, 3);
+    }
+
+    function alternativeHtml(alt) {
+      if (!alt.length) return '';
+      return \`
+        <div class="pt-2 border-t border-slate-800">
+          <p class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Se lo lasci, al suo posto</p>
+          <div class="flex flex-wrap gap-1.5">
+            \${alt.map(a => \`<span class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[11px]">
+              <strong class="text-white">\${esc(a.p.nome)}</strong>
+              <span class="text-slate-500">\${esc(a.p.squadra)}</span>
+              <span class="text-slate-400 tabular-nums"> mercato \${a.mercato}</span>
+              <span class="\${a.margine >= 0 ? 'text-emerald-400' : 'text-amber-400'} font-bold tabular-nums"> tetto \${a.tetto}</span>
+            </span>\`).join('')}
+          </div>
+        </div>\`;
+    }
+
     function scopoDettaglio(scopo) {
       const pezzi = [];
       if (scopo.codice === 'TITOLARE') {
@@ -2038,6 +2077,7 @@ ${playersData}
                       <div><span class="text-slate-500 block">Vantaggio al prezzo mercato</span><strong class="\${(pianoAperto.vantaggioAlMercato ?? -1) >= 0 ? 'text-emerald-300' : 'text-rose-300'} text-base tabular-nums">\${pianoAperto.vantaggioAlMercato === null ? 'non fattibile' : (pianoAperto.vantaggioAlMercato >= 0 ? '+' : '') + pianoAperto.vantaggioAlMercato + ' pt'}</strong></div>
                       <div><span class="text-slate-500 block">Monte Carlo (\${pianoAperto.monteCarlo.scenari})</span><strong class="text-amber-300 tabular-nums">P50 \${pianoAperto.monteCarlo.p50} · P75 \${pianoAperto.monteCarlo.p75}</strong><span class="block text-[10px] text-slate-400">\${pianoAperto.monteCarlo.probabilitaVittoria}% entro il tuo max</span></div>
                     </div>
+                    \${alternativeHtml(alternativeA(p, mioMaxMap, mercato, asseg))}
                     <p class="text-[10px] text-slate-400">Calcolo esatto sugli slot rimasti: confronta questo acquisto con il miglior completamento della rosa ai prezzi live stimati. Monte Carlo simula l'incertezza dei rilanci avversari; i fantapunti sono una proxy finche' non importiamo proiezioni storiche/calendario.</p>
                   </div>\`)
                 : ''}

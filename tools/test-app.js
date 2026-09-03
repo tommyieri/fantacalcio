@@ -309,6 +309,27 @@ function check(nome, atteso, ottenuto) {
   check('simulazione Monte Carlo avversari visibile', true, piano.monteCarlo);
   check('max bid del piano entro la capienza', true, piano.max >= 0 && piano.max <= (await mie()).capienza);
   check('fascia di prezzo con intervallo di mercato', true, piano.fascia);
+  const alt = await page.evaluate(() => {
+    const td = document.getElementById('prezzo-input').closest('td');
+    const t = td.textContent.replace(/\s+/g, ' ');
+    const m = t.match(/Se lo lasci, al suo posto(.*?)Calcolo esatto/);
+    if (!m) return { presenti: false };
+    // Le alternative devono essere dello stesso ruolo e comprabili davvero.
+    const nomi = [...td.querySelectorAll('span strong')].map(e => e.textContent.trim());
+    const aperto = PER_ID.get(apertaRiga);
+    const asseg = assegnazioni();
+    const trovati = nomi.map(n => PLAYERS.find(x => x.nome === n)).filter(Boolean);
+    return {
+      presenti: m[1].trim().length > 0,
+      stessoRuolo: trovati.every(x => x.ruolo === aperto.ruolo),
+      nessunoGiaPreso: trovati.every(x => !asseg.has(x.id)),
+      nessunoEIlCandidato: trovati.every(x => x.id !== aperto.id)
+    };
+  });
+  check('alternative proposte quando lasci il giocatore', true, alt.presenti);
+  check('le alternative sono dello stesso ruolo', true, alt.stessoRuolo);
+  check('le alternative non sono gia assegnate', true, alt.nessunoGiaPreso);
+  check('le alternative escludono il candidato', true, alt.nessunoEIlCandidato);
   check('un solo scopo dichiarato per il candidato', 1, piano.scopo);
   await page.fill('#prezzo-input', '50');
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
