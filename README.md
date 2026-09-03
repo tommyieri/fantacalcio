@@ -45,6 +45,42 @@ esattamente il modo in cui si prende un top. La riga del listone lo dice: *dovra
 altrove* quando il mercato chiede piu' della media sostenibile, *fuori portata* quando supera
 la capienza.
 
+## Prezzi e statistiche vere
+
+Due numeri che il listone ufficiale non ha, e che arrivano da Fantalgoritmo
+(vedi [DATA_SOURCES.md](DATA_SOURCES.md), sono un prodotto a pagamento):
+
+- **il prezzo medio delle aste reali**, misurato su molte aste. La somma dei
+  giocatori contesi fa il 98% del monte crediti di una lega da dieci
+  partecipanti e 500 crediti: e' gia' un'economia chiusa, quindi si usa come
+  peso senza riscalarla. Prima quel peso era l'FVM, che e' una stima di valore e
+  non un prezzo, ed e' il motivo per cui i numeri uscivano lontani dall'asta
+  vera. Adesso lo scarto mediano fra prezzo stimato e prezzo misurato e' mezzo
+  credito su 520 giocatori.
+- **due stagioni di statistiche reali**: presenze, media voto e fantamedia. La
+  fantamedia meno la media voto e' esattamente il bonus netto — rigori, gol,
+  assist e cartellini sono gia' dentro il numero, misurati invece che dedotti.
+  Le presenze vere correggono il giudizio editoriale sulla titolarita' (65% cio'
+  che si dice adesso, 35% cio' che ha fatto davvero).
+
+Chi non compare nello storico non ha giocato in Serie A di recente: l'app lo
+dichiara invece di stimarlo in silenzio, perche' e' la classe di giocatori su
+cui si sbaglia di piu'.
+
+## Punti sopra il rimpiazzo
+
+Il piano rosa non massimizza i fantapunti totali ma quelli **sopra il
+rimpiazzo**. La differenza non e' accademica: la fantamedia parte da 6, quindi
+un giocatore da 1 credito che scende in campo produce comunque duecento punti a
+stagione. Sono punti che prende chiunque, e usarli per scegliere faceva sembrare
+ogni campione un pessimo affare — con quel criterio la rosa migliore era
+ventisei giocatori da un credito.
+
+Il rimpiazzo di un ruolo e' il giocatore che resta appena fuori dagli slot della
+lega. Contando solo cio' che sta sopra quella linea, il tetto calcolato dall'app
+e il prezzo consigliato dal Fantalgoritmo — due metodi indipendenti — cadono a
+una decina di crediti l'uno dall'altro sui primi 150 nomi.
+
 ## Il modificatore di difesa
 
 La lega paga il bonus a chi porta a referto almeno quattro difensori, e la media

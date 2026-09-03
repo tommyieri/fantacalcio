@@ -25,6 +25,8 @@ const AGGIUNTE = path.join(ROOT, 'data/aggiunte.tsv');
 const TRASFERIMENTI = path.join(ROOT, 'data/trasferimenti.tsv');
 const GRIGLIA = path.join(ROOT, 'data/griglia.json');
 const INDISPONIBILI = path.join(ROOT, 'data/indisponibili.tsv');
+const FANTALGORITMO = path.join(ROOT, 'data/fantalgoritmo.tsv');
+const STORICO = path.join(ROOT, 'data/storico.tsv');
 const SOS_TITOLARI = path.join(ROOT, 'data/sosfanta/titolari.csv');
 const SOS_PIAZZATI = path.join(ROOT, 'data/sosfanta/piazzati.csv');
 const FORMAZIONI_FANTACALCIO = path.join(ROOT, 'data/fonti/formazioni-fantacalcio.json');
@@ -224,6 +226,80 @@ for (const squadraFonte of fonteFormazioni.squadre) {
   };
 }
 
+/* --- Fantalgoritmo: prezzi reali d'asta e statistiche vere ------------------ */
+
+// I due dati che il listone ufficiale non ha.
+//
+// `prezzoMedioAste` e' quanto un giocatore viene pagato davvero, misurato su
+// molte aste: la somma dei contesi fa il 98% del monte crediti di una lega da
+// dieci partecipanti e 500 crediti, quindi e' un'economia chiusa gia' calibrata
+// e non va riscalata. `prezzoStat` e' invece il prezzo *consigliato*, che somma
+// al 74%: e' volutamente piu' basso di quanto le aste pagano, ed e' la stessa
+// cosa che il nostro prezzo di indifferenza cerca di dire.
+//
+// `storico.tsv` porta due stagioni di media voto, fantamedia e presenze reali.
+// Chi non compare non ha storico recente in Serie A: e' un'informazione, non un
+// buco, e l'app la mostra.
+function leggiTsv(percorso) {
+  const [intestazione, ...righe] = fs.readFileSync(percorso, 'utf8').trim().split('\n');
+  const colonne = intestazione.split('\t');
+  return righe.filter(r => r.trim()).map(riga => {
+    const celle = riga.split('\t');
+    return Object.fromEntries(colonne.map((c, i) => [c, celle[i] ?? '']));
+  });
+}
+
+const numero = v => {
+  const n = Number(String(v ?? '').replace(',', '.'));
+  return Number.isFinite(n) && String(v).trim() !== '' ? n : undefined;
+};
+
+let prezziAgganciati = 0;
+const prezziMancanti = [];
+for (const riga of leggiTsv(FANTALGORITMO)) {
+  const g = perIdentita.get(chiaveIdentita(riga.nome, riga.squadra));
+  if (!g) { prezziMancanti.push(`${riga.nome} (${riga.squadra})`); continue; }
+  const dati = {
+    mercato: numero(riga.prezzoMedioAste),
+    consigliato: numero(riga.prezzoStat),
+    golMax: numero(riga.prezzoGolMax),
+    ia: numero(riga.ia),
+    fascia: riga.fascia || undefined,
+    accoppiata: riga.accoppiata || undefined
+  };
+  for (const k of Object.keys(dati)) if (dati[k] === undefined) delete dati[k];
+  if (Object.keys(dati).length) { g.fanta = dati; prezziAgganciati++; }
+}
+
+let storicoAgganciati = 0;
+const perSoloNome = new Map();
+for (const g of giocatori) {
+  const k = chiaveIdentita(g.nome, '');
+  perSoloNome.set(k, (perSoloNome.get(k) ?? []).concat(g));
+}
+for (const riga of leggiTsv(STORICO)) {
+  // Molte righe storiche non portano la squadra: quando il cognome nel listone
+  // e' unico l'aggancio resta sicuro, altrimenti si lascia perdere.
+  let g = riga.squadra ? perIdentita.get(chiaveIdentita(riga.nome, riga.squadra)) : undefined;
+  if (!g) {
+    const candidati = perSoloNome.get(chiaveIdentita(riga.nome, '')) ?? [];
+    if (candidati.length === 1) g = candidati[0];
+  }
+  if (!g) continue;
+  const stagioni = [
+    { pg: numero(riga.pg1), mv: numero(riga.mv1), fm: numero(riga.fm1), gol: numero(riga.gol1), assist: numero(riga.assist1), amm: numero(riga.amm1), gs: numero(riga.gs1) },
+    { pg: numero(riga.pg2), mv: numero(riga.mv2), fm: numero(riga.fm2), gol: numero(riga.gol2), gs: numero(riga.gs2) }
+  ].filter(s => s.pg !== undefined && s.mv !== undefined);
+  if (!stagioni.length) continue;
+  for (const st of stagioni) for (const k of Object.keys(st)) if (st[k] === undefined) delete st[k];
+  g.storico = stagioni;
+  storicoAgganciati++;
+}
+
+if (prezziMancanti.length) {
+  console.log(`fantalgoritmo non nel listone: ${prezziMancanti.join(', ')}`);
+}
+
 /* --- Indisponibili: infortuni e squalifiche note al momento dell'asta ------ */
 
 // Il listone e' una fotografia di fine mercato: gli infortuni successivi non ci
@@ -333,6 +409,7 @@ console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).ma
 console.log(`annotati:        ${annotati}`);
 console.log(`SOS Fanta:       ${sosTitolariAgganciati} titolarita', ${sosPiazzatiAgganciati} piazzati agganciati al listone ufficiale`);
 console.log(`indisponibili:   ${indisponibiliAgganciati} agganciati da data/indisponibili.tsv`);
+console.log(`Fantalgoritmo:   ${prezziAgganciati} prezzi d'asta reali, ${storicoAgganciati} con storico Serie A`);
 console.log(`Formazioni:      ${formazioneXIagganciati}/220 XI e ${formazioneAlternativeAgganciate} alternative agganciate (Fantacalcio.it)`);
 console.log(`fuori listone:   ${aggiunti} aggiunti, ${spostati} spostati di squadra`);
 for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {

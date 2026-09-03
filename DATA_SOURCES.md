@@ -23,6 +23,8 @@ raggiungibile da chiunque anche se il repository e' privato.
 | `data/analisi.tsv` | vedi sotto | note redazionali con la fonte citata riga per riga |
 | `data/ricerca/*.md` | idem | appunti grezzi della ricognizione |
 | `data/aggiunte.tsv`, `data/trasferimenti.tsv` | compilazione propria | colma le lacune del listone; dove la quotazione o il FVM sono una stima, l'app lo segnala in arancione con una tilde |
+| `data/fantalgoritmo.tsv` | Fantalgoritmo (Giovanni Curcio), versione 500 FM del 02/09/2026 | **prodotto a pagamento**: prezzo medio delle aste reali, prezzo consigliato, indice di appetibilita', fascia, accoppiata portieri |
+| `data/storico.tsv` | Fantalgoritmo, versione PRO del 02/09/2026 | **prodotto a pagamento**: due stagioni di presenze, media voto, fantamedia, gol, assist, cartellini |
 | `data/players.generated.js` | generato | prodotto da `npm run data` a partire dai file qui sopra: non va modificato a mano |
 
 ## Fonti consultate per `data/analisi.tsv`
@@ -33,6 +35,34 @@ TuttoMercatoWeb, CalcioD'Angolo, DAZN, Tuttosport.
 Ogni riga del file porta la propria colonna `fonti`, e il build fallisce se una
 riga cita un giocatore che nel listone non esiste o usa un tag non previsto: un
 refuso sul nome non puo' far sparire l'annotazione in silenzio.
+
+## Attenzione: i dati Fantalgoritmo sono un prodotto a pagamento
+
+`data/fantalgoritmo.tsv` e `data/storico.tsv` vengono da file venduti da
+[Fantalgoritmo](https://www.Fantalgoritmo.it) (Giovanni Curcio). Sono la parte
+piu' preziosa dei dati di questo repository ed e' anche l'unica che qualcuno ha
+pagato per produrre.
+
+I file sorgente `.xlsx` e `.xlsb` **non sono nel repository** ed e' giusto cosi'.
+`tools/import-fantalgoritmo.py` li converte, ma va lanciato passando i percorsi
+dei file che possiedi:
+
+```
+python3 tools/import-fantalgoritmo.py Fantalgoritmo_500_FM.xlsx FantaAlgoritmo_PRO.xlsb
+```
+
+Resta pero' un fatto da decidere consapevolmente: **l'app e' pubblicata su
+GitHub Pages, quindi i numeri estratti sono pubblici**, anche se il repository
+fosse privato. Se non e' quello che si vuole, le strade sono tre:
+
+1. spegnere GitHub Pages e usare l'app aprendo `index.html` in locale;
+2. tenere `data/fantalgoritmo.tsv` fuori dal build pubblico e caricarlo a mano
+   il giorno dell'asta;
+3. lasciare tutto com'e', consapevoli che si sta ridistribuendo il lavoro di
+   qualcun altro.
+
+Finche' la scelta non e' fatta, il valore di questi due file resta quello di un
+uso personale in preparazione della propria asta.
 
 ## Cosa questo repository non fa
 
