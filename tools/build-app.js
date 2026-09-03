@@ -538,22 +538,6 @@ ${playersData}
     // Benchmark fisso dell'asta: distribuisce il budget di ogni reparto sui
     // giocatori che servono davvero alla lega. Non cambia con le vendite, cosi'
     // l'indice tavolo confronta prezzo reale e valore teorico sulla stessa base.
-    function prezziTeoriciBase() {
-      const valori = new Map();
-      const budgetLega = BUDGET * squadre.length;
-      for (const r of RUOLI) {
-        const necessari = TARGET[r] * squadre.length;
-        const profili = PLAYERS.filter(p => p.ruolo === r).sort((a, b) => b.fvm - a.fvm);
-        const contendibili = profili.slice(0, necessari);
-        const fvmTotale = contendibili.reduce((somma, p) => somma + Math.max(1, p.fvm), 0);
-        const budgetQualita = Math.max(0, budgetLega * PRIORI[r] / 100 - necessari);
-        contendibili.forEach(p => valori.set(p.id,
-          Math.max(1, 1 + Math.round((Math.max(1, p.fvm) / Math.max(1, fvmTotale)) * budgetQualita))));
-        profili.slice(necessari).forEach(p => valori.set(p.id, 1));
-      }
-      return valori;
-    }
-
     // Tier relativo al numero di partecipanti: Tier 1 = un primo slot per
     // squadra, Tier 2 = i due giri successivi. E' piu' utile della sola Q.
     // ufficiale quando occorre capire se la fascia sta davvero finendo.
@@ -830,17 +814,42 @@ ${playersData}
        * sopra il profilo che rimedi comunque. Il rimpiazzo di un ruolo e' il
        * giocatore che resta appena fuori dagli slot della lega.
        */
+      aggiornaPuntiVor(new Map());
+    }
+
+    /*
+     * Livello di rimpiazzo, ricalcolato mentre l'asta va avanti.
+     *
+     * Il rimpiazzo di un ruolo e' il primo giocatore che resta FUORI dagli slot
+     * ancora da assegnare in tutta la lega: se restano venti slot da difensore,
+     * e' il ventunesimo difensore libero. Sopra di lui c'e' valore, sotto no.
+     *
+     * Va ricalcolato ad ogni assegnazione, non una volta al caricamento: quando
+     * i buoni difensori finiscono, quelli che restano diventano piu' preziosi
+     * perche' l'alternativa a cui rinunci e' peggiore. Congelando il livello di
+     * partenza l'app diceva lo stesso numero a rosa vuota e a un'asta quasi
+     * finita, che e' proprio quando la scelta conta di piu'.
+     */
+    function aggiornaPuntiVor(asseg) {
+      const stati = squadre.map(statoSquadra);
+      const rimpiazzi = {};
       for (const r of RUOLI) {
-        const delRuolo = PLAYERS.filter(p => p.ruolo === r)
+        const slotRimasti = stati.reduce((s, st) => s + st.mancanti[r], 0);
+        const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id))
           .sort((a, b) => (VALUTAZIONI_CACHE.get(b.id)?.puntiStagione ?? 0) - (VALUTAZIONI_CACHE.get(a.id)?.puntiStagione ?? 0));
-        const rimpiazzo = delRuolo[Math.min(delRuolo.length - 1, roleStats[r].nDrafted)];
+        // A slot esauriti il ruolo non ha piu' un rimpiazzo da battere.
+        const indice = Math.min(Math.max(0, liberi.length - 1), Math.max(0, slotRimasti));
+        const rimpiazzo = liberi[indice];
         const fmaRimpiazzo = VALUTAZIONI_CACHE.get(rimpiazzo?.id)?.fma ?? 6.0;
-        for (const p of delRuolo) {
-          const v = VALUTAZIONI_CACHE.get(p.id);
-          v.fmaRimpiazzo = Number(fmaRimpiazzo.toFixed(2));
-          v.puntiVor = Number((v.presenzeAttese * Math.max(0, v.fma - fmaRimpiazzo)).toFixed(1));
-        }
+        rimpiazzi[r] = Number(fmaRimpiazzo.toFixed(2));
       }
+      for (const p of PLAYERS) {
+        const v = VALUTAZIONI_CACHE.get(p.id);
+        if (!v) continue;
+        v.fmaRimpiazzo = rimpiazzi[p.ruolo];
+        v.puntiVor = Number((v.presenzeAttese * Math.max(0, v.fma - rimpiazzi[p.ruolo])).toFixed(1));
+      }
+      return rimpiazzi;
     }
 
     inizializzaValutazioni();
@@ -912,22 +921,31 @@ ${playersData}
         const m = Math.floor(ordinati.length / 2);
         return ordinati.length % 2 ? ordinati[m] : (ordinati[m - 1] + ordinati[m]) / 2;
       };
+      /*
+       * Quanto sta rilanciando questo tavolo.
+       *
+       * Il rapporto si misura sul prezzo reale del singolo giocatore, non sulla
+       * media piatta del reparto: pagare un top attaccante 205 crediti e' il
+       * suo prezzo giusto, ma confrontato con la media dei suoi 86 colleghi
+       * sembrava un rilancio da 4x. Con quel confronto la prima chiamata di un
+       * big schiantava l'indice al tetto e l'app leggeva un tavolo isterico
+       * quando invece stava pagando il giusto.
+       */
       const rapporti = [];
       const rapportiRuolo = { P: [], D: [], C: [], A: [] };
-      for (const [id, a] of asseg) {
-        const r = PER_ID.get(id).ruolo;
-        const rapporto = Math.max(0.25, Math.min(4, a.pagato / Math.max(1, prioriPerRuolo[r])));
-        rapporti.push(rapporto);
-        rapportiRuolo[r].push(rapporto);
-      }
-      const inflazioneGlobale = mediana(rapporti);
-      const benchmark = prezziTeoriciBase();
       let pagatoTeorico = 0;
       let pagatoReale = 0;
       for (const [id, a] of asseg) {
+        const g = PER_ID.get(id);
+        const riferimento = Math.max(1, ancoraPrezzo(g));
+        const rapporto = Math.max(0.2, Math.min(3, a.pagato / riferimento));
+        rapporti.push(rapporto);
+        rapportiRuolo[g.ruolo].push(rapporto);
         pagatoReale += a.pagato;
-        pagatoTeorico += benchmark.get(id) ?? 1;
+        pagatoTeorico += riferimento;
       }
+      // La mediana, non la media: un singolo rilancio folle non riscrive il mercato.
+      const inflazioneGlobale = mediana(rapporti);
       const out = {};
       for (const r of RUOLI) {
         const slotTotali = TARGET[r] * squadre.length;
@@ -1492,7 +1510,10 @@ ${playersData}
       // colpo di cache con i numeri della lega precedente.
       const firma = [
         VALUTAZIONI_VERSIONE, squadre.length, st.residuo,
-        RUOLI.map(r => st.mancanti[r]).join('-'), asseg.size
+        RUOLI.map(r => st.mancanti[r]).join('-'), asseg.size,
+        // I livelli di rimpiazzo cambiano col pool: due aste con lo stesso
+        // numero di vendite ma nomi diversi non devono condividere la cache.
+        RUOLI.map(r => VALUTAZIONI_CACHE.get(PLAYERS.find(p => p.ruolo === r)?.id)?.fmaRimpiazzo ?? 0).join('-')
       ].join('|');
       if (FRONTIERE_CACHE.firma === firma) return FRONTIERE_CACHE.dati;
 
@@ -1775,6 +1796,9 @@ ${playersData}
 
     function render() {
       const asseg = assegnazioni();
+      // Prima di ogni altra cosa: il livello di rimpiazzo cambia ad ogni
+      // acquisto, e prezzi, tetti e frontiere si appoggiano tutti su quello.
+      const rimpiazzi = aggiornaPuntiVor(asseg);
       const st = statoSquadra(squadre[0]);
       const and = andamento(asseg);
       const mercato = prezziMercato(asseg, and);

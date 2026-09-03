@@ -373,6 +373,66 @@ function check(nome, atteso, ottenuto) {
   check('la media voto viene dallo storico', true, fa.mvDaStorico);
   check('i punti sopra il rimpiazzo premiano il top, non il giocatore da 1 credito', true, fa.vorTopSopraScarso);
 
+  console.log('\n— aggressivita del tavolo e rimpiazzo live —');
+  const aggr = await page.evaluate(() => {
+    // Questo blocco riscrive squadre e rose per costruire gli scenari: va
+    // rimesso tutto a posto alla fine, altrimenti le verifiche successive
+    // (filtri e persistenza) trovano uno stato che non si aspettano.
+    const backup = JSON.parse(JSON.stringify(squadre));
+    const misura = (fattore) => {
+      squadre = nuoveSquadre(10);
+      inizializzaValutazioni();
+      render();
+      const scelti = [];
+      for (const R of ['P', 'D', 'C', 'A']) {
+        const pool = PLAYERS.filter(x => x.ruolo === R)
+          .sort((a, b) => (b.fanta?.mercato ?? 0) - (a.fanta?.mercato ?? 0));
+        scelti.push(pool[0], pool[15], pool[40]);
+      }
+      let i = 0;
+      for (const g of scelti) {
+        const sq = 1 + (i % 9);
+        const st = statoSquadra(squadre[sq]);
+        if (st.mancanti[g.ruolo] <= 0) continue;
+        const rif = g.fanta?.mercato ?? 10;
+        squadre[sq].rosa.push({ id: g.id, pagato: Math.max(1, Math.min(st.capienza, Math.round(rif * fattore))) });
+        i++;
+      }
+      render();
+      return andamento(assegnazioni()).globale.indice;
+    };
+    // L'indice deve leggere il multiplo vero: pagare il prezzo giusto e' 1x,
+    // non 4x come quando il confronto era con la media piatta del reparto.
+    const giusto = misura(1.0);
+    const caro = misura(1.6);
+    const sconto = misura(0.6);
+    // Il livello di rimpiazzo si ricalcola ad ogni assegnazione, non solo al via.
+    squadre = nuoveSquadre(10); inizializzaValutazioni(); render();
+    const D = PLAYERS.filter(x => x.ruolo === 'D');
+    const primaDelVia = VALUTAZIONI_CACHE.get(D[0].id).fmaRimpiazzo;
+    const peggiori = D.slice().sort((a, b) =>
+      VALUTAZIONI_CACHE.get(a.id).puntiStagione - VALUTAZIONI_CACHE.get(b.id).puntiStagione).slice(0, 20);
+    let j = 0;
+    for (const g of peggiori) {
+      const sq = 1 + (j % 9);
+      if (statoSquadra(squadre[sq]).mancanti.D <= 0) continue;
+      squadre[sq].rosa.push({ id: g.id, pagato: 1 }); j++;
+    }
+    render();
+    const esito = {
+      giusto, caro, sconto,
+      rimpiazzoReagisce: VALUTAZIONI_CACHE.get(D[0].id).fmaRimpiazzo !== primaDelVia
+    };
+    squadre = backup;
+    inizializzaValutazioni();
+    render();
+    return esito;
+  });
+  check('pagare il prezzo giusto legge circa 1x', true, Math.abs(aggr.giusto - 1) < 0.12);
+  check('pagare il 60% in piu legge circa 1.6x', true, Math.abs(aggr.caro - 1.6) < 0.15);
+  check('pagare il 40% in meno legge circa 0.6x', true, Math.abs(aggr.sconto - 0.6) < 0.12);
+  check('il livello di rimpiazzo si ricalcola durante l asta', true, aggr.rimpiazzoReagisce);
+
   console.log('\n— infortuni e verdetto live —');
   const inf = await page.evaluate(() => {
     const z = PLAYERS.find(x => x.nome === 'Zaniolo');
