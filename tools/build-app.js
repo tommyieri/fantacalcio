@@ -585,6 +585,32 @@ ${playersData}
     })();
 
     const CHIAVE = 'fantastrategy.asta.2026';
+    const CHIAVE_INFORTUNI = 'fantastrategy.infortuni.2026';
+
+    /*
+     * Infortuni segnati a mano durante l'asta.
+     *
+     * data/indisponibili.tsv e' una fotografia del giorno in cui e' stato
+     * generato: nessun elenco sara' mai completo la sera dell'asta. Questo e'
+     * lo sfogo manuale — un colpo e il giocatore vale quello che vale davvero,
+     * senza aspettare una rigenerazione dei dati.
+     */
+    function caricaInfortuni() {
+      try {
+        const grezzo = JSON.parse(store.getItem(CHIAVE_INFORTUNI) || '[]');
+        return new Set(Array.isArray(grezzo) ? grezzo.filter(n => Number.isFinite(n)) : []);
+      } catch { return new Set(); }
+    }
+    let infortuniManuali = caricaInfortuni();
+    function salvaInfortuni() {
+      store.setItem(CHIAVE_INFORTUNI, JSON.stringify([...infortuniManuali]));
+    }
+    function segnaInfortunio(id, fermo) {
+      if (fermo) infortuniManuali.add(id); else infortuniManuali.delete(id);
+      salvaInfortuni();
+      inizializzaValutazioni();
+      render();
+    }
 
     function nuoveSquadre(n) {
       return Array.from({ length: n }, (_, i) => ({
@@ -631,6 +657,9 @@ ${playersData}
 
     const VALUTAZIONI_CACHE = new Map();
     let VALUTAZIONI_VERSIONE = 0;
+    // Segnare a mano vuol dire "adesso e' fuori e non so per quanto": due mesi
+    // e' la stima prudente che serve a togliere il giocatore dai primi prezzi.
+    const SALTATE_SEGNATE_A_MANO = 9;
 
     function inizializzaValutazioni() {
       VALUTAZIONI_CACHE.clear();
@@ -679,7 +708,19 @@ ${playersData}
           tit = Math.min(tit, 0.25 + 0.55 * (p.formazione.probabilita / 100));
         }
         if (r === 'P' && p.sos?.gerarchiaPortiere === 'PRIMO') tit = Math.max(tit, 0.95);
-        if (p.tag.includes('RISCHIO')) tit *= 0.70;
+        // Un infortunio non cambia quanto vale il giocatore quando gioca:
+        // cambia quante volte gioca. Quindi agisce sulle presenze, non sulla
+        // media voto — ed e' il motivo per cui uno fermo fino a novembre non
+        // puo' valere il prezzo di uno che c'e' da subito.
+        const saltate = giornateSaltate(p);
+        if (saltate > 0) {
+          tit *= Math.max(0, (38 - saltate) / 38);
+        } else if (p.tag.includes('RISCHIO')) {
+          // Lo sconto generico vale solo quando non sappiamo per quanto sta
+          // fuori: se lo sappiamo, le giornate saltate sono la stessa cosa
+          // detta meglio, e applicarli entrambi conterebbe l'infortunio due volte.
+          tit *= 0.70;
+        }
 
         // Media Voto base e Bonus attesi modellati con continuita' monotonicamente dal listone
         let mv = 6.00;
@@ -725,7 +766,7 @@ ${playersData}
         if (excess > 0) {
           rawVal = 1 + (excess / stRole.excessSum) * stRole.excessPool;
         }
-        if (p.tag.includes('RISCHIO')) rawVal *= 0.80;
+        if (p.tag.includes('RISCHIO') && giornateSaltate(p) <= 0) rawVal *= 0.80;
         const valorePuro = Math.max(1, Math.round(rawVal));
 
         VALUTAZIONI_CACHE.set(p.id, {
@@ -887,6 +928,29 @@ ${playersData}
       return migliore;
     }
 
+    // Quante giornate salta un giocatore, fra quelle note dai dati e quelle
+    // segnate a mano durante l'asta.
+    function giornateSaltate(p) {
+      if (infortuniManuali.has(p.id)) return SALTATE_SEGNATE_A_MANO;
+      return p.indisponibile?.giornateSaltate ?? 0;
+    }
+
+    /*
+     * FVM corretto per disponibilita'. Il listone quota un giocatore come se
+     * facesse la stagione intera: chi rientra a novembre no. Il monte crediti
+     * di un ruolo non sparisce, si sposta su chi c'e', ed e' proprio quello che
+     * succede in asta quando tutti sanno dell'infortunio.
+     *
+     * La correzione e' proporzionale alle presenze, senza sconti extra: se nella
+     * tua lega l'infortunio non lo sa nessuno, il prezzo vero sara' piu' alto di
+     * cosi', e sta a te leggerlo dal radar dei rivali.
+     */
+    function fvmDisponibile(p) {
+      const saltate = giornateSaltate(p);
+      if (saltate <= 0) return p.fvm;
+      return Math.max(1, p.fvm * Math.max(0, (38 - saltate) / 38));
+    }
+
     function prezziMercato(asseg, and) {
       const stati = squadre.map(statoSquadra);
       const residuoLega = stati.reduce((s, st) => s + st.residuo, 0);
@@ -904,16 +968,17 @@ ${playersData}
 
       const mercato = new Map();
       for (const r of RUOLI) {
-        const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id)).sort((a, b) => b.fvm - a.fvm);
+        const liberi = PLAYERS.filter(p => p.ruolo === r && !asseg.has(p.id))
+          .sort((a, b) => fvmDisponibile(b) - fvmDisponibile(a));
         const n = slotRimasti[r];
         const contesi = new Set(liberi.slice(0, n).map(p => p.id));
-        const somma = liberi.slice(0, n).reduce((s, p) => s + p.fvm, 0) || 1;
+        const somma = liberi.slice(0, n).reduce((s, p) => s + fvmDisponibile(p), 0) || 1;
         const monte = Math.max(0, grezzo[r] * scala - n);
         const acquirenti = stati.filter(st => st.mancanti[r] > 0).length;
         const confidenza = and[r].confidenza;
 
         for (const p of liberi) {
-          const atteso = contesi.has(p.id) ? 1 + (p.fvm / somma) * monte : 1;
+          const atteso = contesi.has(p.id) ? 1 + (fvmDisponibile(p) / somma) * monte : 1;
           const ampiezza = 0.12 + (1 - confidenza) * 0.18 + Math.min(0.08, acquirenti * 0.01);
           mercato.set(p.id, {
             atteso: Math.max(1, Math.round(atteso)),
@@ -1995,7 +2060,14 @@ ${playersData}
                       title="\${puo ? \`capienza \${s.capienza} cr\` : \`ha gia tutti gli slot \${p.ruolo}\`}">\${esc(sq.nome)}</button>\`;
                   }).join('')}
                 </div>
-                <button type="button" data-chiudi="1" class="text-[11px] text-slate-500 hover:text-slate-300 pb-2 ml-auto">Annulla</button>
+                <button type="button" data-infortunio="\${p.id}" class="text-[11px] px-2.5 py-1.5 rounded-lg font-semibold transition ml-auto \${
+                  infortuniManuali.has(p.id)
+                    ? 'bg-rose-900/70 text-rose-200 border border-rose-700'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'}"
+                  title="Segna che adesso e fuori: abbassa le presenze attese e quindi il tetto">
+                  \${infortuniManuali.has(p.id) ? 'Fuori: segnato' : 'Segna infortunato'}
+                </button>
+                <button type="button" data-chiudi="1" class="text-[11px] text-slate-500 hover:text-slate-300 pb-2">Annulla</button>
               </div>
               \${radarHtml}
             </td>
@@ -2012,6 +2084,11 @@ ${playersData}
                     ? 'Non presente nel listone in mio possesso: aggiunto a mano'
                     : 'Trasferimento non ancora recepito dal listone in mio possesso'
                 }">fuori listone</span>\` : ''}
+                \${infortuniManuali.has(p.id)
+                  ? '<span class="text-[9px] px-1.5 py-px rounded bg-rose-950 text-rose-300 border border-rose-800/60" title="Segnato fuori da te durante l asta">FUORI</span>'
+                  : p.indisponibile
+                    ? \`<span class="text-[9px] px-1.5 py-px rounded bg-rose-950 text-rose-300 border border-rose-800/60" title="\${esc(p.indisponibile.problema)}">out \${p.indisponibile.giornateSaltate}g, rientro \${esc(p.indisponibile.rientro)}</span>\`
+                    : ''}
               </div>
               <p class="mt-1 flex flex-wrap gap-1">\${mantra}</p>
             </td>
@@ -2045,6 +2122,12 @@ ${playersData}
         b.addEventListener('click', () => {
           const [id, i] = b.dataset.assegna.split(':').map(Number);
           assegna(id, i);
+        });
+      }
+      for (const b of document.querySelectorAll('[data-infortunio]')) {
+        b.addEventListener('click', () => {
+          const id = Number(b.dataset.infortunio);
+          segnaInfortunio(id, !infortuniManuali.has(id));
         });
       }
 

@@ -24,6 +24,7 @@ const SQUADRE = path.join(ROOT, 'data/squadre.tsv');
 const AGGIUNTE = path.join(ROOT, 'data/aggiunte.tsv');
 const TRASFERIMENTI = path.join(ROOT, 'data/trasferimenti.tsv');
 const GRIGLIA = path.join(ROOT, 'data/griglia.json');
+const INDISPONIBILI = path.join(ROOT, 'data/indisponibili.tsv');
 const SOS_TITOLARI = path.join(ROOT, 'data/sosfanta/titolari.csv');
 const SOS_PIAZZATI = path.join(ROOT, 'data/sosfanta/piazzati.csv');
 const FORMAZIONI_FANTACALCIO = path.join(ROOT, 'data/fonti/formazioni-fantacalcio.json');
@@ -223,6 +224,45 @@ for (const squadraFonte of fonteFormazioni.squadre) {
   };
 }
 
+/* --- Indisponibili: infortuni e squalifiche note al momento dell'asta ------ */
+
+// Il listone e' una fotografia di fine mercato: gli infortuni successivi non ci
+// sono, e un giocatore fermo fino a novembre quotato come se giocasse tutto
+// l'anno e' il modo piu' rapido per buttare crediti. Qui la quotazione non si
+// tocca: si annota quante giornate salta, e l'app abbassa di conseguenza la
+// probabilita' di scendere in campo.
+const INIZIO_STAGIONE = Date.parse('2026-08-23T00:00:00Z');
+const GIORNATE_TOT = 38;
+
+let indisponibiliAgganciati = 0;
+const indisponibiliMancanti = [];
+for (const riga of fs.readFileSync(INDISPONIBILI, 'utf8').trim().split('\n').slice(1)) {
+  if (!riga.trim()) continue;
+  const [nome, squadra, rientro, problema, fonti] = riga.split('\t');
+  const g = perIdentita.get(chiaveIdentita(nome, squadra));
+  if (!g) { indisponibiliMancanti.push(`${nome} (${squadra})`); continue; }
+
+  const quando = Date.parse(`${String(rientro).trim()}T00:00:00Z`);
+  if (!Number.isFinite(quando)) {
+    throw new Error(`indisponibili.tsv: data di rientro non valida per ${nome}: "${rientro}"`);
+  }
+  // Una giornata a settimana: e' l'approssimazione giusta per decidere un
+  // prezzo d'asta, non per compilare la formazione di una giornata precisa.
+  const saltate = Math.max(0, Math.min(GIORNATE_TOT,
+    Math.ceil((quando - INIZIO_STAGIONE) / (7 * 24 * 3600 * 1000))));
+
+  g.indisponibile = { rientro: String(rientro).trim(), giornateSaltate: saltate, problema: String(problema).trim() };
+  if (!g.tag.includes('RISCHIO')) g.tag.push('RISCHIO');
+  g.nota = g.nota ? `${g.nota} ${problema}` : problema;
+  g.fonti = [...new Set([...(g.fonti ?? []), ...String(fonti).split(';')])];
+  indisponibiliAgganciati++;
+}
+// Un nome che non aggancia nessuno non deve far fallire il build: la lista
+// arriva da fuori e puo' citare giocatori che nel nostro listone non ci sono.
+if (indisponibiliMancanti.length) {
+  console.log(`indisponibili non nel listone: ${indisponibiliMancanti.join(', ')}`);
+}
+
 /* --- Tag ricavabili dai numeri ------------------------------------------- */
 
 const SLOT = { P: 3, D: 8, C: 8, A: 6 };
@@ -292,6 +332,7 @@ console.log(`righe listone:   ${dati.length}`);
 console.log(`voci generate:   ${giocatori.length} (${Object.entries(conteggi).map(([k, v]) => k + ':' + v).join(', ')})`);
 console.log(`annotati:        ${annotati}`);
 console.log(`SOS Fanta:       ${sosTitolariAgganciati} titolarita', ${sosPiazzatiAgganciati} piazzati agganciati al listone ufficiale`);
+console.log(`indisponibili:   ${indisponibiliAgganciati} agganciati da data/indisponibili.tsv`);
 console.log(`Formazioni:      ${formazioneXIagganciati}/220 XI e ${formazioneAlternativeAgganciate} alternative agganciate (Fantacalcio.it)`);
 console.log(`fuori listone:   ${aggiunti} aggiunti, ${spostati} spostati di squadra`);
 for (const t of ['TOP', 'TITOLARE', 'RIGORISTA', 'MODIFICATORE', 'SCOMMESSA', 'NUOVO', 'RISCHIO', 'LOWCOST']) {

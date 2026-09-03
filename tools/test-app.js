@@ -314,6 +314,56 @@ function check(nome, atteso, ottenuto) {
   check('radar rilanci aggiornato a quota 50', true, await page.evaluate(() => document.getElementById('radar-quota').textContent === '50'));
   await page.click('[data-chiudi]');
 
+  console.log('\n— infortuni e verdetto live —');
+  const inf = await page.evaluate(() => {
+    const z = PLAYERS.find(x => x.nome === 'Zaniolo');
+    const sano = PLAYERS.find(x => x.nome === 'Calhanoglu');
+    const asseg = assegnazioni(), st = statoSquadra(squadre[0]), and = andamento(asseg);
+    const mkt = prezziMercato(asseg, and);
+    const tit = x => VALUTAZIONI_CACHE.get(x.id).tit;
+    return {
+      zaniolloDaiDati: !!z.indisponibile,
+      // Un infortunio noto deve abbassare le presenze attese, non la media voto.
+      titInfortunato: tit(z) < tit(sano),
+      // e deve abbassare anche il prezzo che l'asta gli fara'
+      mercatoInfortunato: mkt.get(z.id).atteso < z.fvm / 2,
+      mvIntatta: VALUTAZIONI_CACHE.get(z.id).mv > 5.8
+    };
+  });
+  check('Zaniolo marcato indisponibile dai dati', true, inf.zaniolloDaiDati);
+  check('l infortunio abbassa le presenze attese', true, inf.titInfortunato);
+  check('l infortunio abbassa il prezzo di mercato', true, inf.mercatoInfortunato);
+  check('l infortunio non tocca la media voto', true, inf.mvIntatta);
+
+  const manuale = await page.evaluate(() => {
+    const c = PLAYERS.find(x => x.nome === 'Calhanoglu');
+    const prima = VALUTAZIONI_CACHE.get(c.id).tit;
+    segnaInfortunio(c.id, true);
+    const dopo = VALUTAZIONI_CACHE.get(c.id).tit;
+    segnaInfortunio(c.id, false);
+    const tornato = VALUTAZIONI_CACHE.get(c.id).tit;
+    return { scende: dopo < prima, reversibile: Math.abs(tornato - prima) < 1e-9 };
+  });
+  check('segnare infortunato abbassa le presenze', true, manuale.scende);
+  check('togliere il segno ripristina il valore', true, manuale.reversibile);
+
+  const live = await page.evaluate(() => {
+    const st = statoSquadra(squadre[0]);
+    const piano = { maxBid: 40, monteCarlo: { chiusure: Array.from({ length: 100 }, (_, i) => i + 1) } };
+    const a = verdettoLive(20, piano, st, { atteso: 30 });
+    const b = verdettoLive(41, piano, st, { atteso: 30 });
+    const c = verdettoLive(st.capienza + 1, piano, st, { atteso: 30 });
+    return {
+      sotto: a.stato, sopra: b.stato, fuori: c.stato,
+      // la probabilita' di vittoria deve crescere col prezzo
+      vittoriaCresce: verdettoLive(60, piano, st, {}).vittoria > a.vittoria
+    };
+  });
+  check('sotto il tetto il verdetto e verde', 'ok', live.sotto);
+  check('sopra il tetto il verdetto avvisa', 'oltre', live.sopra);
+  check('oltre la capienza il verdetto blocca', 'stop', live.fuori);
+  check('la probabilita di vittoria cresce col prezzo', true, live.vittoriaCresce);
+
   console.log('\n— filtri e ricerca —');
   await page.click('[data-ruolo="D"]');
   const nD = await page.evaluate(() => document.querySelectorAll('#tabella tr').length);
